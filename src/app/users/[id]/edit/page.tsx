@@ -32,9 +32,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, ArrowLeft, Save } from "lucide-react";
+import { AlertCircle, ArrowLeft, Save, Building2 } from "lucide-react";
 import { getUserById, updateUser, type UserFormValues } from "@/actions/users";
 import { getRoles } from "@/actions/roles";
+import { getDepartments } from "@/actions/departments";
 import { useToast } from "@/components/ui/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
@@ -101,24 +102,25 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
         }
 
         // Fetch departments
-        // This would fetch departments from a similar action like getRoles
-        // For now, we'll use a placeholder
-        // const departmentsResponse = await getDepartments();
-        // if (departmentsResponse.success) {
-        //   setDepartments(departmentsResponse.departments);
-        // }
+        const departmentsResponse = await getDepartments();
+        if (departmentsResponse.success) {
+          setDepartments(departmentsResponse.departments);
+        } else {
+          setError("Failed to load departments");
+        }
 
         // Fetch user data
         const userResponse = await getUserById(params.id);
         if (userResponse.success) {
           const user = userResponse.user;
           form.reset({
-            name: user.name,
-            email: user.email,
+            name: user.name || "",
+            email: user.email || "",
             password: "", // Empty password field for security
             roleIds: user.roleIds || [],
             departmentIds: user.departmentIds || [],
           });
+          setIsPageLoading(false);
         } else {
           setError(userResponse.error || "Failed to load user data");
           toast({
@@ -322,7 +324,64 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
                   </div>
                 </div>
 
-                {/* Department selection would go here */}
+                <Separator />
+
+                <div>
+                  <FormLabel className="flex items-center">
+                    <Building2 className="mr-2 h-4 w-4" />
+                    Departments
+                  </FormLabel>
+                  <FormDescription>
+                    Assign departments to this user
+                  </FormDescription>
+                  <div className="grid gap-2 mt-2">
+                    {departments.length > 0 ? (
+                      departments.map((department) => (
+                        <FormField
+                          key={department.id}
+                          control={form.control}
+                          name="departmentIds"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                              <FormControl>
+                                <Checkbox
+                                  checked={field.value?.includes(department.id)}
+                                  onCheckedChange={(checked) => {
+                                    return checked
+                                      ? field.onChange([
+                                          ...(field.value || []),
+                                          department.id,
+                                        ])
+                                      : field.onChange(
+                                          field.value?.filter(
+                                            (value) => value !== department.id
+                                          )
+                                        );
+                                  }}
+                                />
+                              </FormControl>
+                              <div className="space-y-1 leading-none">
+                                <FormLabel className="cursor-pointer">
+                                  {department.name}
+                                </FormLabel>
+                                {department.description && (
+                                  <FormDescription>
+                                    {department.description}
+                                  </FormDescription>
+                                )}
+                              </div>
+                            </FormItem>
+                          )}
+                        />
+                      ))
+                    ) : (
+                      <p className="text-sm text-muted-foreground">
+                        No departments available
+                      </p>
+                    )}
+                  </div>
+                  <FormMessage />
+                </div>
               </div>
 
               <div className="flex gap-2 justify-end">

@@ -157,3 +157,179 @@ export async function createAnonymousIncident(data: AnonymousIncidentInput) {
     };
   }
 }
+
+// Schema for referring incidents to departments
+const referIncidentSchema = z.object({
+  incidentId: z.string().cuid("Invalid incident ID"),
+  departmentIds: z
+    .array(z.string().cuid("Invalid department ID"))
+    .min(1, "At least one department must be selected"),
+  message: z.string().optional(),
+});
+
+type ReferIncidentInput = z.infer<typeof referIncidentSchema>;
+
+export async function referIncidentToDepartments(data: ReferIncidentInput) {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user) {
+    return { success: false, error: "Not authenticated" };
+  }
+
+  try {
+    // Validate data
+    const validatedData = referIncidentSchema.parse(data);
+
+    // First update the incident status to UNDER_INVESTIGATION if it's not already
+    await prisma.incident.update({
+      where: { id: validatedData.incidentId },
+      data: {
+        status: "UNDER_INVESTIGATION",
+      },
+    });
+
+    // Create referrals for each department
+    const referrals = await Promise.all(
+      validatedData.departmentIds.map(async (departmentId) => {
+        // Check if referral already exists
+        const existingReferral = await prisma.incidentReferral.findUnique({
+          where: {
+            incidentId_departmentId: {
+              incidentId: validatedData.incidentId,
+              departmentId,
+            },
+          },
+        });
+
+        if (existingReferral) {
+          // Update existing referral if it exists
+          return prisma.incidentReferral.update({
+            where: {
+              id: existingReferral.id,
+            },
+            data: {
+              message: validatedData.message,
+              status: "PENDING", // Reset to pending if referred again
+              acknowledgedAt: null,
+              completedAt: null,
+            },
+          });
+        } else {
+          // Create new referral
+          return prisma.incidentReferral.create({
+            data: {
+              incidentId: validatedData.incidentId,
+              departmentId,
+              message: validatedData.message,
+              status: "PENDING",
+            },
+          });
+        }
+      })
+    );
+
+    // Create notifications for each department
+    // This is a simplified example - you'd need user-department associations to target specific users
+
+    // Revalidate related pages
+    revalidatePath(`/incidents/${validatedData.incidentId}`);
+    revalidatePath("/incidents");
+    revalidatePath("/dashboard");
+
+    return {
+      success: true,
+      referrals: referrals.map(
+        (r: { id: string; departmentId: string; status: string }) => ({
+          id: r.id,
+          departmentId: r.departmentId,
+          status: r.status,
+        })
+      ),
+    };
+  } catch (error) {
+    console.error("Error referring incident:", error);
+    if (error instanceof z.ZodError) {
+      return {
+        success: false,
+        error: "Validation failed",
+        issues: error.errors,
+      };
+    }
+    return { success: false, error: "Failed to refer incident" };
+  }
+}
+
+// Schema for responding to incident referrals
+const respondToReferralSchema = z.object({
+  referralId: z.string().cuid("Invalid referral ID"),
+  rootCause: z.string().min(1, "Root cause is required"),
+  recommendations: z.string().optional(),
+  status: z.enum(["ACKNOWLEDGED", "COMPLETED"]),
+});
+
+type RespondToReferralInput = z.infer<typeof respondToReferralSchema>;
+
+export async function respondToIncidentReferral(data: RespondToReferralInput) {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user) {
+    return { success: false, error: "Not authenticated" };
+  }
+
+  try {
+    // Validate data
+    const validatedData = respondToReferralSchema.parse(data);
+
+    // Update the referral with the response
+    const referral = await prisma.incidentReferral.update({
+      where: { id: validatedData.referralId },
+      data: {
+        rootCause: validatedData.rootCause,
+        recommendations: validatedData.recommendations,
+        status: validatedData.status,
+        acknowledgedAt:
+          validatedData.status === "ACKNOWLEDGED" ? new Date() : undefined,
+        completedAt:
+          validatedData.status === "COMPLETED" ? new Date() : undefined,
+      },
+      include: {
+        incident: true,
+      },
+    });
+
+    // If all referrals are completed, update the incident status to PENDING_REVIEW
+    if (validatedData.status === "COMPLETED") {
+      const allReferrals = await prisma.incidentReferral.findMany({
+        where: { incidentId: referral.incidentId },
+      });
+
+      const allCompleted = allReferrals.every(
+        (r: { status: string }) => r.status === "COMPLETED"
+      );
+
+      if (allCompleted) {
+        await prisma.incident.update({
+          where: { id: referral.incidentId },
+          data: { status: "PENDING_REVIEW" },
+        });
+      }
+    }
+
+    // Revalidate related pages
+    revalidatePath(`/incidents/${referral.incidentId}`);
+    revalidatePath("/incidents");
+    revalidatePath("/dashboard");
+
+    return { success: true, referral };
+  } catch (error) {
+    console.error("Error responding to referral:", error);
+    if (error instanceof z.ZodError) {
+      return {
+        success: false,
+        error: "Validation failed",
+        issues: error.errors,
+      };
+    }
+    return { success: false, error: "Failed to respond to referral" };
+  }
+}

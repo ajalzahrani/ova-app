@@ -45,6 +45,16 @@ export function MainNav() {
           Incidents
         </Link>
         <Link
+          href="/departments"
+          className={cn(
+            "text-sm font-medium transition-colors hover:text-primary",
+            pathname === "/departments" || pathname.startsWith("/departments/")
+              ? "text-primary"
+              : "text-muted-foreground"
+          )}>
+          Departments
+        </Link>
+        <Link
           href="/reports"
           className={cn(
             "text-sm font-medium transition-colors hover:text-primary",

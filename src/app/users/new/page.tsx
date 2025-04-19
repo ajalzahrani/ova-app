@@ -24,21 +24,25 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, ArrowLeft } from "lucide-react";
-import { createUser, type UserFormValues } from "@/actions/users";
+import { AlertCircle, ArrowLeft, Building2 } from "lucide-react";
+import { createUser } from "@/actions/users";
 import { getRoles } from "@/actions/roles";
+import { getDepartments } from "@/actions/departments";
 import { useToast } from "@/components/ui/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 
-// Form schema for user creation
-const userFormSchema = z.object({
+// Define form schema
+const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   roleIds: z.array(z.string()).min(1, "At least one role must be selected"),
   departmentIds: z.array(z.string()).optional(),
 });
+
+// Get type from schema
+type FormValues = z.infer<typeof formSchema>;
 
 // Interface for roles
 interface Role {
@@ -51,7 +55,7 @@ interface Role {
 interface Department {
   id: string;
   name: string;
-  description?: string;
+  description?: string | null;
 }
 
 export default function NewUserPage() {
@@ -64,8 +68,8 @@ export default function NewUserPage() {
   const [isPageLoading, setIsPageLoading] = useState(true);
 
   // Initialize the form
-  const form = useForm<UserFormValues>({
-    resolver: zodResolver(userFormSchema),
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       email: "",
@@ -89,12 +93,12 @@ export default function NewUserPage() {
         }
 
         // Fetch departments
-        // This would fetch departments from a similar action like getRoles
-        // For now, we'll use a placeholder
-        // const departmentsResponse = await getDepartments();
-        // if (departmentsResponse.success) {
-        //   setDepartments(departmentsResponse.departments);
-        // }
+        const departmentsResponse = await getDepartments();
+        if (departmentsResponse.success) {
+          setDepartments(departmentsResponse.departments);
+        } else {
+          setError("Failed to load departments");
+        }
       } catch (err) {
         console.error("Error loading data:", err);
         setError("An unexpected error occurred while loading data");
@@ -107,7 +111,7 @@ export default function NewUserPage() {
   }, []);
 
   // Handle form submission
-  const onSubmit = async (data: UserFormValues) => {
+  const onSubmit = async (data: FormValues) => {
     setIsLoading(true);
     setError(null);
 
@@ -224,68 +228,108 @@ export default function NewUserPage() {
                 <Separator />
 
                 <div>
-                  <FormLabel className="block mb-3">Roles</FormLabel>
-                  <div className="grid gap-4">
-                    <FormField
-                      control={form.control}
-                      name="roleIds"
-                      render={() => (
-                        <FormItem>
-                          {roles.map((role) => (
-                            <div
-                              key={role.id}
-                              className="flex items-center space-x-2 mb-2">
-                              <FormField
-                                control={form.control}
-                                name="roleIds"
-                                render={({ field }) => {
-                                  return (
-                                    <FormItem
-                                      key={role.id}
-                                      className="flex flex-row items-start space-x-3 space-y-0">
-                                      <FormControl>
-                                        <Checkbox
-                                          checked={field.value?.includes(
-                                            role.id
-                                          )}
-                                          onCheckedChange={(checked) => {
-                                            return checked
-                                              ? field.onChange([
-                                                  ...field.value,
-                                                  role.id,
-                                                ])
-                                              : field.onChange(
-                                                  field.value?.filter(
-                                                    (value) => value !== role.id
-                                                  )
-                                                );
-                                          }}
-                                        />
-                                      </FormControl>
-                                      <div className="space-y-1 leading-none">
-                                        <FormLabel className="text-sm font-medium">
-                                          {role.name}
-                                        </FormLabel>
-                                        {role.description && (
-                                          <p className="text-xs text-muted-foreground">
-                                            {role.description}
-                                          </p>
-                                        )}
-                                      </div>
-                                    </FormItem>
-                                  );
+                  <FormLabel>Roles</FormLabel>
+                  <FormDescription>
+                    Select one or more roles for this user
+                  </FormDescription>
+                  <div className="grid gap-2 mt-2">
+                    {roles.map((role) => (
+                      <FormField
+                        key={role.id}
+                        control={form.control}
+                        name="roleIds"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value?.includes(role.id)}
+                                onCheckedChange={(checked) => {
+                                  return checked
+                                    ? field.onChange([...field.value, role.id])
+                                    : field.onChange(
+                                        field.value?.filter(
+                                          (value) => value !== role.id
+                                        )
+                                      );
                                 }}
                               />
+                            </FormControl>
+                            <div className="space-y-1 leading-none">
+                              <FormLabel className="cursor-pointer">
+                                {role.name}
+                              </FormLabel>
+                              {role.description && (
+                                <FormDescription>
+                                  {role.description}
+                                </FormDescription>
+                              )}
                             </div>
-                          ))}
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                          </FormItem>
+                        )}
+                      />
+                    ))}
                   </div>
+                  <FormMessage />
                 </div>
 
-                {/* Department selection would go here */}
+                <Separator />
+
+                <div>
+                  <FormLabel className="flex items-center">
+                    <Building2 className="mr-2 h-4 w-4" />
+                    Departments
+                  </FormLabel>
+                  <FormDescription>
+                    Assign departments to this user
+                  </FormDescription>
+                  <div className="grid gap-2 mt-2">
+                    {departments.length > 0 ? (
+                      departments.map((department) => (
+                        <FormField
+                          key={department.id}
+                          control={form.control}
+                          name="departmentIds"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                              <FormControl>
+                                <Checkbox
+                                  checked={field.value?.includes(department.id)}
+                                  onCheckedChange={(checked) => {
+                                    return checked
+                                      ? field.onChange([
+                                          ...(field.value || []),
+                                          department.id,
+                                        ])
+                                      : field.onChange(
+                                          field.value?.filter(
+                                            (value) => value !== department.id
+                                          )
+                                        );
+                                  }}
+                                />
+                              </FormControl>
+                              <div className="space-y-1 leading-none">
+                                <FormLabel className="cursor-pointer">
+                                  {department.name}
+                                </FormLabel>
+                                {department.description && (
+                                  <FormDescription>
+                                    {department.description}
+                                  </FormDescription>
+                                )}
+                              </div>
+                            </FormItem>
+                          )}
+                        />
+                      ))
+                    ) : (
+                      <p className="text-sm text-muted-foreground">
+                        No departments available
+                      </p>
+                    )}
+                  </div>
+                  <FormMessage />
+                </div>
               </div>
 
               <div className="flex gap-2 justify-end">

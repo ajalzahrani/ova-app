@@ -23,6 +23,7 @@ import {
   MessageSquare,
   AlertOctagon,
 } from "lucide-react";
+import { ReferIncidentDialog } from "@/components/incidents/refer-incident-dialog";
 
 interface IncidentDetailProps {
   params: {
@@ -53,12 +54,28 @@ export default async function IncidentDetail({ params }: IncidentDetailProps) {
           name: true,
         },
       },
+      referrals: {
+        include: {
+          department: true,
+        },
+      },
     },
   });
 
   if (!incident) {
     notFound();
   }
+
+  // Fetch all departments for the referral dialog
+  const departments = await prisma.department.findMany({
+    select: {
+      id: true,
+      name: true,
+    },
+    orderBy: {
+      name: "asc",
+    },
+  });
 
   // Function to get badge variant based on severity
   const getSeverityVariant = (severity: string) => {
@@ -94,6 +111,20 @@ export default async function IncidentDetail({ params }: IncidentDetailProps) {
     }
   };
 
+  // Function to get badge variant based on referral status
+  const getReferralStatusVariant = (status: string) => {
+    switch (status) {
+      case "PENDING":
+        return "outline";
+      case "ACKNOWLEDGED":
+        return "secondary";
+      case "COMPLETED":
+        return "default";
+      default:
+        return "outline";
+    }
+  };
+
   // Function to render severity icon
   const renderSeverityIcon = (severity: string) => {
     switch (severity) {
@@ -122,6 +153,10 @@ export default async function IncidentDetail({ params }: IncidentDetailProps) {
               Back to Incidents
             </Link>
           </Button>
+          <ReferIncidentDialog
+            incidentId={incident.id}
+            departments={departments}
+          />
           <Button asChild>
             <Link href={`/incidents/${incident.id}/edit`}>Edit Incident</Link>
           </Button>
@@ -230,6 +265,64 @@ export default async function IncidentDetail({ params }: IncidentDetailProps) {
           </CardContent>
         </Card>
       </div>
+
+      {/* Department Referrals Section */}
+      {incident.referrals.length > 0 && (
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle>Department Referrals</CardTitle>
+            <CardDescription>
+              Departments that have been asked to investigate this incident
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {incident.referrals.map((referral) => (
+                <div key={referral.id} className="border rounded-md p-4">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h4 className="font-medium">
+                        {referral.department.name}
+                      </h4>
+                      <p className="text-sm text-muted-foreground">
+                        Referred on{" "}
+                        {new Date(referral.referredAt).toLocaleDateString()}
+                      </p>
+                      {referral.message && (
+                        <p className="mt-2 text-sm">
+                          <span className="font-medium">Message:</span>{" "}
+                          {referral.message}
+                        </p>
+                      )}
+                    </div>
+                    <Badge variant={getReferralStatusVariant(referral.status)}>
+                      {referral.status}
+                    </Badge>
+                  </div>
+
+                  {referral.rootCause && (
+                    <div className="mt-3 pt-3 border-t">
+                      <p className="text-sm font-medium">Root Cause:</p>
+                      <p className="text-sm mt-1">{referral.rootCause}</p>
+
+                      {referral.recommendations && (
+                        <div className="mt-2">
+                          <p className="text-sm font-medium">
+                            Recommendations:
+                          </p>
+                          <p className="text-sm mt-1">
+                            {referral.recommendations}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </DashboardShell>
   );
 }
