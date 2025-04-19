@@ -20,9 +20,9 @@ The Occupational Violence and Aggression (OVA) System is designed to help organi
 - Core roles to include:
   - **Admin**: Full system access
   - **Manager**: Department-level access and oversight
-  - **HR**: Access to all incidents and reporting features
+  - **Quality Assurance**: Access to all incidents and reporting features
   - **Safety Officer**: Access to incident review and safety recommendations
-  - **Employee**: Basic access to report incidents and view their own reports
+  - **Employee**: Basic access to report incidents and view their own reports (no access to other employees' reports)
   - **Investigator**: Specialized access for detailed incident investigation
 
 #### 1.2 Permission Controls
@@ -71,11 +71,6 @@ The Occupational Violence and Aggression (OVA) System is designed to help organi
 - Personal data protection measures
 - Consent management for information sharing
 
-#### 2.4 Mobile Support
-- Responsive design for mobile reporting
-- Simplified mobile form for urgent reporting
-- Offline capabilities with later synchronization
-
 ### 3. Incident Management
 
 #### 3.1 Dashboard and Overview
@@ -109,7 +104,8 @@ The Occupational Violence and Aggression (OVA) System is designed to help organi
 - Approval processes for closing incidents
 
 #### 3.5 Departmental Referrals
-- Ability to refer incidents to different departments
+- Ability to refer incidents to more than one department
+- Receive from department incident resolution, root cause analysis, and recommendations
 - Inter-departmental collaboration features
 - Tracking of departmental responsibilities and actions
 - Departmental performance metrics for incident handling
@@ -201,7 +197,7 @@ The Occupational Violence and Aggression (OVA) System is designed to help organi
 
 ### 6. Integration
 
-- API endpoints for integration with other systems
+- API endpoints for integration with other systems (e.g. HR, EMR, etc.)
 - SSO capability
 - Integration with HR systems
 - Export/import functionality

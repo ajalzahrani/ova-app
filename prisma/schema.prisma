@@ -1,0 +1,238 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String         @id @default(cuid())
+  name           String
+  email          String         @unique
+  password       String?
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+  
+  // Relations
+  userRoles      UserRole[]
+  reportedIncidents Incident[]  @relation("reporter")
+  assignedIncidents Incident[]  @relation("assignee")
+  departments    Department[]
+  actions        Action[]
+  investigations Investigation[]
+  
+  @@map("users")
+}
+
+model Role {
+  id          String     @id @default(cuid())
+  name        String     @unique
+  description String?
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+  
+  // Relations
+  userRoles   UserRole[]
+  permissions RolePermission[]
+  
+  @@map("roles")
+}
+
+model UserRole {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  roleId    String   @map("role_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, roleId])
+  @@map("user_roles")
+}
+
+model Permission {
+  id          String           @id @default(cuid())
+  name        String           @unique
+  description String?
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+  
+  // Relations
+  rolePermissions RolePermission[]
+  
+  @@map("permissions")
+}
+
+model RolePermission {
+  id           String     @id @default(cuid())
+  roleId       String     @map("role_id")
+  permissionId String     @map("permission_id")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+  
+  // Relations
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  
+  @@unique([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model Department {
+  id          String     @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+  
+  // Relations
+  users       User[]
+  incidents   Incident[]
+  
+  @@map("departments")
+}
+
+model Incident {
+  id            String     @id @default(cuid())
+  title         String
+  description   String
+  dateOccurred  DateTime   @map("date_occurred")
+  location      String
+  incidentType  String     @map("incident_type")
+  severity      String     // LOW, MEDIUM, HIGH, CRITICAL
+  status        String     // NEW, UNDER_INVESTIGATION, PENDING_REVIEW, RESOLVED, CLOSED
+  isConfidential Boolean   @default(false) @map("is_confidential")
+  isAnonymous   Boolean    @default(false) @map("is_anonymous")
+  createdAt     DateTime   @default(now()) @map("created_at")
+  updatedAt     DateTime   @updatedAt @map("updated_at")
+  
+  // Relations
+  reporterId    String?    @map("reporter_id")
+  reporter      User?      @relation("reporter", fields: [reporterId], references: [id])
+  assigneeId    String?    @map("assignee_id")
+  assignee      User?      @relation("assignee", fields: [assigneeId], references: [id])
+  departmentId  String?    @map("department_id")
+  department    Department? @relation(fields: [departmentId], references: [id])
+  evidence      Evidence[]
+  actions       Action[]
+  investigation Investigation?
+  witnesses     Witness[]
+  involvedParties InvolvedParty[]
+  
+  @@map("incidents")
+}
+
+model Evidence {
+  id          String   @id @default(cuid())
+  incidentId  String   @map("incident_id")
+  fileName    String   @map("file_name")
+  fileType    String   @map("file_type")
+  fileSize    Int      @map("file_size")
+  fileUrl     String   @map("file_url")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  incident    Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  
+  @@map("evidence")
+}
+
+model Witness {
+  id          String   @id @default(cuid())
+  incidentId  String   @map("incident_id")
+  name        String
+  contact     String?
+  statement   String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  incident    Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  
+  @@map("witnesses")
+}
+
+model InvolvedParty {
+  id          String   @id @default(cuid())
+  incidentId  String   @map("incident_id")
+  name        String?
+  type        String   // STAFF, PATIENT, VISITOR, EXTERNAL
+  details     String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  incident    Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  
+  @@map("involved_parties")
+}
+
+model Investigation {
+  id               String   @id @default(cuid())
+  incidentId       String   @unique @map("incident_id")
+  investigatorId   String   @map("investigator_id")
+  findings         String?
+  rootCause        String?  @map("root_cause")
+  recommendations  String?
+  startDate        DateTime @map("start_date")
+  completionDate   DateTime? @map("completion_date")
+  status           String
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  incident         Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  investigator     User     @relation(fields: [investigatorId], references: [id])
+  
+  @@map("investigations")
+}
+
+model Action {
+  id           String   @id @default(cuid())
+  incidentId   String   @map("incident_id")
+  assigneeId   String   @map("assignee_id")
+  description  String
+  dueDate      DateTime @map("due_date")
+  completedAt  DateTime? @map("completed_at")
+  status       String
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  incident     Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  assignee     User     @relation(fields: [assigneeId], references: [id])
+  
+  @@map("actions")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?  @map("user_id")
+  action    String
+  entity    String
+  entityId  String   @map("entity_id")
+  details   String?
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  @@map("audit_logs")
+}
+
+model Notification {
+  id           String   @id @default(cuid())
+  userId       String   @map("user_id")
+  title        String
+  message      String
+  isRead       Boolean  @default(false) @map("is_read")
+  type         String
+  relatedEntity String?  @map("related_entity")
+  relatedId    String?  @map("related_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+  
+  @@map("notifications")
+} 

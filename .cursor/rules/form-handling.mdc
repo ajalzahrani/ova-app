@@ -1,0 +1,113 @@
+---
+description: Form Handling with React Hook Form and Zod
+globs: *.ts,*.tsx,*.js,*.jsx
+alwaysApply: false
+---
+
+# Form Handling with React Hook Form and Zod
+
+<rule>
+name: form_handling
+description: Standards for implementing forms using React Hook Form with Zod validation
+filters:
+  - type: file_extension
+    pattern: "\\.tsx$|\\.ts$"
+  - type: content
+    pattern: "(?s)import.*?useForm|import.*?z\\s+from\\s+['\"]zod['\"]"
+
+actions:
+  - type: suggest
+    message: |
+      ## Form Handling Best Practices
+
+      1. Schema Definition:
+         ```tsx
+         import { z } from "zod";
+         
+         const formSchema = z.object({
+           // Define your form fields with validation
+           name: z.string().min(2, "Name must be at least 2 characters"),
+           email: z.string().email("Invalid email address"),
+           // Add more fields as needed
+         });
+         
+         // Type inference
+         type FormValues = z.infer<typeof formSchema>;
+         ```
+
+      2. Form Setup:
+         ```tsx
+         import { useForm } from "react-hook-form";
+         import { zodResolver } from "@hookform/resolvers/zod";
+         
+         // Inside your component:
+         const form = useForm<FormValues>({
+           resolver: zodResolver(formSchema),
+           defaultValues: {
+             name: "",
+             email: "",
+             // Add more default values
+           },
+         });
+         ```
+
+      3. Form Component Structure:
+         ```tsx
+         import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+         import { Button } from "@/components/ui/button";
+         import { Input } from "@/components/ui/input";
+         
+         // Inside your component return:
+         <Form {...form}>
+           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+             <FormField
+               control={form.control}
+               name="name"
+               render={({ field }) => (
+                 <FormItem>
+                   <FormLabel>Name</FormLabel>
+                   <FormControl>
+                     <Input placeholder="Enter your name" {...field} />
+                   </FormControl>
+                   <FormDescription>Enter your full name</FormDescription>
+                   <FormMessage />
+                 </FormItem>
+               )}
+             />
+             
+             {/* Repeat for other fields */}
+             
+             <Button type="submit">Submit</Button>
+           </form>
+         </Form>
+         ```
+
+      4. Form Submission:
+         ```tsx
+         const onSubmit = async (data: FormValues) => {
+           try {
+             // Handle form submission
+             // e.g., API call, state update, etc.
+             console.log(data);
+           } catch (error) {
+             // Handle error
+             console.error(error);
+           }
+         };
+         ```
+
+      5. Error Handling:
+         - Use form.formState.errors to access validation errors
+         - Utilize FormMessage from shadcn/ui to display errors
+         - Implement try/catch blocks for submission errors
+
+examples:
+  - input: |
+      import { useForm } from "react-hook-form";
+      import { z } from "zod";
+    output: "Form component using React Hook Form with Zod"
+
+metadata:
+  priority: high
+  version: 1.0
+</rule> 

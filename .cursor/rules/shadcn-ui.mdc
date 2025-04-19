@@ -1,0 +1,325 @@
+---
+description: ShadCN UI Components and Patterns
+globs: *.ts,*.tsx
+alwaysApply: false
+---
+
+# ShadCN UI Components and Patterns
+
+<rule>
+name: shadcn_ui
+description: Standards for implementing ShadCN UI components and patterns in the OVA system
+filters:
+  - type: file_extension
+    pattern: "\\.tsx$|\\.ts$"
+  - type: content
+    pattern: "(?s)import.*?@/components/ui|Button|Dialog|Dropdown|Form"
+
+actions:
+  - type: suggest
+    message: |
+      ## ShadCN UI Best Practices
+
+      1. Component Imports:
+         ```tsx
+         // Import ShadCN UI components from the components/ui directory
+         import { Button } from "@/components/ui/button"
+         import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+         import { Input } from "@/components/ui/input"
+         import { Label } from "@/components/ui/label"
+         import {
+           Select,
+           SelectContent,
+           SelectItem,
+           SelectTrigger,
+           SelectValue,
+         } from "@/components/ui/select"
+         import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+         ```
+
+      2. Button Variants:
+         ```tsx
+         // Button variants
+         <Button>Default</Button>
+         <Button variant="destructive">Destructive</Button>
+         <Button variant="outline">Outline</Button>
+         <Button variant="secondary">Secondary</Button>
+         <Button variant="ghost">Ghost</Button>
+         <Button variant="link">Link</Button>
+         
+         // Button sizes
+         <Button size="default">Default</Button>
+         <Button size="sm">Small</Button>
+         <Button size="lg">Large</Button>
+         
+         // Button with icon
+         <Button>
+           <PlusIcon className="mr-2 h-4 w-4" />
+           Add Incident
+         </Button>
+         
+         // Disabled state
+         <Button disabled>Disabled</Button>
+         <Button disabled isLoading>Loading...</Button>
+         ```
+
+      3. Card Components:
+         ```tsx
+         <Card>
+           <CardHeader>
+             <CardTitle>Incident #1234</CardTitle>
+             <CardDescription>Reported on April 1, 2023</CardDescription>
+           </CardHeader>
+           <CardContent>
+             <p>Description of the incident...</p>
+           </CardContent>
+           <CardFooter className="flex justify-between">
+             <Button variant="outline">Cancel</Button>
+             <Button>Save</Button>
+           </CardFooter>
+         </Card>
+         ```
+
+      4. Form Components:
+         ```tsx
+         <div className="grid gap-4">
+           <div className="grid gap-2">
+             <Label htmlFor="title">Title</Label>
+             <Input id="title" placeholder="Enter incident title" />
+           </div>
+           
+           <div className="grid gap-2">
+             <Label htmlFor="severity">Severity</Label>
+             <Select>
+               <SelectTrigger id="severity">
+                 <SelectValue placeholder="Select severity level" />
+               </SelectTrigger>
+               <SelectContent>
+                 <SelectItem value="low">Low</SelectItem>
+                 <SelectItem value="medium">Medium</SelectItem>
+                 <SelectItem value="high">High</SelectItem>
+                 <SelectItem value="critical">Critical</SelectItem>
+               </SelectContent>
+             </Select>
+           </div>
+           
+           <div className="grid gap-2">
+             <Label htmlFor="description">Description</Label>
+             <Textarea id="description" placeholder="Describe the incident" />
+           </div>
+           
+           <Button className="w-full">Submit</Button>
+         </div>
+         ```
+
+      5. Dialog (Modal):
+         ```tsx
+         import {
+           Dialog,
+           DialogContent,
+           DialogDescription,
+           DialogFooter,
+           DialogHeader,
+           DialogTitle,
+           DialogTrigger,
+         } from "@/components/ui/dialog"
+         
+         <Dialog>
+           <DialogTrigger asChild>
+             <Button variant="outline">Open Dialog</Button>
+           </DialogTrigger>
+           <DialogContent className="sm:max-w-[425px]">
+             <DialogHeader>
+               <DialogTitle>Confirm Action</DialogTitle>
+               <DialogDescription>
+                 Are you sure you want to perform this action?
+               </DialogDescription>
+             </DialogHeader>
+             <div className="grid gap-4 py-4">
+               {/* Dialog content here */}
+             </div>
+             <DialogFooter>
+               <Button type="submit">Confirm</Button>
+             </DialogFooter>
+           </DialogContent>
+         </Dialog>
+         ```
+
+      6. Tables:
+         ```tsx
+         import {
+           Table,
+           TableBody,
+           TableCaption,
+           TableCell,
+           TableHead,
+           TableHeader,
+           TableRow,
+         } from "@/components/ui/table"
+         
+         <Table>
+           <TableCaption>Recent Incidents</TableCaption>
+           <TableHeader>
+             <TableRow>
+               <TableHead>ID</TableHead>
+               <TableHead>Title</TableHead>
+               <TableHead>Severity</TableHead>
+               <TableHead>Status</TableHead>
+               <TableHead className="text-right">Actions</TableHead>
+             </TableRow>
+           </TableHeader>
+           <TableBody>
+             {incidents.map((incident) => (
+               <TableRow key={incident.id}>
+                 <TableCell className="font-medium">{incident.id}</TableCell>
+                 <TableCell>{incident.title}</TableCell>
+                 <TableCell>
+                   <Badge variant={getSeverityVariant(incident.severity)}>
+                     {incident.severity}
+                   </Badge>
+                 </TableCell>
+                 <TableCell>{incident.status}</TableCell>
+                 <TableCell className="text-right">
+                   <Button variant="ghost" size="sm">
+                     <EyeIcon className="h-4 w-4" />
+                   </Button>
+                   <Button variant="ghost" size="sm">
+                     <EditIcon className="h-4 w-4" />
+                   </Button>
+                 </TableCell>
+               </TableRow>
+             ))}
+           </TableBody>
+         </Table>
+         ```
+
+      7. Feedback Components:
+         ```tsx
+         // Alert
+         import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+         import { AlertCircle } from "lucide-react"
+         
+         <Alert variant="destructive">
+           <AlertCircle className="h-4 w-4" />
+           <AlertTitle>Error</AlertTitle>
+           <AlertDescription>
+             Failed to save incident. Please try again.
+           </AlertDescription>
+         </Alert>
+         
+         // Toast notification
+         import { useToast } from "@/components/ui/use-toast"
+         
+         // In your component:
+         const { toast } = useToast()
+         
+         // Trigger toast
+         const handleAction = () => {
+           toast({
+             title: "Success",
+             description: "Incident has been saved successfully.",
+           })
+         }
+         ```
+
+      8. Navigation Components:
+         ```tsx
+         // Tabs
+         <Tabs defaultValue="overview" className="w-full">
+           <TabsList className="grid w-full grid-cols-3">
+             <TabsTrigger value="overview">Overview</TabsTrigger>
+             <TabsTrigger value="details">Details</TabsTrigger>
+             <TabsTrigger value="activity">Activity</TabsTrigger>
+           </TabsList>
+           <TabsContent value="overview">
+             <Card>
+               <CardHeader>
+                 <CardTitle>Overview</CardTitle>
+               </CardHeader>
+               <CardContent>
+                 <p>Overview content...</p>
+               </CardContent>
+             </Card>
+           </TabsContent>
+           <TabsContent value="details">
+             <Card>
+               <CardHeader>
+                 <CardTitle>Details</CardTitle>
+               </CardHeader>
+               <CardContent>
+                 <p>Details content...</p>
+               </CardContent>
+             </Card>
+           </TabsContent>
+           <TabsContent value="activity">
+             <Card>
+               <CardHeader>
+                 <CardTitle>Activity</CardTitle>
+               </CardHeader>
+               <CardContent>
+                 <p>Activity content...</p>
+               </CardContent>
+             </Card>
+           </TabsContent>
+         </Tabs>
+         ```
+
+      9. Layout Components:
+         ```tsx
+         <div className="flex min-h-screen flex-col">
+           {/* Header */}
+           <header className="sticky top-0 z-10 w-full border-b bg-background/95 backdrop-blur">
+             <div className="container flex h-14 items-center">
+               <MainNav />
+               <div className="ml-auto flex items-center space-x-4">
+                 <UserMenu />
+               </div>
+             </div>
+           </header>
+           
+           {/* Main content with sidebar */}
+           <div className="flex-1 items-start md:grid md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+             <aside className="fixed top-14 z-30 hidden h-[calc(100vh-3.5rem)] w-full shrink-0 border-r md:sticky md:block">
+               <ScrollArea className="h-full py-6 pr-6 lg:py-8">
+                 <SidebarNav items={sidebarNavItems} />
+               </ScrollArea>
+             </aside>
+             <main className="flex-1 p-4 md:p-8">
+               {children}
+             </main>
+           </div>
+         </div>
+         ```
+
+examples:
+  - input: |
+      <div className="border rounded p-4 shadow-sm">
+        <h3 className="text-lg font-medium mb-2">Incident Report</h3>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Title</label>
+            <input 
+              type="text" 
+              className="w-full px-3 py-2 border rounded-md" 
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Description</label>
+            <textarea 
+              className="w-full px-3 py-2 border rounded-md" 
+              rows={3}
+            ></textarea>
+          </div>
+          <button 
+            className="px-4 py-2 bg-blue-600 text-white rounded-md"
+          >
+            Submit
+          </button>
+        </div>
+      </div>
+    output: "Form that should be updated to use ShadCN UI components"
+
+metadata:
+  priority: high
+  version: 1.0
+</rule> 

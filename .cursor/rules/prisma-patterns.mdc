@@ -1,0 +1,253 @@
+---
+description: Prisma ORM with PostgreSQL Best Practices
+globs: *.ts,*.tsx,*.js,*.jsx,*.prisma
+alwaysApply: false
+---
+
+# Prisma ORM with PostgreSQL
+
+<rule>
+name: prisma_patterns
+description: Standards for implementing Prisma ORM patterns with PostgreSQL in the OVA system
+filters:
+  - type: file_extension
+    pattern: "\\.prisma$|\\.ts$|\\.js$"
+  - type: content
+    pattern: "(?s)import.*?prisma|PrismaClient|prisma\\."
+
+actions:
+  - type: suggest
+    message: |
+      ## Prisma ORM Best Practices
+
+      1. Schema Design:
+         ```prisma
+         // schema.prisma
+         generator client {
+           provider = "prisma-client-js"
+         }
+         
+         datasource db {
+           provider = "postgresql"
+           url      = env("DATABASE_URL")
+         }
+         
+         // User model example with relations
+         model User {
+           id        String   @id @default(uuid())
+           email     String   @unique
+           name      String?
+           role      Role     @default(EMPLOYEE)
+           createdAt DateTime @default(now()) @map("created_at")
+           updatedAt DateTime @updatedAt @map("updated_at")
+           
+           // Relations
+           incidents        Incident[]  @relation("reporter")
+           assignedIncidents Incident[] @relation("assignee")
+           department       Department? @relation(fields: [departmentId], references: [id])
+           departmentId     String?     @map("department_id")
+           
+           @@index([departmentId])
+           @@map("users")
+         }
+         
+         enum Role {
+           ADMIN
+           MANAGER
+           QUALITY_ASSURANCE
+           SAFETY_OFFICER
+           EMPLOYEE
+           INVESTIGATOR
+         }
+         ```
+
+      2. Client Setup:
+         ```typescript
+         // lib/prisma.ts
+         import { PrismaClient } from '@prisma/client'
+         
+         const globalForPrisma = global as unknown as { prisma: PrismaClient }
+         
+         export const prisma = globalForPrisma.prisma || new PrismaClient()
+         
+         if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+         ```
+
+      3. Data Fetching:
+         ```typescript
+         // Using the client
+         import { prisma } from '@/lib/prisma'
+         
+         // Create
+         const createUser = async (data) => {
+           return await prisma.user.create({
+             data,
+           })
+         }
+         
+         // Read with relations
+         const getIncidentWithRelations = async (id: string) => {
+           return await prisma.incident.findUnique({
+             where: { id },
+             include: {
+               reporter: true,
+               assignee: true,
+               department: true,
+               evidence: true,
+             },
+           })
+         }
+         
+         // Update
+         const updateIncident = async (id: string, data) => {
+           return await prisma.incident.update({
+             where: { id },
+             data,
+           })
+         }
+         
+         // Delete
+         const deleteIncident = async (id: string) => {
+           return await prisma.incident.delete({
+             where: { id },
+           })
+         }
+         ```
+
+      4. Transaction Management:
+         ```typescript
+         // Use transactions for related operations
+         const createIncidentWithEvidence = async (incidentData, evidenceData) => {
+           return await prisma.$transaction(async (tx) => {
+             const incident = await tx.incident.create({
+               data: incidentData,
+             })
+             
+             // Create evidence linked to the incident
+             const evidence = await tx.evidence.create({
+               data: {
+                 ...evidenceData,
+                 incidentId: incident.id,
+               },
+             })
+             
+             return { incident, evidence }
+           })
+         }
+         ```
+
+      5. Query Optimization:
+         ```typescript
+         // Select only what you need
+         const getIncidentSummaries = async () => {
+           return await prisma.incident.findMany({
+             select: {
+               id: true,
+               title: true,
+               status: true,
+               createdAt: true,
+               reporter: {
+                 select: {
+                   id: true,
+                   name: true,
+                 },
+               },
+             },
+             orderBy: {
+               createdAt: 'desc',
+             },
+           })
+         }
+         
+         // Pagination
+         const getIncidentsPaginated = async (page = 1, pageSize = 10) => {
+           const skip = (page - 1) * pageSize
+           
+           const [total, incidents] = await Promise.all([
+             prisma.incident.count(),
+             prisma.incident.findMany({
+               skip,
+               take: pageSize,
+               orderBy: {
+                 createdAt: 'desc',
+               },
+             }),
+           ])
+           
+           return {
+             incidents,
+             meta: {
+               total,
+               page,
+               pageSize,
+               pageCount: Math.ceil(total / pageSize),
+             },
+           }
+         }
+         ```
+
+      6. Data Validation:
+         ```typescript
+         // Combine Zod with Prisma
+         import { z } from 'zod'
+         
+         const IncidentSchema = z.object({
+           title: z.string().min(5, 'Title must be at least 5 characters'),
+           description: z.string().min(10, 'Description must be at least 10 characters'),
+           severity: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
+           location: z.string().min(1, 'Location is required'),
+           reporterId: z.string().uuid('Invalid reporter ID'),
+           departmentId: z.string().uuid('Invalid department ID').optional(),
+         })
+         
+         type IncidentInput = z.infer<typeof IncidentSchema>
+         
+         // Use in API routes/server actions
+         const createValidatedIncident = async (data: unknown) => {
+           const validatedData = IncidentSchema.parse(data)
+           
+           return await prisma.incident.create({
+             data: validatedData,
+           })
+         }
+         ```
+
+      7. Error Handling:
+         ```typescript
+         // Properly handle Prisma errors
+         import { Prisma } from '@prisma/client'
+         
+         const createUserWithErrorHandling = async (data) => {
+           try {
+             return await prisma.user.create({
+               data,
+             })
+           } catch (error) {
+             if (error instanceof Prisma.PrismaClientKnownRequestError) {
+               // Handle known errors
+               if (error.code === 'P2002') {
+                 throw new Error(`A user with this ${error.meta?.target} already exists`)
+               }
+             }
+             // Re-throw other errors
+             throw error
+           }
+         }
+         ```
+
+examples:
+  - input: |
+      import { PrismaClient } from '@prisma/client'
+      
+      // Direct prisma instance creation
+      const prisma = new PrismaClient()
+      
+      export async function getUsers() {
+        return await prisma.user.findMany()
+      }
+    output: "Prisma client usage in the application"
+
+metadata:
+  priority: high
+  version: 1.0
+</rule> 

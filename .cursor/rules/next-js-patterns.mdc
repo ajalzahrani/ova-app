@@ -1,0 +1,428 @@
+---
+description: Next.js Patterns and API Routes
+globs: *.ts,*.tsx,*.js,*.jsx
+alwaysApply: false
+---
+
+# Next.js Patterns and API Routes
+
+<rule>
+name: next_js_patterns
+description: Standards for implementing Next.js patterns and API routes in the OVA system
+filters:
+  - type: file_extension
+    pattern: "\\.tsx$|\\.ts$|\\.jsx$|\\.js$"
+  - type: content
+    pattern: "(?s)import.*?next|'use client'|'use server'|NextResponse|NextRequest"
+
+actions:
+  - type: suggest
+    message: |
+      ## Next.js Best Practices
+
+      1. App Router Structure:
+         ```
+         app/
+         ├── (auth)/
+         │   ├── login/
+         │   │   └── page.tsx
+         │   ├── register/
+         │   │   └── page.tsx
+         │   └── layout.tsx
+         ├── (dashboard)/
+         │   ├── incidents/
+         │   │   ├── [id]/
+         │   │   │   ├── page.tsx
+         │   │   │   └── edit/
+         │   │   │       └── page.tsx
+         │   │   ├── new/
+         │   │   │   └── page.tsx
+         │   │   └── page.tsx
+         │   ├── reports/
+         │   │   └── page.tsx
+         │   └── layout.tsx
+         ├── api/
+         │   ├── incidents/
+         │   │   ├── [id]/
+         │   │   │   ├── route.ts
+         │   │   │   └── status/
+         │   │   │       └── route.ts
+         │   │   └── route.ts
+         │   └── auth/
+         │       └── [...nextauth]/
+         │           └── route.ts
+         ├── layout.tsx
+         └── page.tsx
+         ```
+
+      2. Client Components:
+         ```tsx
+         'use client'
+         
+         import { useState } from 'react'
+         import { Button } from '@/components/ui/button'
+         
+         interface ClientComponentProps {
+           initialData: any
+         }
+         
+         export function ClientComponent({ initialData }: ClientComponentProps) {
+           // Client-side state
+           const [data, setData] = useState(initialData)
+           
+           // Event handlers
+           const handleClick = () => {
+             setData({ ...data, updated: true })
+           }
+           
+           return (
+             <div>
+               <pre>{JSON.stringify(data, null, 2)}</pre>
+               <Button onClick={handleClick}>Update Data</Button>
+             </div>
+           )
+         }
+         ```
+
+      3. Server Components (Default):
+         ```tsx
+         // This is a Server Component by default (no 'use client' directive)
+         import { ClientComponent } from '@/components/ClientComponent'
+         import { prisma } from '@/lib/prisma'
+         
+         export default async function IncidentsPage() {
+           // Data fetching in server component
+           const incidents = await prisma.incident.findMany({
+             take: 10,
+             orderBy: {
+               createdAt: 'desc',
+             },
+             include: {
+               reporter: {
+                 select: {
+                   name: true,
+                 },
+               },
+             },
+           })
+           
+           return (
+             <div className="space-y-6">
+               <h1 className="text-2xl font-bold">Recent Incidents</h1>
+               
+               {/* Pass server data to client component */}
+               <ClientComponent initialData={incidents} />
+             </div>
+           )
+         }
+         ```
+
+      4. API Routes:
+         ```tsx
+         // app/api/incidents/route.ts
+         import { NextRequest, NextResponse } from 'next/server'
+         import { prisma } from '@/lib/prisma'
+         import { z } from 'zod'
+         import { getServerSession } from 'next-auth'
+         import { authOptions } from '@/lib/auth'
+         
+         // GET handler
+         export async function GET(request: NextRequest) {
+           // Authentication check
+           const session = await getServerSession(authOptions)
+           if (!session) {
+             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+           }
+           
+           // Parse query parameters
+           const { searchParams } = new URL(request.url)
+           const status = searchParams.get('status')
+           const page = parseInt(searchParams.get('page') || '1')
+           const pageSize = parseInt(searchParams.get('pageSize') || '10')
+           
+           // Build query
+           const where = {}
+           if (status) {
+             where.status = status
+           }
+           
+           // Get data with pagination
+           const [total, incidents] = await Promise.all([
+             prisma.incident.count({ where }),
+             prisma.incident.findMany({
+               where,
+               skip: (page - 1) * pageSize,
+               take: pageSize,
+               orderBy: {
+                 createdAt: 'desc',
+               },
+               include: {
+                 reporter: {
+                   select: {
+                     id: true,
+                     name: true,
+                   },
+                 },
+               },
+             }),
+           ])
+           
+           // Return response
+           return NextResponse.json({
+             incidents,
+             meta: {
+               total,
+               page,
+               pageSize,
+               pageCount: Math.ceil(total / pageSize),
+             },
+           })
+         }
+         
+         // POST handler with validation
+         export async function POST(request: NextRequest) {
+           // Authentication check
+           const session = await getServerSession(authOptions)
+           if (!session) {
+             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+           }
+           
+           try {
+             // Parse request body
+             const body = await request.json()
+             
+             // Validate with Zod
+             const IncidentSchema = z.object({
+               title: z.string().min(5, 'Title must be at least 5 characters'),
+               description: z.string().min(10, 'Description must be at least 10 characters'),
+               severity: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
+               location: z.string().min(1, 'Location is required'),
+             })
+             
+             const validatedData = IncidentSchema.parse(body)
+             
+             // Create incident
+             const incident = await prisma.incident.create({
+               data: {
+                 ...validatedData,
+                 status: 'NEW',
+                 reporterId: session.user.id,
+               },
+             })
+             
+             return NextResponse.json(incident, { status: 201 })
+           } catch (error) {
+             if (error instanceof z.ZodError) {
+               return NextResponse.json(
+                 { error: 'Validation failed', issues: error.format() },
+                 { status: 400 }
+               )
+             }
+             
+             return NextResponse.json(
+               { error: 'Internal server error' },
+               { status: 500 }
+             )
+           }
+         }
+         ```
+
+      5. Dynamic Route Parameters:
+         ```tsx
+         // app/api/incidents/[id]/route.ts
+         import { NextRequest, NextResponse } from 'next/server'
+         import { prisma } from '@/lib/prisma'
+         
+         interface RouteParams {
+           params: {
+             id: string
+           }
+         }
+         
+         export async function GET(request: NextRequest, { params }: RouteParams) {
+           const { id } = params
+           
+           try {
+             const incident = await prisma.incident.findUnique({
+               where: { id },
+               include: {
+                 reporter: true,
+                 assignee: true,
+                 department: true,
+                 evidence: true,
+               },
+             })
+             
+             if (!incident) {
+               return NextResponse.json(
+                 { error: 'Incident not found' },
+                 { status: 404 }
+               )
+             }
+             
+             return NextResponse.json(incident)
+           } catch (error) {
+             return NextResponse.json(
+               { error: 'Internal server error' },
+               { status: 500 }
+             )
+           }
+         }
+         ```
+
+      6. Server Actions:
+         ```tsx
+         // app/actions.ts
+         'use server'
+         
+         import { z } from 'zod'
+         import { revalidatePath } from 'next/cache'
+         import { prisma } from '@/lib/prisma'
+         import { getServerSession } from 'next-auth'
+         import { authOptions } from '@/lib/auth'
+         
+         // Create incident server action
+         export async function createIncident(formData: FormData) {
+           // Authentication check
+           const session = await getServerSession(authOptions)
+           if (!session) {
+             return { error: 'Unauthorized' }
+           }
+           
+           // Validate with Zod
+           const IncidentSchema = z.object({
+             title: z.string().min(5, 'Title must be at least 5 characters'),
+             description: z.string().min(10, 'Description must be at least 10 characters'),
+             severity: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
+             location: z.string().min(1, 'Location is required'),
+           })
+           
+           // Parse and validate form data
+           const validatedFields = IncidentSchema.safeParse({
+             title: formData.get('title'),
+             description: formData.get('description'),
+             severity: formData.get('severity'),
+             location: formData.get('location'),
+           })
+           
+           // Return validation errors
+           if (!validatedFields.success) {
+             return {
+               error: 'Invalid fields',
+               issues: validatedFields.error.flatten().fieldErrors,
+             }
+           }
+           
+           try {
+             // Create incident
+             const incident = await prisma.incident.create({
+               data: {
+                 ...validatedFields.data,
+                 status: 'NEW',
+                 reporterId: session.user.id,
+               },
+             })
+             
+             // Revalidate the incidents page
+             revalidatePath('/incidents')
+             
+             return { success: true, incident }
+           } catch (error) {
+             return { error: 'Failed to create incident' }
+           }
+         }
+         ```
+
+      7. Authentication Integration:
+         ```tsx
+         // lib/auth.ts
+         import { PrismaAdapter } from '@auth/prisma-adapter'
+         import { prisma } from '@/lib/prisma'
+         import { type NextAuthOptions } from 'next-auth'
+         import CredentialsProvider from 'next-auth/providers/credentials'
+         import bcrypt from 'bcrypt'
+         
+         export const authOptions: NextAuthOptions = {
+           adapter: PrismaAdapter(prisma),
+           session: {
+             strategy: 'jwt',
+           },
+           pages: {
+             signIn: '/login',
+           },
+           providers: [
+             CredentialsProvider({
+               name: 'Credentials',
+               credentials: {
+                 email: { label: 'Email', type: 'email' },
+                 password: { label: 'Password', type: 'password' },
+               },
+               async authorize(credentials) {
+                 if (!credentials?.email || !credentials?.password) {
+                   return null
+                 }
+                 
+                 const user = await prisma.user.findUnique({
+                   where: {
+                     email: credentials.email,
+                   },
+                 })
+                 
+                 if (!user || !user.password) {
+                   return null
+                 }
+                 
+                 const isValidPassword = await bcrypt.compare(
+                   credentials.password,
+                   user.password
+                 )
+                 
+                 if (!isValidPassword) {
+                   return null
+                 }
+                 
+                 return {
+                   id: user.id,
+                   email: user.email,
+                   name: user.name,
+                   role: user.role,
+                 }
+               },
+             }),
+           ],
+           callbacks: {
+             async jwt({ token, user }) {
+               if (user) {
+                 token.id = user.id
+                 token.role = user.role
+               }
+               return token
+             },
+             async session({ session, token }) {
+               if (token) {
+                 session.user.id = token.id
+                 session.user.role = token.role
+               }
+               return session
+             },
+           },
+         }
+         ```
+
+examples:
+  - input: |
+      // Basic API route
+      export default async function handler(req, res) {
+        if (req.method === 'GET') {
+          const data = await fetchData()
+          res.status(200).json(data)
+        } else {
+          res.status(405).end()
+        }
+      }
+    output: "API route that should be migrated to App Router format"
+
+metadata:
+  priority: high
+  version: 1.0
+</rule> 

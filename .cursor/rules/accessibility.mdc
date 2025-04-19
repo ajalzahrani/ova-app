@@ -1,0 +1,256 @@
+---
+description: Accessibility and Responsive Design
+globs: *.tsx,*.ts,*.jsx,*.js
+alwaysApply: false
+---
+
+# Accessibility and Responsive Design
+
+<rule>
+name: accessibility_responsive
+description: Standards for implementing accessible and responsive design in the OVA system
+filters:
+  - type: file_extension
+    pattern: "\\.tsx$|\\.jsx$|\\.ts$|\\.js$"
+  - type: content
+    pattern: "(?s)<.*?className|aria-|role=|@media"
+
+actions:
+  - type: suggest
+    message: |
+      ## Accessibility and Responsive Design Best Practices
+
+      1. Semantic HTML:
+         ```tsx
+         // Prefer semantic HTML elements over divs
+         
+         // Instead of:
+         <div className="header">...</div>
+         <div className="navigation">...</div>
+         <div className="main-content">...</div>
+         <div className="footer">...</div>
+         
+         // Use:
+         <header>...</header>
+         <nav>...</nav>
+         <main>...</main>
+         <footer>...</footer>
+         
+         // For lists:
+         <ul>
+           <li>Item 1</li>
+           <li>Item 2</li>
+         </ul>
+         
+         // For articles:
+         <article>
+           <h2>Article Title</h2>
+           <p>Article content...</p>
+         </article>
+         ```
+
+      2. ARIA Attributes:
+         ```tsx
+         // Use ARIA attributes when needed
+         
+         // For non-visible elements
+         <span className="sr-only">Hidden text for screen readers</span>
+         
+         // Landmark roles (when semantic HTML is not enough)
+         <div role="banner">...</div>
+         <div role="navigation">...</div>
+         <div role="main">...</div>
+         
+         // Dynamic content updates
+         <div 
+           aria-live="polite" 
+           aria-atomic="true"
+         >
+           {statusMessage}
+         </div>
+         
+         // Form labels and controls
+         <label htmlFor="name">Name</label>
+         <input 
+           id="name" 
+           aria-required="true"
+           aria-invalid={errors.name ? "true" : "false"}
+           aria-describedby="name-error"
+         />
+         {errors.name && (
+           <p id="name-error" className="text-red-500">
+             {errors.name.message}
+           </p>
+         )}
+         ```
+
+      3. Keyboard Navigation:
+         ```tsx
+         // Ensure interactive elements are keyboard accessible
+         
+         // Custom button needs keyboard support
+         <div
+           role="button"
+           tabIndex={0}
+           onClick={handleClick}
+           onKeyDown={(e) => {
+             if (e.key === 'Enter' || e.key === ' ') {
+               handleClick();
+             }
+           }}
+         >
+           Click Me
+         </div>
+         
+         // Skip link for keyboard users
+         <a 
+           href="#main-content" 
+           className="sr-only focus:not-sr-only"
+         >
+           Skip to main content
+         </a>
+         
+         // Focus management for modals
+         useEffect(() => {
+           if (isOpen) {
+             modalRef.current?.focus();
+           }
+         }, [isOpen]);
+         ```
+
+      4. Color and Contrast:
+         ```tsx
+         // Use color classes that meet WCAG contrast requirements
+         
+         // Text colors with good contrast
+         <p className="text-gray-900 dark:text-gray-100">
+           High contrast text
+         </p>
+         
+         // Avoid relying solely on color for information
+         <div className="flex items-center">
+           <div className="w-4 h-4 bg-red-500 rounded-full" />
+           <span className="ml-2">Error: Form submission failed</span>
+         </div>
+         
+         // For Tailwind, consider using:
+         // text-gray-900 dark:text-gray-100 (for high contrast text)
+         // bg-gray-100 dark:bg-gray-900 (for high contrast backgrounds)
+         ```
+
+      5. Responsive Design with Tailwind:
+         ```tsx
+         // Mobile-first design
+         
+         // Responsive layout with Tailwind breakpoints
+         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+           {/* Content will display in 1, 2, or 3 columns depending on screen size */}
+           <Card />
+           <Card />
+           <Card />
+         </div>
+         
+         // Responsive text sizes
+         <h1 className="text-xl md:text-2xl lg:text-3xl font-bold">
+           Responsive Heading
+         </h1>
+         
+         // Responsive spacing
+         <div className="p-4 md:p-6 lg:p-8">
+           {/* Padding increases with screen size */}
+         </div>
+         
+         // Responsive navigation
+         <nav className="flex flex-col md:flex-row">
+           <Link className="py-2 md:py-0 md:px-4">Home</Link>
+           <Link className="py-2 md:py-0 md:px-4">Dashboard</Link>
+           <Link className="py-2 md:py-0 md:px-4">Reports</Link>
+         </nav>
+         ```
+
+      6. Responsive Images:
+         ```tsx
+         // Responsive image sizing with Tailwind
+         <img 
+           src="/image.jpg" 
+           alt="Descriptive alt text"
+           className="w-full max-w-md mx-auto h-auto" 
+         />
+         
+         // Using Next.js Image component for optimized loading
+         import Image from 'next/image'
+         
+         <Image 
+           src="/image.jpg"
+           alt="Descriptive alt text"
+           width={800}
+           height={600}
+           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+           priority={true} // For images above the fold
+         />
+         ```
+
+      7. Dark Mode Support:
+         ```tsx
+         // Dark mode toggling with Tailwind and Next-themes
+         
+         // In component
+         const { theme, setTheme } = useTheme()
+         
+         // Toggle button
+         <button
+           onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+           aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+         >
+           {theme === 'dark' ? (
+             <SunIcon className="h-5 w-5" />
+           ) : (
+             <MoonIcon className="h-5 w-5" />
+           )}
+         </button>
+         
+         // Dark mode responsive classes
+         <div className="bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+           Dark mode compatible content
+         </div>
+         ```
+
+      8. Accessibility Testing:
+         ```tsx
+         // Tools to consider:
+         // - Use React axe for development testing
+         // - Test with keyboard navigation
+         // - Test with screen readers (NVDA, VoiceOver)
+         // - Use Lighthouse for accessibility audits
+         
+         // React axe integration in development
+         if (process.env.NODE_ENV !== 'production') {
+           import('react-axe').then((axe) => {
+             axe.default(React, ReactDOM, 1000);
+           });
+         }
+         ```
+
+examples:
+  - input: |
+      <div onClick={handleClick}>
+        Click me
+      </div>
+    output: "Interactive element should use a button element with proper ARIA attributes"
+
+  - input: |
+      <div className="container mx-auto">
+        <div className="flex">
+          <div className="w-1/4">Sidebar</div>
+          <div className="w-3/4">
+            <div className="text-lg">Page Title</div>
+            <div>Content goes here</div>
+          </div>
+        </div>
+      </div>
+    output: "Layout should use semantic HTML elements and responsive designs"
+
+metadata:
+  priority: high
+  version: 1.0
+</rule> 
