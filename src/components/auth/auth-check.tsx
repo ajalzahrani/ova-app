@@ -13,15 +13,27 @@ export function AuthCheck({ children }: AuthCheckProps) {
   const router = useRouter();
   const pathname = usePathname();
 
+  // Public routes that don't require authentication
+  const publicRoutes = ["/login", "/", "/anonymous-report"];
+
   useEffect(() => {
-    // If the user is not logged in and not on the login page, redirect to login
-    if (status === "unauthenticated" && pathname !== "/login") {
+    // If the user is not logged in and not on a public route, redirect to login
+    if (
+      status === "unauthenticated" &&
+      !publicRoutes.includes(pathname) &&
+      !pathname.startsWith("/anonymous-report/")
+    ) {
       router.push("/login");
     }
 
     // If the user is logged in and on the login page, redirect to dashboard
     if (status === "authenticated" && pathname === "/login") {
-      router.push("/");
+      router.push("/dashboard");
+    }
+
+    // If the user is logged in and on the home page, redirect to dashboard
+    if (status === "authenticated" && pathname === "/") {
+      router.push("/dashboard");
     }
   }, [status, router, pathname]);
 
@@ -34,8 +46,12 @@ export function AuthCheck({ children }: AuthCheckProps) {
     );
   }
 
-  // On login page, or authenticated
-  if (pathname === "/login" || status === "authenticated") {
+  // On public routes, or authenticated
+  if (
+    publicRoutes.includes(pathname) ||
+    pathname.startsWith("/anonymous-report/") ||
+    status === "authenticated"
+  ) {
     return <>{children}</>;
   }
 

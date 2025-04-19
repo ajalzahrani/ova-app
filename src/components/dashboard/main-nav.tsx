@@ -1,13 +1,23 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-
-import { cn } from "@/lib/utils"
-import { Shield } from "lucide-react"
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { cn } from "@/lib/utils";
+import { Shield, ChevronDown } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function MainNav() {
-  const pathname = usePathname()
+  const pathname = usePathname();
+  const { data: session } = useSession();
+
+  // Check if the user has admin role
+  const isAdmin = session?.user?.roles?.includes("ADMIN");
 
   return (
     <div className="flex gap-6 md:gap-10">
@@ -20,39 +30,62 @@ export function MainNav() {
           href="/"
           className={cn(
             "text-sm font-medium transition-colors hover:text-primary",
-            pathname === "/" ? "text-primary" : "text-muted-foreground",
-          )}
-        >
+            pathname === "/" ? "text-primary" : "text-muted-foreground"
+          )}>
           Dashboard
         </Link>
         <Link
           href="/incidents"
           className={cn(
             "text-sm font-medium transition-colors hover:text-primary",
-            pathname === "/incidents" || pathname.startsWith("/incidents/") ? "text-primary" : "text-muted-foreground",
-          )}
-        >
+            pathname === "/incidents" || pathname.startsWith("/incidents/")
+              ? "text-primary"
+              : "text-muted-foreground"
+          )}>
           Incidents
         </Link>
         <Link
           href="/reports"
           className={cn(
             "text-sm font-medium transition-colors hover:text-primary",
-            pathname === "/reports" ? "text-primary" : "text-muted-foreground",
-          )}
-        >
+            pathname === "/reports" ? "text-primary" : "text-muted-foreground"
+          )}>
           Reports
         </Link>
+        {isAdmin && (
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              className={cn(
+                "flex items-center text-sm font-medium transition-colors hover:text-primary",
+                pathname.startsWith("/users") || pathname.startsWith("/roles")
+                  ? "text-primary"
+                  : "text-muted-foreground"
+              )}>
+              Management <ChevronDown className="ml-1 h-4 w-4" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem asChild>
+                <Link href="/users" className="w-full">
+                  Users
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/roles" className="w-full">
+                  Roles
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
         <Link
           href="/settings"
           className={cn(
             "text-sm font-medium transition-colors hover:text-primary",
-            pathname === "/settings" ? "text-primary" : "text-muted-foreground",
-          )}
-        >
+            pathname === "/settings" ? "text-primary" : "text-muted-foreground"
+          )}>
           Settings
         </Link>
       </nav>
     </div>
-  )
+  );
 }
