@@ -9,13 +9,14 @@ import bcrypt from "bcrypt";
 
 const userSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
+  username: z.string().min(2, "Username must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
   password: z
     .string()
     .min(8, "Password must be at least 8 characters")
     .optional(),
-  roleIds: z.array(z.string()).min(1, "At least one role must be selected"),
-  departmentIds: z.array(z.string()).optional(),
+  roleId: z.string().min(1, "At least one role must be selected"),
+  departmentId: z.string().optional(),
 });
 
 export type UserFormValues = z.infer<typeof userSchema>;
@@ -24,19 +25,15 @@ export type UserFormValues = z.infer<typeof userSchema>;
 export async function getUsers() {
   const session = await getServerSession(authOptions);
 
-  if (!session?.user || !session.user.roles.includes("ADMIN")) {
+  if (!session?.user || session.user.role !== "ADMIN") {
     return { success: false, error: "Not authorized" };
   }
 
   try {
     const users = await prisma.user.findMany({
       include: {
-        userRoles: {
-          include: {
-            role: true,
-          },
-        },
-        departments: true,
+        role: true,
+        department: true,
       },
       orderBy: {
         name: "asc",
@@ -47,7 +44,8 @@ export async function getUsers() {
       success: true,
       users: users.map((user) => ({
         ...user,
-        roles: user.userRoles.map((ur) => ur.role),
+        role: user.role,
+        department: user.department,
       })),
     };
   } catch (error) {
@@ -60,7 +58,7 @@ export async function getUsers() {
 export async function getUserById(userId: string) {
   const session = await getServerSession(authOptions);
 
-  if (!session?.user || !session.user.roles.includes("ADMIN")) {
+  if (!session?.user || session.user.role !== "ADMIN") {
     return { success: false, error: "Not authorized" };
   }
 
@@ -68,12 +66,8 @@ export async function getUserById(userId: string) {
     const user = await prisma.user.findUnique({
       where: { id: userId },
       include: {
-        userRoles: {
-          include: {
-            role: true,
-          },
-        },
-        departments: true,
+        role: true,
+        department: true,
       },
     });
 
@@ -85,9 +79,8 @@ export async function getUserById(userId: string) {
       success: true,
       user: {
         ...user,
-        roles: user.userRoles.map((ur) => ur.role),
-        roleIds: user.userRoles.map((ur) => ur.roleId),
-        departmentIds: user.departments.map((d) => d.id),
+        role: user.role,
+        department: user.department,
       },
     };
   } catch (error) {
@@ -100,7 +93,7 @@ export async function getUserById(userId: string) {
 export async function createUser(data: UserFormValues) {
   const session = await getServerSession(authOptions);
 
-  if (!session?.user || !session.user.roles.includes("ADMIN")) {
+  if (!session?.user || session.user.role !== "ADMIN") {
     return { success: false, error: "Not authorized" };
   }
 
@@ -126,42 +119,36 @@ export async function createUser(data: UserFormValues) {
     const user = await prisma.user.create({
       data: {
         name: validatedData.name,
+        username: validatedData.name,
         email: validatedData.email,
-        password: hashedPassword,
-        userRoles: {
-          create: validatedData.roleIds.map((roleId) => ({
-            roleId,
-          })),
+        password: hashedPassword || "",
+        role: {
+          connect: { id: validatedData.roleId },
         },
-        ...(validatedData.departmentIds &&
-        validatedData.departmentIds.length > 0
+        ...(validatedData.departmentId
           ? {
-              departments: {
-                connect: validatedData.departmentIds.map((id) => ({ id })),
+              department: {
+                connect: { id: validatedData.departmentId },
               },
             }
           : {}),
       },
       include: {
-        userRoles: {
-          include: {
-            role: true,
-          },
-        },
-        departments: true,
+        role: true,
+        department: true,
       },
     });
 
-    // Log audit
-    await prisma.auditLog.create({
-      data: {
-        userId: session.user.id,
-        action: "CREATE",
-        entity: "USER",
-        entityId: user.id,
-        details: `Created user: ${user.name} (${user.email})`,
-      },
-    });
+    // // Log audit
+    // await prisma.auditLog.create({
+    //   data: {
+    //     userId: session.user.id,
+    //     action: "CREATE",
+    //     entity: "USER",
+    //     entityId: user.id,
+    //     details: `Created user: ${user.name} (${user.email})`,
+    //   },
+    // });
 
     // Revalidate users pages
     revalidatePath("/users");
@@ -184,7 +171,7 @@ export async function createUser(data: UserFormValues) {
 export async function updateUser(userId: string, data: UserFormValues) {
   const session = await getServerSession(authOptions);
 
-  if (!session?.user || !session.user.roles.includes("ADMIN")) {
+  if (!session?.user || session.user.role !== "ADMIN") {
     return { success: false, error: "Not authorized" };
   }
 
@@ -193,7 +180,7 @@ export async function updateUser(userId: string, data: UserFormValues) {
     const validatedData = userSchema.parse(data);
 
     // Hash password if provided and not empty
-    let hashedPassword;
+    let hashedPassword: string | undefined;
     if (validatedData.password) {
       hashedPassword = await bcrypt.hash(validatedData.password, 10);
     }
@@ -229,29 +216,12 @@ export async function updateUser(userId: string, data: UserFormValues) {
         data: userData,
       });
 
-      // Delete existing role assignments and create new ones
-      await tx.userRole.deleteMany({
-        where: { userId },
-      });
-
-      // Create new role assignments
-      for (const roleId of validatedData.roleIds) {
-        await tx.userRole.create({
-          data: {
-            userId,
-            roleId,
-          },
-        });
-      }
-
       // Update department assignments
       await tx.user.update({
         where: { id: userId },
         data: {
-          departments: {
-            set: validatedData.departmentIds
-              ? validatedData.departmentIds.map((id) => ({ id }))
-              : [],
+          department: {
+            connect: { id: validatedData.departmentId },
           },
         },
       });
@@ -259,16 +229,16 @@ export async function updateUser(userId: string, data: UserFormValues) {
       return updatedUser;
     });
 
-    // Log audit
-    await prisma.auditLog.create({
-      data: {
-        userId: session.user.id,
-        action: "UPDATE",
-        entity: "USER",
-        entityId: userId,
-        details: `Updated user: ${user.name} (${user.email})`,
-      },
-    });
+    // // Log audit
+    // await prisma.auditLog.create({
+    //   data: {
+    //     userId: session.user.id,
+    //     action: "UPDATE",
+    //     entity: "USER",
+    //     entityId: userId,
+    //     details: `Updated user: ${user.name} (${user.email})`,
+    //   },
+    // });
 
     // Revalidate users pages
     revalidatePath("/users");
@@ -292,7 +262,7 @@ export async function updateUser(userId: string, data: UserFormValues) {
 export async function deleteUser(userId: string) {
   const session = await getServerSession(authOptions);
 
-  if (!session?.user || !session.user.roles.includes("ADMIN")) {
+  if (!session?.user || session.user.role !== "ADMIN") {
     return { success: false, error: "Not authorized" };
   }
 
@@ -311,16 +281,16 @@ export async function deleteUser(userId: string) {
       where: { id: userId },
     });
 
-    // Log audit
-    await prisma.auditLog.create({
-      data: {
-        userId: session.user.id,
-        action: "DELETE",
-        entity: "USER",
-        entityId: userId,
-        details: `Deleted user: ${user.name} (${user.email})`,
-      },
-    });
+    // // Log audit
+    // await prisma.auditLog.create({
+    //   data: {
+    //     userId: session.user.id,
+    //     action: "DELETE",
+    //     entity: "USER",
+    //     entityId: userId,
+    //     details: `Deleted user: ${user.name} (${user.email})`,
+    //   },
+    // });
 
     // Revalidate users page
     revalidatePath("/users");

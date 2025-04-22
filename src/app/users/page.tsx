@@ -24,18 +24,23 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/components/ui/use-toast";
-import { getUsers, deleteUser } from "@/actions/users";
+import { getUsers, deleteUser } from "@/actions-old/users";
 import { useEffect } from "react";
 
 // Type for the user data
 interface User {
   id: string;
   name: string;
+  username: string;
   email: string;
-  roles: {
+  role: {
     id: string;
     name: string;
-  }[];
+  };
+  department: {
+    id: string;
+    name: string;
+  } | null;
 }
 
 export default function UsersPage() {
@@ -145,11 +150,9 @@ export default function UsersPage() {
                     <TableCell>{user.email}</TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
-                        {user.roles.map((role) => (
-                          <Badge key={role.id} variant="outline">
-                            {role.name}
-                          </Badge>
-                        ))}
+                        <Badge key={user.role.id} variant="outline">
+                          {user.role.name}
+                        </Badge>
                       </div>
                     </TableCell>
                     <TableCell className="text-right">

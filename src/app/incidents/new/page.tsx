@@ -27,7 +27,7 @@ import {
 import { toast } from "@/components/ui/use-toast";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
-import { createIncident } from "@/actions/incidents";
+import { createIncident } from "@/actions-old/incidents";
 
 const incidentSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),

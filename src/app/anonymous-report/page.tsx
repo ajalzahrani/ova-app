@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "@/components/ui/use-toast";
 import { ShieldAlert, ArrowLeft } from "lucide-react";
-import { createAnonymousIncident } from "@/actions/incidents";
+import { createAnonymousIncident } from "@/actions-old/incidents";
 
 const anonymousIncidentSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),

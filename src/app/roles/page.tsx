@@ -23,7 +23,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/components/ui/use-toast";
-import { getRoles, deleteRole } from "@/actions/roles";
+import { getRoles, deleteRole } from "@/actions-old/roles";
 
 // Type for the role data
 interface Role {

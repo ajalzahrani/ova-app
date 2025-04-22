@@ -33,9 +33,13 @@ import {
 } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, ArrowLeft, Save, Building2 } from "lucide-react";
-import { getUserById, updateUser, type UserFormValues } from "@/actions/users";
-import { getRoles } from "@/actions/roles";
-import { getDepartments } from "@/actions/departments";
+import {
+  getUserById,
+  updateUser,
+  type UserFormValues,
+} from "@/actions-old/users";
+import { getRoles } from "@/actions-old/roles";
+import { getDepartments } from "@/actions-old/departments";
 import { useToast } from "@/components/ui/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
@@ -43,28 +47,28 @@ import { Separator } from "@/components/ui/separator";
 // Form schema for user edit
 const userFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
+  username: z.string().min(2, "Username must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
   password: z
     .string()
     .min(8, "Password must be at least 8 characters")
     .optional()
     .or(z.literal("")),
-  roleIds: z.array(z.string()).min(1, "At least one role must be selected"),
-  departmentIds: z.array(z.string()).optional(),
+  roleId: z.string().min(1, "At least one role must be selected"),
+  departmentId: z.string().optional(),
 });
 
 // Interface for roles
 interface Role {
   id: string;
   name: string;
-  description?: string;
+  description?: string | null;
 }
 
 // Interface for departments
 interface Department {
   id: string;
   name: string;
-  description?: string;
 }
 
 export default function EditUserPage({ params }: { params: { id: string } }) {
@@ -81,10 +85,11 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
     resolver: zodResolver(userFormSchema),
     defaultValues: {
       name: "",
+      username: "",
       email: "",
       password: "",
-      roleIds: [],
-      departmentIds: [],
+      roleId: "",
+      departmentId: "",
     },
   });
 
@@ -96,7 +101,7 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
         // Fetch roles
         const rolesResponse = await getRoles();
         if (rolesResponse.success) {
-          setRoles(rolesResponse.roles);
+          setRoles(rolesResponse.roles || []);
         } else {
           setError("Failed to load roles");
         }
@@ -104,7 +109,7 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
         // Fetch departments
         const departmentsResponse = await getDepartments();
         if (departmentsResponse.success) {
-          setDepartments(departmentsResponse.departments);
+          setDepartments(departmentsResponse.departments || []);
         } else {
           setError("Failed to load departments");
         }
@@ -114,11 +119,12 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
         if (userResponse.success) {
           const user = userResponse.user;
           form.reset({
-            name: user.name || "",
-            email: user.email || "",
+            name: user?.name || "",
+            username: user?.username || "",
+            email: user?.email || "",
             password: "", // Empty password field for security
-            roleIds: user.roleIds || [],
-            departmentIds: user.departmentIds || [],
+            roleId: user?.roleId || "",
+            departmentId: user?.departmentId || "",
           });
           setIsPageLoading(false);
         } else {
@@ -267,7 +273,7 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
                   <div className="grid gap-4">
                     <FormField
                       control={form.control}
-                      name="roleIds"
+                      name="roleId"
                       render={() => (
                         <FormItem>
                           {roles.map((role) => (
@@ -276,7 +282,7 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
                               className="flex items-center space-x-2 mb-2">
                               <FormField
                                 control={form.control}
-                                name="roleIds"
+                                name="roleId"
                                 render={({ field }) => {
                                   return (
                                     <FormItem
@@ -294,9 +300,9 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
                                                   role.id,
                                                 ])
                                               : field.onChange(
-                                                  field.value?.filter(
-                                                    (value) => value !== role.id
-                                                  )
+                                                  field.value
+                                                    .toString()
+                                                    .replace(role.id, "")
                                                 );
                                           }}
                                         />
@@ -340,23 +346,16 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
                         <FormField
                           key={department.id}
                           control={form.control}
-                          name="departmentIds"
+                          name="departmentId"
                           render={({ field }) => (
                             <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                               <FormControl>
                                 <Checkbox
-                                  checked={field.value?.includes(department.id)}
+                                  checked={field.value === department.id}
                                   onCheckedChange={(checked) => {
                                     return checked
-                                      ? field.onChange([
-                                          ...(field.value || []),
-                                          department.id,
-                                        ])
-                                      : field.onChange(
-                                          field.value?.filter(
-                                            (value) => value !== department.id
-                                          )
-                                        );
+                                      ? field.onChange(department.id)
+                                      : field.onChange("");
                                   }}
                                 />
                               </FormControl>
@@ -364,11 +363,6 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
                                 <FormLabel className="cursor-pointer">
                                   {department.name}
                                 </FormLabel>
-                                {department.description && (
-                                  <FormDescription>
-                                    {department.description}
-                                  </FormDescription>
-                                )}
                               </div>
                             </FormItem>
                           )}

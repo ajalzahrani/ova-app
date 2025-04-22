@@ -31,7 +31,7 @@ import {
   updateRole,
   getPermissions,
   type RoleFormValues,
-} from "@/actions/roles";
+} from "@/actions-old/roles";
 import { useToast } from "@/components/ui/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
@@ -55,7 +55,7 @@ export default function EditRolePage({ params }: { params: { id: string } }) {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [permissions, setPermissions] = useState<Permission[]>([]);
+  // const [permissions, setPermissions] = useState<Permission[]>([]);
   const [isPageLoading, setIsPageLoading] = useState(true);
 
   // Initialize the form
@@ -74,21 +74,21 @@ export default function EditRolePage({ params }: { params: { id: string } }) {
       setIsPageLoading(true);
       try {
         // Fetch permissions
-        const permissionsResponse = await getPermissions();
-        if (permissionsResponse.success) {
-          setPermissions(permissionsResponse.permissions);
-        } else {
-          setError("Failed to load permissions");
-        }
+        // const permissionsResponse = await getPermissions();
+        // if (permissionsResponse.success) {
+        //   setPermissions(permissionsResponse.permissions);
+        // } else {
+        //   setError("Failed to load permissions");
+        // }
 
         // Fetch role data
         const roleResponse = await getRoleById(params.id);
         if (roleResponse.success) {
           const role = roleResponse.role;
           form.reset({
-            name: role.name,
-            description: role.description || "",
-            permissionIds: role.permissionIds || [],
+            name: role?.name || "",
+            description: role?.description || "",
+            // permissionIds: role?.permissionIds || [],
           });
         } else {
           setError(roleResponse.error || "Failed to load role data");
@@ -212,7 +212,7 @@ export default function EditRolePage({ params }: { params: { id: string } }) {
                   )}
                 />
 
-                {permissions.length > 0 && (
+                {/* {permissions.length > 0 && (
                   <>
                     <Separator />
                     <div>
@@ -279,7 +279,7 @@ export default function EditRolePage({ params }: { params: { id: string } }) {
                       </div>
                     </div>
                   </>
-                )}
+                )} */}
               </div>
 
               <div className="flex gap-2 justify-end">

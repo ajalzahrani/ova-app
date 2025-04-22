@@ -25,13 +25,6 @@ export async function getRoles() {
 
   try {
     const roles = await prisma.role.findMany({
-      include: {
-        permissions: {
-          include: {
-            permission: true,
-          },
-        },
-      },
       orderBy: {
         name: "asc",
       },
@@ -39,10 +32,7 @@ export async function getRoles() {
 
     return {
       success: true,
-      roles: roles.map((role) => ({
-        ...role,
-        permissions: role.permissions.map((rp) => rp.permission),
-      })),
+      roles: roles,
     };
   } catch (error) {
     console.error("Error fetching roles:", error);

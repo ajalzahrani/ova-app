@@ -35,75 +35,75 @@ export default async function DashboardPage() {
   }
 
   // Get incident counts
-  const totalIncidents = await prisma.incident.count();
-  const openIncidents = await prisma.incident.count({
-    where: {
-      status: {
-        notIn: ["RESOLVED", "CLOSED"],
-      },
-    },
-  });
-  const highRiskIncidents = await prisma.incident.count({
-    where: {
-      severity: {
-        in: ["HIGH", "CRITICAL"],
-      },
-    },
-  });
+  // const totalIncidents = await prisma.incident.count();
+  // const openIncidents = await prisma.incident.count({
+  //   where: {
+  //     status: {
+  //       notIn: ["RESOLVED", "CLOSED"],
+  //     },
+  //   },
+  // });
+  // const highRiskIncidents = await prisma.incident.count({
+  //   where: {
+  //     severity: {
+  //       in: ["HIGH", "CRITICAL"],
+  //     },
+  //   },
+  // });
 
-  // Calculate resolution rate
-  const resolvedIncidents = await prisma.incident.count({
-    where: {
-      status: {
-        in: ["RESOLVED", "CLOSED"],
-      },
-    },
-  });
-  const resolutionRate =
-    totalIncidents > 0
-      ? Math.round((resolvedIncidents / totalIncidents) * 100)
-      : 0;
+  // // Calculate resolution rate
+  // const resolvedIncidents = await prisma.incident.count({
+  //   where: {
+  //     status: {
+  //       in: ["RESOLVED", "CLOSED"],
+  //     },
+  //   },
+  // });
+  // const resolutionRate =
+  //   totalIncidents > 0
+  //     ? Math.round((resolvedIncidents / totalIncidents) * 100)
+  //     : 0;
 
-  // Get the user's departments
-  const userWithDepartments = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    include: { departments: true },
-  });
+  // // Get the user's departments
+  // const userWithDepartments = await prisma.user.findUnique({
+  //   where: { id: session.user.id },
+  //   include: { departments: true },
+  // });
 
-  // Get referrals for user's departments
-  const departmentIds =
-    userWithDepartments?.departments.map((dept: Department) => dept.id) || [];
+  // // Get referrals for user's departments
+  // const departmentIds =
+  //   userWithDepartments?.departments.map((dept: Department) => dept.id) || [];
 
-  const departmentReferrals =
-    departmentIds.length > 0
-      ? await prisma.incidentReferral.findMany({
-          where: {
-            departmentId: {
-              in: departmentIds,
-            },
-          },
-          include: {
-            incident: {
-              select: {
-                id: true,
-                title: true,
-                status: true,
-                severity: true,
-                createdAt: true,
-              },
-            },
-            department: {
-              select: {
-                id: true,
-                name: true,
-              },
-            },
-          },
-          orderBy: {
-            referredAt: "desc",
-          },
-        })
-      : [];
+  // const departmentReferrals =
+  //   departmentIds.length > 0
+  //     ? await prisma.incidentReferral.findMany({
+  //         where: {
+  //           departmentId: {
+  //             in: departmentIds,
+  //           },
+  //         },
+  //         include: {
+  //           incident: {
+  //             select: {
+  //               id: true,
+  //               title: true,
+  //               status: true,
+  //               severity: true,
+  //               createdAt: true,
+  //             },
+  //           },
+  //           department: {
+  //             select: {
+  //               id: true,
+  //               name: true,
+  //             },
+  //           },
+  //         },
+  //         orderBy: {
+  //           referredAt: "desc",
+  //         },
+  //       })
+  //     : [];
 
   return (
     <DashboardShell>
@@ -125,7 +125,7 @@ export default async function DashboardPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalIncidents}</div>
+            <div className="text-2xl font-bold">{12}</div>
             <p className="text-xs text-muted-foreground">
               All reported incidents
             </p>
@@ -138,7 +138,7 @@ export default async function DashboardPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{openIncidents}</div>
+            <div className="text-2xl font-bold">{12}</div>
             <p className="text-xs text-muted-foreground">
               Active incidents requiring attention
             </p>
@@ -149,7 +149,7 @@ export default async function DashboardPage() {
             <CardTitle className="text-sm font-medium">High Risk</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{highRiskIncidents}</div>
+            <div className="text-2xl font-bold">{12}</div>
             <p className="text-xs text-muted-foreground">
               High & critical severity incidents
             </p>
@@ -162,7 +162,7 @@ export default async function DashboardPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{resolutionRate}%</div>
+            <div className="text-2xl font-bold">{12}%</div>
             <p className="text-xs text-muted-foreground">
               Resolved & closed incidents
             </p>
@@ -170,7 +170,7 @@ export default async function DashboardPage() {
         </Card>
       </div>
 
-      {departmentIds.length > 0 && (
+      {/* {departmentIds.length > 0 && (
         <div className="mt-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
@@ -224,7 +224,7 @@ export default async function DashboardPage() {
             currentDepartmentId={departmentIds[0] || ""}
           />
         </div>
-      )}
+      )} */}
 
       <div className="grid gap-4 mt-6 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-4">

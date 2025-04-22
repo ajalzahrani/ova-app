@@ -15,10 +15,10 @@ async function main() {
   });
 
   const managerRole = await prisma.role.upsert({
-    where: { name: "MANAGER" },
+    where: { name: "QUALITY_MANAGER" },
     update: {},
     create: {
-      name: "MANAGER",
+      name: "QUALITY_MANAGER",
       description: "Department-level access and oversight",
     },
   });
@@ -68,12 +68,9 @@ async function main() {
     create: {
       email: "admin@example.com",
       name: "Admin User",
+      username: "admin",
       password: hashedPassword,
-      userRoles: {
-        create: {
-          roleId: adminRole.id,
-        },
-      },
+      roleId: adminRole.id,
     },
   });
 
@@ -83,7 +80,6 @@ async function main() {
     update: {},
     create: {
       name: "Information Technology",
-      description: "IT department",
     },
   });
 
@@ -92,7 +88,6 @@ async function main() {
     update: {},
     create: {
       name: "Human Resources",
-      description: "HR department",
     },
   });
 
@@ -101,16 +96,59 @@ async function main() {
     update: {},
     create: {
       name: "Security",
-      description: "Security department",
     },
   });
 
+  const statusOpen = await prisma.occurrenceStatus.upsert({
+    where: { id: "1" },
+    update: {},
+    create: {
+      name: "OPEN",
+    },
+  });
+
+  const statusClosed = await prisma.occurrenceStatus.upsert({
+    where: { id: "2" },
+    update: {},
+    create: {
+      name: "CLOSED",
+    },
+  });
+
+  const statusAssigned = await prisma.occurrenceStatus.upsert({
+    where: { id: "3" },
+    update: {},
+    create: {
+      name: "ASSIGNED",
+    },
+  });
+
+  const statusInProgress = await prisma.occurrenceStatus.upsert({
+    where: { id: "4" },
+    update: {},
+    create: {
+      name: "IN_PROGRESS",
+    },
+  });
+
+  const statusCompleted = await prisma.occurrenceStatus.upsert({
+    where: { id: "5" },
+    update: {},
+    create: {
+      name: "COMPLETED",
+    },
+  });
   console.log({
     adminRole,
     adminUser,
     itDepartment,
     hrDepartment,
     securityDepartment,
+    statusOpen,
+    statusClosed,
+    statusAssigned,
+    statusInProgress,
+    statusCompleted,
   });
 }
 

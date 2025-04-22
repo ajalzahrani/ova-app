@@ -17,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
 import { FileText, CheckSquare } from "lucide-react";
-import { respondToIncidentReferral } from "@/actions/incidents";
+import { respondToIncidentReferral } from "@/actions-old/incidents";
 import {
   Select,
   SelectContent,

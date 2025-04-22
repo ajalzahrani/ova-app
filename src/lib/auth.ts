@@ -1,6 +1,6 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
-import { NextAuthOptions } from "next-auth";
+import { NextAuthOptions, getServerSession } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcrypt";
 
@@ -29,11 +29,7 @@ export const authOptions: NextAuthOptions = {
             email: credentials.email,
           },
           include: {
-            userRoles: {
-              include: {
-                role: true,
-              },
-            },
+            role: true,
           },
         });
 
@@ -54,9 +50,7 @@ export const authOptions: NextAuthOptions = {
           id: user.id,
           email: user.email,
           name: user.name,
-          roles: user.userRoles.map(
-            (ur: { role: { name: string } }) => ur.role.name
-          ),
+          role: user.role.name,
         };
       },
     }),
@@ -65,16 +59,21 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.roles = user.roles || [];
+        token.role = user.role;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id;
-        session.user.roles = token.roles;
+        session.user.role = token.role;
       }
       return session;
     },
   },
 };
+
+export async function getCurrentUser() {
+  const session = await getServerSession(authOptions);
+  return session?.user;
+}

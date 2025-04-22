@@ -17,7 +17,7 @@ export function MainNav() {
   const { data: session } = useSession();
 
   // Check if the user has admin role
-  const isAdmin = session?.user?.roles?.includes("ADMIN");
+  const isAdmin = session?.user?.role === "ADMIN";
 
   return (
     <div className="flex gap-6 md:gap-10">
@@ -43,6 +43,16 @@ export function MainNav() {
               : "text-muted-foreground"
           )}>
           Incidents
+        </Link>
+        <Link
+          href="/occurrences"
+          className={cn(
+            "text-sm font-medium transition-colors hover:text-primary",
+            pathname === "/occurrences"
+              ? "text-primary"
+              : "text-muted-foreground"
+          )}>
+          Occurrences
         </Link>
         <Link
           href="/departments"

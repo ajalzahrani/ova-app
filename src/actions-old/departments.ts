@@ -22,7 +22,7 @@ export async function getDepartments() {
 
     return {
       success: true,
-      departments,
+      departments: departments,
     };
   } catch (error) {
     console.error("Error fetching departments:", error);

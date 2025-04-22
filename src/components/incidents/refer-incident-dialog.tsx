@@ -17,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
 import { Share2 } from "lucide-react";
-import { referIncidentToDepartments } from "@/actions/incidents";
+import { referIncidentToDepartments } from "@/actions-old/incidents";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 
