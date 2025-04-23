@@ -30,6 +30,7 @@ import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { createIncident } from "@/actions-old/incidents";
 import { createOccurrence } from "./actions";
 import { getSubIncidents, getTopLevelIncidents } from "@/actions/incidents";
+import { getOccurrenceLocations } from "@/actions/locations";
 
 const occurrenceSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),
@@ -103,13 +104,19 @@ export default function NewOccurrencePage() {
   const [incidents, setIncidents] = useState<any[]>([]);
   const [subIncidents, setSubIncidents] = useState<any[]>([]);
   const [selectedIncidentId, setSelectedIncidentId] = useState<string>("");
+  const [locations, setLocations] = useState<any[]>([]);
 
-  // Fetch top-level incidents on component mount
+  // Fetch top-level incidents on component mount and locations
   useEffect(() => {
     async function fetchIncidents() {
       const data = await getTopLevelIncidents();
       setIncidents(data || []);
     }
+    async function fetchLocations() {
+      const data = await getOccurrenceLocations();
+      setLocations(data || []);
+    }
+    fetchLocations();
     fetchIncidents();
   }, []);
 
@@ -136,6 +143,10 @@ export default function NewOccurrencePage() {
   // Handle sub-incident selection
   const handleSubIncidentChange = (value: string) => {
     setValue("incidentId", value); // Override with sub-incident
+  };
+
+  const handleLocationChange = (value: string) => {
+    setValue("location", value); // Override with sub-incident
   };
 
   return (
@@ -182,11 +193,18 @@ export default function NewOccurrencePage() {
 
               <div className="space-y-2">
                 <Label htmlFor="location">Location</Label>
-                <Input
-                  id="location"
-                  placeholder="Where the incident occurred"
-                  {...register("location")}
-                />
+                <Select onValueChange={handleLocationChange} defaultValue="">
+                  <SelectTrigger id="location">
+                    <SelectValue placeholder="Select location" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {locations.map((location) => (
+                      <SelectItem key={location.id} value={location.id}>
+                        {location.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 {errors.location && (
                   <p className="text-sm text-red-500">
                     {errors.location.message}
@@ -229,33 +247,6 @@ export default function NewOccurrencePage() {
                       </SelectContent>
                     </Select>
                   </div>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="severity">Severity</Label>
-                <Select
-                  onValueChange={(value) => setValue("severityId", value)}
-                  defaultValue="">
-                  <SelectTrigger id="severityId">
-                    <SelectValue placeholder="Select severity level" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {/* 
-                      IMPORTANT: These values need to be replaced with actual IDs from your database.
-                      The ID values must match existing records in the Severity table.
-                      These placeholder values will cause runtime errors if the IDs don't exist.
-                    */}
-                    <SelectItem value="low">Low</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="critical">Critical</SelectItem>
-                  </SelectContent>
-                </Select>
-                {errors.severityId && (
-                  <p className="text-sm text-red-500">
-                    {errors.severityId.message}
-                  </p>
                 )}
               </div>
 

@@ -325,6 +325,94 @@ async function main() {
     },
   });
 
+  const incident7 = await prisma.incident.upsert({
+    where: { name: "Fighting" },
+    update: {
+      name: "Fighting",
+      severity: {
+        connect: {
+          id: severityHigh.id,
+        },
+      },
+      parent: {
+        connect: {
+          id: incident2.id,
+        },
+      },
+    },
+    create: {
+      name: "Fighting",
+      severity: { connect: { id: severityHigh.id } },
+      parent: {
+        connect: { id: incident2.id },
+      },
+    },
+  });
+
+  const incident8 = await prisma.incident.upsert({
+    where: { name: "Fighting with a weapon" },
+    update: {
+      name: "Fighting with a weapon",
+      severity: {
+        connect: {
+          id: severityHigh.id,
+        },
+      },
+      parent: {
+        connect: {
+          id: incident7.id,
+        },
+      },
+    },
+    create: {
+      name: "Fighting with a weapon",
+      severity: { connect: { id: severityHigh.id } },
+      parent: {
+        connect: { id: incident7.id },
+      },
+    },
+  });
+
+  const location1 = await prisma.occurrenceLocation.upsert({
+    where: { name: "Office" },
+    update: {
+      name: "Office",
+    },
+    create: {
+      name: "Office",
+    },
+  });
+
+  const location2 = await prisma.occurrenceLocation.upsert({
+    where: { name: "Warehouse" },
+    update: {
+      name: "Warehouse",
+    },
+    create: {
+      name: "Warehouse",
+    },
+  });
+
+  const location3 = await prisma.occurrenceLocation.upsert({
+    where: { name: "Factory" },
+    update: {
+      name: "Factory",
+    },
+    create: {
+      name: "Factory",
+    },
+  });
+
+  const location4 = await prisma.occurrenceLocation.upsert({
+    where: { name: "Lunch Room" },
+    update: {
+      name: "Lunch Room",
+    },
+    create: {
+      name: "Lunch Room",
+    },
+  });
+
   console.log({
     adminRole,
     adminUser,
@@ -345,6 +433,13 @@ async function main() {
     incident3,
     incident4,
     incident5,
+    incident6,
+    incident7,
+    incident8,
+    location1,
+    location2,
+    location3,
+    location4,
   });
 }
 

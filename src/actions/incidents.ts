@@ -1,6 +1,5 @@
 "use server";
 
-// app/api/incidents/route.ts or lib/incidents.ts
 import { prisma } from "@/lib/prisma";
 
 // Get all top-level incidents (no parent)

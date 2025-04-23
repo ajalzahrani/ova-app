@@ -44,7 +44,11 @@ type OccurrenceWithRelations = Prisma.OccurrenceGetPayload<{
       };
     };
     status: true;
-    incident: true;
+    incident: {
+      include: {
+        severity: true;
+      };
+    };
   };
 }>;
 
@@ -114,6 +118,7 @@ export function OccurrencesList({ occurrences }: OccurrencesListProps) {
             <TableHead>Reported By</TableHead>
             <TableHead>Department</TableHead>
             <TableHead>Reported</TableHead>
+            <TableHead>Severity</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -143,12 +148,9 @@ export function OccurrencesList({ occurrences }: OccurrencesListProps) {
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center">
-                    {renderSeverityIcon(occurrence.incident.severity)}
-                    <Badge
-                      variant={getSeverityVariant(
-                        occurrence.incident.severity
-                      )}>
-                      {occurrence.incident.severity}
+                    {renderSeverityIcon(occurrence.incident.name)}
+                    <Badge variant={occurrence.incident.name}>
+                      {occurrence.incident.name}
                     </Badge>
                   </div>
                 </TableCell>
@@ -161,16 +163,24 @@ export function OccurrencesList({ occurrences }: OccurrencesListProps) {
                     addSuffix: true,
                   })}
                 </TableCell>
+                <TableCell>
+                  <div className="flex items-center">
+                    {renderSeverityIcon(occurrence.incident.severity.name)}
+                    <Badge variant={occurrence.incident.severity.name}>
+                      {occurrence.incident.severity.name}
+                    </Badge>
+                  </div>
+                </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
                     <Button variant="ghost" size="icon" asChild>
-                      <Link href={`/incidents/${occurrence.id}`}>
+                      <Link href={`/occurrences/${occurrence.id}`}>
                         <Eye className="h-4 w-4" />
                         <span className="sr-only">View</span>
                       </Link>
                     </Button>
                     <Button variant="ghost" size="icon" asChild>
-                      <Link href={`/incidents/${occurrence.id}/edit`}>
+                      <Link href={`/occurrences/${occurrence.id}/edit`}>
                         <FileEdit className="h-4 w-4" />
                         <span className="sr-only">Edit</span>
                       </Link>

@@ -110,10 +110,10 @@ export default async function DashboardPage() {
       <DashboardHeader
         heading="Dashboard"
         text="Overview of OVA incidents and reports">
-        <Link href="/incidents/new">
+        <Link href="/occurrences/new">
           <Button>
             <PlusCircle className="mr-2 h-4 w-4" />
-            Report Incident
+            Report Occurrence
           </Button>
         </Link>
       </DashboardHeader>

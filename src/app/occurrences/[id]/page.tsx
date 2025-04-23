@@ -2,6 +2,18 @@ import { assignToDepartments } from "./actions";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { DashboardShell } from "@/components/dashboard/dashboard-shell";
+import { DashboardHeader } from "@/components/dashboard/dashboard-header";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { ArrowLeft, ChevronLeft, PlusCircle } from "lucide-react";
+import Link from "next/link";
+import { ReferIncidentDialog } from "@/components/incidents/refer-incident-dialog";
 
 export default async function OccurrenceDetails({
   params,
@@ -10,15 +22,68 @@ export default async function OccurrenceDetails({
 }) {
   const occurrence = await prisma.occurrence.findUnique({
     where: { id: params.id },
-    include: { createdBy: true, assignments: true },
+    include: {
+      createdBy: true,
+      assignments: true,
+      incident: { include: { severity: true } },
+    },
   });
 
   const departments = await prisma.department.findMany();
 
   return (
-    <div className="max-w-2xl mx-auto mt-10 space-y-6">
-      <h1 className="text-xl font-bold">{occurrence?.title}</h1>
-      <p className="text-gray-700">{occurrence?.description}</p>
+    <DashboardShell>
+      <DashboardHeader
+        heading={occurrence?.title || "Occurrence details"}
+        text={occurrence?.description || "Occurrence details"}>
+        <div className="flex gap-2">
+          <Button variant="outline" asChild>
+            <Link href="/occurrences">
+              <ChevronLeft className="mr-2 h-4 w-4" />
+              Back to Occurrences
+            </Link>
+          </Button>
+          <ReferIncidentDialog
+            incidentId={occurrence?.id}
+            departments={departments}
+          />
+          <Button asChild>
+            <Link href={`/incidents/${occurrence?.id}/edit`}>
+              Edit Incident
+            </Link>
+          </Button>
+        </div>
+      </DashboardHeader>
+
+      <div className="grid gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Occurrence details</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>{occurrence?.description}</p>
+          </CardContent>
+          <CardFooter>
+            <p>{occurrence?.createdBy.name}</p>
+          </CardFooter>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Incident details</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>{occurrence?.incident.name}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Severity details</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>{occurrence?.incident.severity.name}</p>
+          </CardContent>
+        </Card>
+      </div>
 
       <form
         action={async (formData) => {
@@ -27,7 +92,7 @@ export default async function OccurrenceDetails({
           await assignToDepartments(params.id, selected);
         }}
         className="space-y-4">
-        <h2 className="font-semibold">اختر الأقسام للتحويل:</h2>
+        <h2 className="font-semibold">Assign to departments:</h2>
 
         <div className="space-y-2">
           {departments.map((d) => (
@@ -38,8 +103,8 @@ export default async function OccurrenceDetails({
           ))}
         </div>
 
-        <Button type="submit">تحويل</Button>
+        <Button type="submit">Assign</Button>
       </form>
-    </div>
+    </DashboardShell>
   );
 }

@@ -27,7 +27,11 @@ export default async function OccurrencesPage() {
         },
       },
       status: true,
-      incident: true,
+      incident: {
+        include: {
+          severity: true,
+        },
+      },
     },
   });
 

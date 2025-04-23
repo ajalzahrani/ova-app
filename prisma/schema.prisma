@@ -45,6 +45,7 @@ model Occurrence {
   description         String
   statusId            String
   incidentId          String
+  locationId          String?
   createdById         String?
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
@@ -55,10 +56,20 @@ model Occurrence {
   createdBy   User?                  @relation("CreatedOccurrences", fields: [createdById], references: [id])
   status      OccurrenceStatus       @relation(fields: [statusId], references: [id])
   incident    Incident               @relation(fields: [incidentId], references: [id])
+  location    OccurrenceLocation?    @relation(fields: [locationId], references: [id])
   assignments OccurrenceAssignment[]
   messages    OccurrenceMessage[]
   Severity    Severity?              @relation(fields: [severityId], references: [id])
   severityId  String?
+}
+
+model OccurrenceLocation {
+  id    String  @id @default(uuid())
+  name  String  @unique
+  level String?
+
+  // Relations
+  occurrence Occurrence[]
 }
 
 model OccurrenceAssignment {
