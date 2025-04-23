@@ -1,5 +1,3 @@
-// schema.prisma
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,92 +8,110 @@ datasource db {
 }
 
 model User {
-  id           String      @id @default(uuid())
-  name         String
-  email        String      @unique
-  username     String      @unique
-  password     String
-  departmentId String?
-  department   Department? @relation(fields: [departmentId], references: [id])
-  createdAt    DateTime    @default(now())
-
+  id                 String              @id @default(uuid())
+  name               String
+  email              String              @unique
+  username           String              @unique
+  password           String
+  departmentId       String?
+  createdAt          DateTime            @default(now())
+  roleId             String
   occurrencesCreated Occurrence[]        @relation("CreatedOccurrences")
   messages           OccurrenceMessage[]
-
-  // Relation to Role
-  roleId String // Foreign key
-  role   Role   @relation(fields: [roleId], references: [id])
+  department         Department?         @relation(fields: [departmentId], references: [id])
+  role               Role                @relation(fields: [roleId], references: [id])
 }
 
 model Role {
   id          String   @id @default(cuid())
   name        String   @unique
   description String?
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-
-  // Relations
-  users User[] // One Role can have many Users
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  users       User[]
 }
 
 model Department {
-  id   String @id @default(uuid())
-  name String @unique
-
-  users             User[]
+  id                String                 @id @default(uuid())
+  name              String                 @unique
   assignments       OccurrenceAssignment[]
   OccurrenceMessage OccurrenceMessage[]
+  users             User[]
 }
 
 model Occurrence {
-  id                  String           @id @default(uuid())
+  id                  String    @id @default(uuid())
   title               String
   description         String
   statusId            String
-  createdById         String
-  createdBy           User             @relation("CreatedOccurrences", fields: [createdById], references: [id])
-  createdAt           DateTime         @default(now())
+  incidentId          String
+  createdById         String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
   assignedByQualityAt DateTime?
   closedByQualityAt   DateTime?
 
-  status      OccurrenceStatus         @relation(fields: [statusId], references: [id])
+  // Relations
+  createdBy   User?                  @relation("CreatedOccurrences", fields: [createdById], references: [id])
+  status      OccurrenceStatus       @relation(fields: [statusId], references: [id])
+  incident    Incident               @relation(fields: [incidentId], references: [id])
   assignments OccurrenceAssignment[]
   messages    OccurrenceMessage[]
+  Severity    Severity?              @relation(fields: [severityId], references: [id])
+  severityId  String?
 }
 
 model OccurrenceAssignment {
   id           String     @id @default(uuid())
   occurrenceId String
-  occurrence   Occurrence @relation(fields: [occurrenceId], references: [id])
   departmentId String
+  rootCause    String?
+  actionPlan   String?
+  isCompleted  Boolean    @default(false)
+  completedAt  DateTime?
+  assignedAt   DateTime   @default(now())
   department   Department @relation(fields: [departmentId], references: [id])
-
-  rootCause   String?
-  actionPlan  String?
-  isCompleted Boolean   @default(false)
-  completedAt DateTime?
-  assignedAt  DateTime  @default(now())
+  occurrence   Occurrence @relation(fields: [occurrenceId], references: [id])
 }
 
 model OccurrenceMessage {
-  id           String     @id @default(uuid())
-  occurrenceId String
-  occurrence   Occurrence @relation(fields: [occurrenceId], references: [id])
-
-  senderId String
-  sender   User   @relation(fields: [senderId], references: [id])
-
+  id                    String      @id @default(uuid())
+  occurrenceId          String
+  senderId              String
   recipientDepartmentId String?
+  message               String
+  createdAt             DateTime    @default(now())
+  occurrence            Occurrence  @relation(fields: [occurrenceId], references: [id])
   recipientDepartment   Department? @relation(fields: [recipientDepartmentId], references: [id])
-
-  message   String
-  createdAt DateTime @default(now())
+  sender                User        @relation(fields: [senderId], references: [id])
 }
 
 model OccurrenceStatus {
-  id   String @id @default(uuid())
-  name String
+  id          String       @id @default(uuid())
+  name        String       @unique
+  variant     String?
+  occurrences Occurrence[]
+}
+
+model Incident {
+  id          String  @id @default(uuid())
+  name        String  @unique
+  description String?
+  severityId  String
+  parentId    String? // Optional parent ID for sub-incidents
 
   // Relations
+  severity    Severity     @relation(fields: [severityId], references: [id])
+  parent      Incident?    @relation("IncidentHierarchy", fields: [parentId], references: [id])
+  children    Incident[]   @relation("IncidentHierarchy")
   occurrences Occurrence[]
+}
+
+model Severity {
+  id          String       @id @default(uuid())
+  name        String       @unique
+  level       Int
+  variant     String?
+  occurrences Occurrence[]
+  Incident    Incident[]
 }

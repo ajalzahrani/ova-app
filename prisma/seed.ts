@@ -64,7 +64,13 @@ async function main() {
 
   const adminUser = await prisma.user.upsert({
     where: { email: "admin@example.com" },
-    update: {},
+    update: {
+      email: "admin@example.com",
+      name: "Admin User",
+      username: "admin",
+      password: hashedPassword,
+      roleId: adminRole.id,
+    },
     create: {
       email: "admin@example.com",
       name: "Admin User",
@@ -76,68 +82,249 @@ async function main() {
 
   // Create sample departments
   const itDepartment = await prisma.department.upsert({
-    where: { id: "1" },
-    update: {},
+    where: { name: "Information Technology" },
+    update: {
+      name: "Information Technology",
+    },
     create: {
       name: "Information Technology",
     },
   });
 
   const hrDepartment = await prisma.department.upsert({
-    where: { id: "2" },
-    update: {},
+    where: { name: "Human Resources" },
+    update: {
+      name: "Human Resources",
+    },
     create: {
       name: "Human Resources",
     },
   });
 
   const securityDepartment = await prisma.department.upsert({
-    where: { id: "3" },
-    update: {},
+    where: { name: "Security" },
+    update: {
+      name: "Security",
+    },
     create: {
       name: "Security",
     },
   });
 
   const statusOpen = await prisma.occurrenceStatus.upsert({
-    where: { id: "1" },
-    update: {},
+    where: { name: "OPEN" },
+    update: {
+      name: "OPEN",
+      variant: "outline",
+    },
     create: {
       name: "OPEN",
+      variant: "outline",
     },
   });
 
   const statusClosed = await prisma.occurrenceStatus.upsert({
-    where: { id: "2" },
-    update: {},
+    where: { name: "CLOSED" },
+    update: {
+      name: "CLOSED",
+      variant: "secondary",
+    },
     create: {
       name: "CLOSED",
+      variant: "secondary",
     },
   });
 
   const statusAssigned = await prisma.occurrenceStatus.upsert({
-    where: { id: "3" },
-    update: {},
+    where: { name: "ASSIGNED" },
+    update: {
+      name: "ASSIGNED",
+      variant: "default",
+    },
     create: {
       name: "ASSIGNED",
+      variant: "default",
     },
   });
 
   const statusInProgress = await prisma.occurrenceStatus.upsert({
-    where: { id: "4" },
-    update: {},
+    where: { name: "IN_PROGRESS" },
+    update: {
+      name: "IN_PROGRESS",
+      variant: "default",
+    },
     create: {
       name: "IN_PROGRESS",
+      variant: "default",
     },
   });
 
   const statusCompleted = await prisma.occurrenceStatus.upsert({
-    where: { id: "5" },
-    update: {},
+    where: { name: "COMPLETED" },
+    update: {
+      name: "COMPLETED",
+      variant: "default",
+    },
     create: {
       name: "COMPLETED",
+      variant: "default",
     },
   });
+
+  const severityLow = await prisma.severity.upsert({
+    where: { name: "LOW" },
+    update: {
+      name: "LOW",
+      level: 1,
+      variant: "outline",
+    },
+    create: {
+      name: "LOW",
+      level: 1,
+      variant: "outline",
+    },
+  });
+
+  const severityMedium = await prisma.severity.upsert({
+    where: { name: "MEDIUM" },
+    update: {
+      name: "MEDIUM",
+      level: 2,
+      variant: "secondary",
+    },
+    create: {
+      name: "MEDIUM",
+      level: 2,
+      variant: "secondary",
+    },
+  });
+
+  const severityHigh = await prisma.severity.upsert({
+    where: { name: "HIGH" },
+    update: {
+      name: "HIGH",
+      level: 3,
+      variant: "destructive",
+    },
+    create: {
+      name: "HIGH",
+      level: 3,
+      variant: "destructive",
+    },
+  });
+
+  const severityCritical = await prisma.severity.upsert({
+    where: { name: "CRITICAL" },
+    update: {
+      name: "CRITICAL",
+      level: 4,
+      variant: "destructive",
+    },
+    create: {
+      name: "CRITICAL",
+      level: 4,
+      variant: "destructive",
+    },
+  });
+
+  const incident1 = await prisma.incident.upsert({
+    where: { name: "Verbal Abuse" },
+    update: {
+      name: "Verbal Abuse",
+      severity: {
+        connect: {
+          id: severityLow.id,
+        },
+      },
+    },
+    create: {
+      name: "Verbal Abuse",
+      severity: {
+        connect: { id: severityLow.id },
+      },
+    },
+  });
+
+  const incident2 = await prisma.incident.upsert({
+    where: { name: "Physical Assault" },
+    update: {
+      name: "Physical Assault",
+      severity: {
+        connect: {
+          id: severityMedium.id,
+        },
+      },
+    },
+    create: {
+      name: "Physical Assault",
+      severity: { connect: { id: severityMedium.id } },
+    },
+  });
+
+  const incident3 = await prisma.incident.upsert({
+    where: { name: "Threatening Behavior" },
+    update: {
+      name: "Threatening Behavior",
+      severity: {
+        connect: {
+          id: severityHigh.id,
+        },
+      },
+    },
+    create: {
+      name: "Threatening Behavior",
+      severity: { connect: { id: severityHigh.id } },
+    },
+  });
+
+  const incident4 = await prisma.incident.upsert({
+    where: { name: "Harassment" },
+    update: {
+      name: "Harassment",
+      severity: {
+        connect: {
+          id: severityCritical.id,
+        },
+      },
+    },
+    create: {
+      name: "Harassment",
+      severity: { connect: { id: severityCritical.id } },
+    },
+  });
+
+  const incident5 = await prisma.incident.upsert({
+    where: { name: "Property Damage" },
+    update: {
+      name: "Property Damage",
+      severity: {
+        connect: {
+          id: severityCritical.id,
+        },
+      },
+    },
+    create: {
+      name: "Property Damage",
+      severity: { connect: { id: severityCritical.id } },
+    },
+  });
+
+  const incident6 = await prisma.incident.upsert({
+    where: { name: "Other" },
+    update: {
+      name: "Other",
+      severity: {
+        connect: {
+          id: severityLow.id,
+        },
+      },
+    },
+    create: {
+      name: "Other",
+      severity: { connect: { id: severityLow.id } },
+    },
+  });
+
   console.log({
     adminRole,
     adminUser,
@@ -149,6 +336,15 @@ async function main() {
     statusAssigned,
     statusInProgress,
     statusCompleted,
+    severityLow,
+    severityMedium,
+    severityHigh,
+    severityCritical,
+    incident1,
+    incident2,
+    incident3,
+    incident4,
+    incident5,
   });
 }
 

@@ -16,19 +16,21 @@ export default async function IncidentsPage() {
     redirect("/login");
   }
 
-  const incidents = await prisma.incident.findMany({
+  const incidents = await prisma.occurrence.findMany({
     orderBy: {
       createdAt: "desc",
     },
     include: {
-      reporter: {
+      assignments: {
         select: {
-          name: true,
-        },
-      },
-      department: {
-        select: {
-          name: true,
+          id: true,
+          assignedAt: true,
+          department: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
         },
       },
     },
