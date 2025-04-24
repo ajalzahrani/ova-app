@@ -27,17 +27,15 @@ import {
 import { toast } from "@/components/ui/use-toast";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
-import { createIncident } from "@/actions-old/incidents";
 import { createOccurrence } from "./actions";
-import { getSubIncidents, getTopLevelIncidents } from "@/actions/incidents";
 import { getOccurrenceLocations } from "@/actions/locations";
+import { IncidentSelector } from "@/app/occurrences/components/incident-selector";
 
 const occurrenceSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
   location: z.string().min(3, "Location is required"),
   incidentId: z.string().min(1, "Incident is required"),
-  severityId: z.string().min(1, "Severity is required"),
   dateOccurred: z.string().refine((val) => !isNaN(Date.parse(val)), {
     message: "Invalid date",
   }),
@@ -48,6 +46,7 @@ type OccurrenceFormValues = z.infer<typeof occurrenceSchema>;
 export default function NewOccurrencePage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [locations, setLocations] = useState<any[]>([]);
 
   const {
     register,
@@ -61,16 +60,18 @@ export default function NewOccurrencePage() {
       description: "",
       location: "",
       incidentId: "",
-      severityId: "",
       dateOccurred: new Date().toISOString().split("T")[0],
     },
   });
 
   const onSubmit = async (data: OccurrenceFormValues) => {
+    console.log("onSubmit called", data);
     setIsSubmitting(true);
     try {
       // Create empty FormData instance to satisfy schema requirement
       const formDataInstance = new FormData();
+
+      console.log("data", { data, formDataInstance });
 
       // Call with formData property included
       const result = await createOccurrence({
@@ -92,6 +93,7 @@ export default function NewOccurrencePage() {
         });
       }
     } catch (error) {
+      console.error("Form submission error:", error);
       toast({
         variant: "destructive",
         title: "Error",
@@ -101,53 +103,20 @@ export default function NewOccurrencePage() {
     setIsSubmitting(false);
   };
 
-  const [incidents, setIncidents] = useState<any[]>([]);
-  const [subIncidents, setSubIncidents] = useState<any[]>([]);
-  const [selectedIncidentId, setSelectedIncidentId] = useState<string>("");
-  const [locations, setLocations] = useState<any[]>([]);
+  // Debug function to show form errors
+  const checkFormErrors = () => {
+    console.log("Current form errors:", errors);
+    console.log("Missing fields:", Object.keys(errors));
+  };
 
-  // Fetch top-level incidents on component mount and locations
+  // Fetch locations and severities on component mount
   useEffect(() => {
-    async function fetchIncidents() {
-      const data = await getTopLevelIncidents();
-      setIncidents(data || []);
-    }
     async function fetchLocations() {
       const data = await getOccurrenceLocations();
       setLocations(data || []);
     }
     fetchLocations();
-    fetchIncidents();
   }, []);
-
-  // Fetch sub-incidents when a parent is selected
-  useEffect(() => {
-    if (!selectedIncidentId) {
-      setSubIncidents([]);
-      return;
-    }
-
-    async function fetchSubIncidents() {
-      const data = await getSubIncidents(selectedIncidentId);
-      setSubIncidents(data || []);
-    }
-    fetchSubIncidents();
-  }, [selectedIncidentId]);
-
-  // Handle top-level incident selection
-  const handleIncidentChange = (value: string) => {
-    setSelectedIncidentId(value);
-    setValue("incidentId", value); // Set form value
-  };
-
-  // Handle sub-incident selection
-  const handleSubIncidentChange = (value: string) => {
-    setValue("incidentId", value); // Override with sub-incident
-  };
-
-  const handleLocationChange = (value: string) => {
-    setValue("location", value); // Override with sub-incident
-  };
 
   return (
     <DashboardShell>
@@ -193,7 +162,9 @@ export default function NewOccurrencePage() {
 
               <div className="space-y-2">
                 <Label htmlFor="location">Location</Label>
-                <Select onValueChange={handleLocationChange} defaultValue="">
+                <Select
+                  onValueChange={(value) => setValue("location", value)}
+                  defaultValue="">
                   <SelectTrigger id="location">
                     <SelectValue placeholder="Select location" />
                   </SelectTrigger>
@@ -212,43 +183,15 @@ export default function NewOccurrencePage() {
                 )}
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="incidentType">Incident Type</Label>
-                <Select onValueChange={handleIncidentChange} defaultValue="">
-                  <SelectTrigger id="incidentType">
-                    <SelectValue placeholder="Select incident type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {incidents.map((incident) => (
-                      <SelectItem key={incident.id} value={incident.id}>
-                        {incident.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                {subIncidents.length > 0 && (
-                  <div className="mt-4">
-                    <Label htmlFor="subIncidentType">Sub-Category</Label>
-                    <Select
-                      onValueChange={handleSubIncidentChange}
-                      defaultValue="">
-                      <SelectTrigger id="subIncidentType">
-                        <SelectValue placeholder="Select sub-category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {subIncidents.map((subIncident) => (
-                          <SelectItem
-                            key={subIncident.id}
-                            value={subIncident.id}>
-                            {subIncident.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-              </div>
+              {/* Incident selector component */}
+              <IncidentSelector
+                onIncidentChange={(value) => setValue("incidentId", value)}
+              />
+              {errors.incidentId && (
+                <p className="text-sm text-red-500">
+                  {errors.incidentId.message}
+                </p>
+              )}
 
               <div className="space-y-2">
                 <Label htmlFor="description">Description</Label>
@@ -266,9 +209,20 @@ export default function NewOccurrencePage() {
               </div>
             </CardContent>
             <CardFooter className="flex justify-between">
-              <Button variant="outline" onClick={() => router.back()}>
-                Cancel
-              </Button>
+              <div>
+                <Button
+                  variant="outline"
+                  onClick={() => router.back()}
+                  className="mr-2">
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={checkFormErrors}>
+                  Debug
+                </Button>
+              </div>
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? "Submitting..." : "Submit Report"}
               </Button>

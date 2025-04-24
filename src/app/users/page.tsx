@@ -24,7 +24,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/components/ui/use-toast";
-import { getUsers, deleteUser } from "@/actions-old/users";
+import { getUsers, deleteUser } from "@/actions/users";
 import { useEffect } from "react";
 
 // Type for the user data

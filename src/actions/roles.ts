@@ -10,7 +10,6 @@ import { revalidatePath } from "next/cache";
 const roleSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   description: z.string().optional(),
-  permissionIds: z.array(z.string()).optional(),
 });
 
 export type RoleFormValues = z.infer<typeof roleSchema>;
@@ -44,20 +43,13 @@ export async function getRoles() {
 export async function getRoleById(roleId: string) {
   const session = await getServerSession(authOptions);
 
-  if (!session?.user || !session.user.roles.includes("ADMIN")) {
+  if (!session?.user || session.user.role !== "ADMIN") {
     return { success: false, error: "Not authorized" };
   }
 
   try {
     const role = await prisma.role.findUnique({
       where: { id: roleId },
-      include: {
-        permissions: {
-          include: {
-            permission: true,
-          },
-        },
-      },
     });
 
     if (!role) {
@@ -68,8 +60,6 @@ export async function getRoleById(roleId: string) {
       success: true,
       role: {
         ...role,
-        permissions: role.permissions.map((rp) => rp.permission),
-        permissionIds: role.permissions.map((rp) => rp.permissionId),
       },
     };
   } catch (error) {
@@ -82,7 +72,7 @@ export async function getRoleById(roleId: string) {
 export async function createRole(data: RoleFormValues) {
   const session = await getServerSession(authOptions);
 
-  if (!session?.user || !session.user.roles.includes("ADMIN")) {
+  if (!session?.user || session.user.role !== "ADMIN") {
     return { success: false, error: "Not authorized" };
   }
 
@@ -104,34 +94,6 @@ export async function createRole(data: RoleFormValues) {
       data: {
         name: validatedData.name,
         description: validatedData.description || null,
-        ...(validatedData.permissionIds &&
-        validatedData.permissionIds.length > 0
-          ? {
-              permissions: {
-                create: validatedData.permissionIds.map((permissionId) => ({
-                  permissionId,
-                })),
-              },
-            }
-          : {}),
-      },
-      include: {
-        permissions: {
-          include: {
-            permission: true,
-          },
-        },
-      },
-    });
-
-    // Log audit
-    await prisma.auditLog.create({
-      data: {
-        userId: session.user.id,
-        action: "CREATE",
-        entity: "ROLE",
-        entityId: role.id,
-        details: `Created role: ${role.name}`,
       },
     });
 
@@ -156,7 +118,7 @@ export async function createRole(data: RoleFormValues) {
 export async function updateRole(roleId: string, data: RoleFormValues) {
   const session = await getServerSession(authOptions);
 
-  if (!session?.user || !session.user.roles.includes("ADMIN")) {
+  if (!session?.user || session.user.role !== "ADMIN") {
     return { success: false, error: "Not authorized" };
   }
 
@@ -187,38 +149,7 @@ export async function updateRole(roleId: string, data: RoleFormValues) {
         },
       });
 
-      // Delete existing permission assignments
-      await tx.rolePermission.deleteMany({
-        where: { roleId },
-      });
-
-      // Create new permission assignments if any
-      if (
-        validatedData.permissionIds &&
-        validatedData.permissionIds.length > 0
-      ) {
-        for (const permissionId of validatedData.permissionIds) {
-          await tx.rolePermission.create({
-            data: {
-              roleId,
-              permissionId,
-            },
-          });
-        }
-      }
-
       return updatedRole;
-    });
-
-    // Log audit
-    await prisma.auditLog.create({
-      data: {
-        userId: session.user.id,
-        action: "UPDATE",
-        entity: "ROLE",
-        entityId: roleId,
-        details: `Updated role: ${role.name}`,
-      },
     });
 
     // Revalidate roles pages
@@ -243,7 +174,7 @@ export async function updateRole(roleId: string, data: RoleFormValues) {
 export async function deleteRole(roleId: string) {
   const session = await getServerSession(authOptions);
 
-  if (!session?.user || !session.user.roles.includes("ADMIN")) {
+  if (!session?.user || session.user.role !== "ADMIN") {
     return { success: false, error: "Not authorized" };
   }
 
@@ -258,7 +189,7 @@ export async function deleteRole(roleId: string) {
     }
 
     // Check if role is in use
-    const userRolesCount = await prisma.userRole.count({
+    const userRolesCount = await prisma.user.count({
       where: { roleId },
     });
 
@@ -274,17 +205,6 @@ export async function deleteRole(roleId: string) {
       where: { id: roleId },
     });
 
-    // Log audit
-    await prisma.auditLog.create({
-      data: {
-        userId: session.user.id,
-        action: "DELETE",
-        entity: "ROLE",
-        entityId: roleId,
-        details: `Deleted role: ${role.name}`,
-      },
-    });
-
     // Revalidate roles page
     revalidatePath("/roles");
 
@@ -292,27 +212,5 @@ export async function deleteRole(roleId: string) {
   } catch (error) {
     console.error("Error deleting role:", error);
     return { success: false, error: "Failed to delete role" };
-  }
-}
-
-// Get all permissions
-export async function getPermissions() {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user || !session.user.roles.includes("ADMIN")) {
-    return { success: false, error: "Not authorized" };
-  }
-
-  try {
-    const permissions = await prisma.permission.findMany({
-      orderBy: {
-        name: "asc",
-      },
-    });
-
-    return { success: true, permissions };
-  } catch (error) {
-    console.error("Error fetching permissions:", error);
-    return { success: false, error: "Failed to fetch permissions" };
   }
 }

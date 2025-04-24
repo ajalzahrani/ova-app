@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/card";
 import { ArrowLeft, ChevronLeft, PlusCircle } from "lucide-react";
 import Link from "next/link";
-import { ReferIncidentDialog } from "@/components/incidents/refer-incident-dialog";
+import { ReferOccurrenceDialog } from "@/app/occurrences/components/refer-occurrence-dialog";
 
 export default async function OccurrenceDetails({
   params,
@@ -29,6 +29,10 @@ export default async function OccurrenceDetails({
     },
   });
 
+  if (!occurrence) {
+    return <div>Occurrence not found</div>;
+  }
+
   const departments = await prisma.department.findMany();
 
   return (
@@ -43,13 +47,13 @@ export default async function OccurrenceDetails({
               Back to Occurrences
             </Link>
           </Button>
-          <ReferIncidentDialog
-            incidentId={occurrence?.id}
+          <ReferOccurrenceDialog
+            occurrenceId={occurrence.id}
             departments={departments}
           />
           <Button asChild>
-            <Link href={`/incidents/${occurrence?.id}/edit`}>
-              Edit Incident
+            <Link href={`/occurrences/${occurrence?.id}/edit`}>
+              Edit Occurrence
             </Link>
           </Button>
         </div>
@@ -64,7 +68,7 @@ export default async function OccurrenceDetails({
             <p>{occurrence?.description}</p>
           </CardContent>
           <CardFooter>
-            <p>{occurrence?.createdBy.name}</p>
+            <p>{occurrence?.createdBy?.name}</p>
           </CardFooter>
         </Card>
         <Card>

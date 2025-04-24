@@ -40,35 +40,31 @@ model Department {
 }
 
 model Occurrence {
-  id                  String    @id @default(uuid())
+  id                  String                 @id @default(uuid())
   title               String
   description         String
   statusId            String
   incidentId          String
-  locationId          String?
   createdById         String?
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
   assignedByQualityAt DateTime?
   closedByQualityAt   DateTime?
-
-  // Relations
-  createdBy   User?                  @relation("CreatedOccurrences", fields: [createdById], references: [id])
-  status      OccurrenceStatus       @relation(fields: [statusId], references: [id])
-  incident    Incident               @relation(fields: [incidentId], references: [id])
-  location    OccurrenceLocation?    @relation(fields: [locationId], references: [id])
-  assignments OccurrenceAssignment[]
-  messages    OccurrenceMessage[]
-  Severity    Severity?              @relation(fields: [severityId], references: [id])
-  severityId  String?
+  severityId          String?
+  locationId          String?
+  createdBy           User?                  @relation("CreatedOccurrences", fields: [createdById], references: [id])
+  incident            Incident               @relation(fields: [incidentId], references: [id])
+  location            OccurrenceLocation?    @relation(fields: [locationId], references: [id])
+  Severity            Severity?              @relation(fields: [severityId], references: [id])
+  status              OccurrenceStatus       @relation(fields: [statusId], references: [id])
+  assignments         OccurrenceAssignment[]
+  messages            OccurrenceMessage[]
 }
 
 model OccurrenceLocation {
-  id    String  @id @default(uuid())
-  name  String  @unique
-  level String?
-
-  // Relations
+  id         String       @id @default(uuid())
+  name       String       @unique
+  level      String?
   occurrence Occurrence[]
 }
 
@@ -81,6 +77,7 @@ model OccurrenceAssignment {
   isCompleted  Boolean    @default(false)
   completedAt  DateTime?
   assignedAt   DateTime   @default(now())
+  message      String?
   department   Department @relation(fields: [departmentId], references: [id])
   occurrence   Occurrence @relation(fields: [occurrenceId], references: [id])
 }
@@ -105,16 +102,14 @@ model OccurrenceStatus {
 }
 
 model Incident {
-  id          String  @id @default(uuid())
-  name        String  @unique
+  id          String       @id @default(uuid())
+  name        String       @unique
   description String?
   severityId  String
-  parentId    String? // Optional parent ID for sub-incidents
-
-  // Relations
-  severity    Severity     @relation(fields: [severityId], references: [id])
+  parentId    String?
   parent      Incident?    @relation("IncidentHierarchy", fields: [parentId], references: [id])
   children    Incident[]   @relation("IncidentHierarchy")
+  severity    Severity     @relation(fields: [severityId], references: [id])
   occurrences Occurrence[]
 }
 
@@ -123,6 +118,6 @@ model Severity {
   name        String       @unique
   level       Int
   variant     String?
-  occurrences Occurrence[]
   Incident    Incident[]
+  occurrences Occurrence[]
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,28 +17,16 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, ArrowLeft, Save, Building2 } from "lucide-react";
-import {
-  getUserById,
-  updateUser,
-  type UserFormValues,
-} from "@/actions-old/users";
-import { getRoles } from "@/actions-old/roles";
+import { getUserById, updateUser, type UserFormValues } from "@/actions/users";
+import { getRoles } from "@/actions/roles";
 import { getDepartments } from "@/actions-old/departments";
 import { useToast } from "@/components/ui/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -71,7 +59,19 @@ interface Department {
   name: string;
 }
 
-export default function EditUserPage({ params }: { params: { id: string } }) {
+// Define a type for the page params
+interface PageParams {
+  id: string;
+}
+
+export default function EditUserPage({
+  params,
+}: {
+  params: PageParams | Promise<PageParams>;
+}) {
+  const resolvedParams = use(params as Promise<PageParams>);
+  const userId = resolvedParams.id;
+
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -115,7 +115,7 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
         }
 
         // Fetch user data
-        const userResponse = await getUserById(params.id);
+        const userResponse = await getUserById(userId);
         if (userResponse.success) {
           const user = userResponse.user;
           form.reset({
@@ -144,7 +144,7 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
     };
 
     fetchData();
-  }, [params.id, form, toast]);
+  }, [userId, form, toast]);
 
   // Handle form submission
   const onSubmit = async (data: UserFormValues) => {
@@ -152,7 +152,7 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
     setError(null);
 
     try {
-      const result = await updateUser(params.id, data);
+      const result = await updateUser(userId, data);
       if (result.success) {
         toast({
           title: "Success",

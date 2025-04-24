@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -26,36 +25,20 @@ import {
 } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, ArrowLeft } from "lucide-react";
-import {
-  getRoleById,
-  updateRole,
-  getPermissions,
-  type RoleFormValues,
-} from "@/actions-old/roles";
+import { getRoleById, updateRole, type RoleFormValues } from "@/actions/roles";
 import { useToast } from "@/components/ui/use-toast";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Separator } from "@/components/ui/separator";
 
 // Form schema for role edit
 const roleFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   description: z.string().optional(),
-  permissionIds: z.array(z.string()).optional(),
 });
-
-// Interface for permissions
-interface Permission {
-  id: string;
-  name: string;
-  description?: string | null;
-}
 
 export default function EditRolePage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // const [permissions, setPermissions] = useState<Permission[]>([]);
   const [isPageLoading, setIsPageLoading] = useState(true);
 
   // Initialize the form
@@ -64,7 +47,6 @@ export default function EditRolePage({ params }: { params: { id: string } }) {
     defaultValues: {
       name: "",
       description: "",
-      permissionIds: [],
     },
   });
 
@@ -73,14 +55,6 @@ export default function EditRolePage({ params }: { params: { id: string } }) {
     const fetchData = async () => {
       setIsPageLoading(true);
       try {
-        // Fetch permissions
-        // const permissionsResponse = await getPermissions();
-        // if (permissionsResponse.success) {
-        //   setPermissions(permissionsResponse.permissions);
-        // } else {
-        //   setError("Failed to load permissions");
-        // }
-
         // Fetch role data
         const roleResponse = await getRoleById(params.id);
         if (roleResponse.success) {
@@ -88,7 +62,6 @@ export default function EditRolePage({ params }: { params: { id: string } }) {
           form.reset({
             name: role?.name || "",
             description: role?.description || "",
-            // permissionIds: role?.permissionIds || [],
           });
         } else {
           setError(roleResponse.error || "Failed to load role data");
@@ -211,75 +184,6 @@ export default function EditRolePage({ params }: { params: { id: string } }) {
                     </FormItem>
                   )}
                 />
-
-                {/* {permissions.length > 0 && (
-                  <>
-                    <Separator />
-                    <div>
-                      <FormLabel className="block mb-3">Permissions</FormLabel>
-                      <div className="grid gap-4">
-                        <FormField
-                          control={form.control}
-                          name="permissionIds"
-                          render={() => (
-                            <FormItem>
-                              {permissions.map((permission) => (
-                                <div
-                                  key={permission.id}
-                                  className="flex items-center space-x-2 mb-2">
-                                  <FormField
-                                    control={form.control}
-                                    name="permissionIds"
-                                    render={({ field }) => {
-                                      return (
-                                        <FormItem
-                                          key={permission.id}
-                                          className="flex flex-row items-start space-x-3 space-y-0">
-                                          <FormControl>
-                                            <Checkbox
-                                              checked={field.value?.includes(
-                                                permission.id
-                                              )}
-                                              onCheckedChange={(checked) => {
-                                                return checked
-                                                  ? field.onChange([
-                                                      ...(field.value || []),
-                                                      permission.id,
-                                                    ])
-                                                  : field.onChange(
-                                                      field.value?.filter(
-                                                        (value) =>
-                                                          value !==
-                                                          permission.id
-                                                      ) || []
-                                                    );
-                                              }}
-                                            />
-                                          </FormControl>
-                                          <div className="space-y-1 leading-none">
-                                            <FormLabel className="text-sm font-medium">
-                                              {permission.name}
-                                            </FormLabel>
-                                            {permission.description && (
-                                              <p className="text-xs text-muted-foreground">
-                                                {permission.description}
-                                              </p>
-                                            )}
-                                          </div>
-                                        </FormItem>
-                                      );
-                                    }}
-                                  />
-                                </div>
-                              ))}
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                    </div>
-                  </>
-                )} */}
               </div>
 
               <div className="flex gap-2 justify-end">

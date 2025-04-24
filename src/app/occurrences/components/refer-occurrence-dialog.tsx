@@ -17,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
 import { Share2 } from "lucide-react";
-import { referIncidentToDepartments } from "@/actions-old/incidents";
+import { referOccurrenceToDepartments } from "@/app/occurrences/[id]/actions";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -26,15 +26,15 @@ interface Department {
   name: string;
 }
 
-interface ReferIncidentDialogProps {
-  incidentId: string;
+interface ReferOccurrenceDialogProps {
+  occurrenceId: string;
   departments: Department[];
 }
 
-export function ReferIncidentDialog({
-  incidentId,
+export function ReferOccurrenceDialog({
+  occurrenceId,
   departments,
-}: ReferIncidentDialogProps) {
+}: ReferOccurrenceDialogProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -65,8 +65,8 @@ export function ReferIncidentDialog({
 
     setIsSubmitting(true);
     try {
-      const result = await referIncidentToDepartments({
-        incidentId,
+      const result = await referOccurrenceToDepartments({
+        occurrenceId,
         departmentIds: selectedDepartmentIds,
         message: message.trim() || undefined,
       });
@@ -74,7 +74,7 @@ export function ReferIncidentDialog({
       if (result.success) {
         toast({
           title: "Success",
-          description: `Incident referred to ${selectedDepartmentIds.length} department(s)`,
+          description: `Occurrence referred to ${selectedDepartmentIds.length} department(s)`,
         });
         setOpen(false);
         setMessage("");
@@ -84,11 +84,11 @@ export function ReferIncidentDialog({
         toast({
           variant: "destructive",
           title: "Error",
-          description: result.error || "Failed to refer incident",
+          description: result.error || "Failed to refer occurrence",
         });
       }
     } catch (error) {
-      console.error("Error referring incident:", error);
+      console.error("Error referring occurrence:", error);
       toast({
         variant: "destructive",
         title: "Error",
@@ -108,9 +108,9 @@ export function ReferIncidentDialog({
       </DialogTrigger>
       <DialogContent className="sm:max-w-[525px]">
         <DialogHeader>
-          <DialogTitle>Refer Incident to Departments</DialogTitle>
+          <DialogTitle>Refer Occurrence to Departments</DialogTitle>
           <DialogDescription>
-            Select departments to refer this incident to for investigation and
+            Select departments to refer this occurrence to for investigation and
             response.
           </DialogDescription>
         </DialogHeader>
@@ -166,7 +166,7 @@ export function ReferIncidentDialog({
             </Button>
           </DialogClose>
           <Button type="button" onClick={handleSubmit} disabled={isSubmitting}>
-            {isSubmitting ? "Referring..." : "Refer Incident"}
+            {isSubmitting ? "Referring..." : "Refer Occurrence"}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -34,6 +34,22 @@ export async function getSubIncidents(parentId: string) {
   });
 }
 
+// Get sub-sub-incidents for a specific sub-incident
+export async function getSubSubIncidents(subIncidentId: string) {
+  return prisma.incident.findMany({
+    where: {
+      parentId: subIncidentId,
+    },
+    include: {
+      children: true, // Include next level if needed
+      severity: true, // Include severity details
+    },
+    orderBy: {
+      name: "asc",
+    },
+  });
+}
+
 // Get a single incident with all details
 export async function getIncidentById(id: string) {
   return prisma.incident.findUnique({

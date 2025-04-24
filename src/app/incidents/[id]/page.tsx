@@ -23,7 +23,7 @@ import {
   MessageSquare,
   AlertOctagon,
 } from "lucide-react";
-import { ReferIncidentDialog } from "@/components/incidents/refer-incident-dialog";
+import { ReferIncidentDialog } from "@/app/occurrences/components/refer-occurrence-dialog";
 
 interface IncidentDetailProps {
   params: {

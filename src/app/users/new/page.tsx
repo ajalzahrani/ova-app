@@ -25,8 +25,8 @@ import {
 } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, ArrowLeft, Building2 } from "lucide-react";
-import { createUser } from "@/actions-old/users";
-import { getRoles } from "@/actions-old/roles";
+import { createUser } from "@/actions/users";
+import { getRoles } from "@/actions/roles";
 import { getDepartments } from "@/actions-old/departments";
 import { useToast } from "@/components/ui/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -36,9 +36,10 @@ import { Separator } from "@/components/ui/separator";
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
+  username: z.string().min(2, "Username must be at least 2 characters"),
   password: z.string().min(8, "Password must be at least 8 characters"),
-  roleIds: z.array(z.string()).min(1, "At least one role must be selected"),
-  departmentIds: z.array(z.string()).optional(),
+  roleId: z.string().min(1, "At least one role must be selected"),
+  departmentId: z.string().optional(),
 });
 
 // Get type from schema
@@ -46,9 +47,11 @@ type FormValues = z.infer<typeof formSchema>;
 
 // Interface for roles
 interface Role {
-  id: string;
   name: string;
-  description?: string;
+  id: string;
+  createdAt: Date;
+  description: string | null;
+  updatedAt: Date;
 }
 
 // Interface for departments
@@ -71,11 +74,12 @@ export default function NewUserPage() {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      username: "",
       name: "",
       email: "",
       password: "",
-      roleIds: [],
-      departmentIds: [],
+      roleId: "",
+      departmentId: "",
     },
   });
 
@@ -87,7 +91,7 @@ export default function NewUserPage() {
         // Fetch roles
         const rolesResponse = await getRoles();
         if (rolesResponse.success) {
-          setRoles(rolesResponse.roles);
+          setRoles(rolesResponse.roles || []);
         } else {
           setError("Failed to load roles");
         }
@@ -95,7 +99,7 @@ export default function NewUserPage() {
         // Fetch departments
         const departmentsResponse = await getDepartments();
         if (departmentsResponse.success) {
-          setDepartments(departmentsResponse.departments);
+          setDepartments(departmentsResponse.departments || []);
         } else {
           setError("Failed to load departments");
         }
@@ -181,6 +185,20 @@ export default function NewUserPage() {
               <div className="grid gap-6">
                 <FormField
                   control={form.control}
+                  name="username"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Username</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter username" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
                   name="name"
                   render={({ field }) => (
                     <FormItem>
@@ -237,20 +255,16 @@ export default function NewUserPage() {
                       <FormField
                         key={role.id}
                         control={form.control}
-                        name="roleIds"
+                        name="roleId"
                         render={({ field }) => (
                           <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                             <FormControl>
                               <Checkbox
-                                checked={field.value?.includes(role.id)}
+                                checked={field.value === role.id}
                                 onCheckedChange={(checked) => {
                                   return checked
-                                    ? field.onChange([...field.value, role.id])
-                                    : field.onChange(
-                                        field.value?.filter(
-                                          (value) => value !== role.id
-                                        )
-                                      );
+                                    ? field.onChange(role.id)
+                                    : field.onChange("");
                                 }}
                               />
                             </FormControl>
@@ -288,23 +302,16 @@ export default function NewUserPage() {
                         <FormField
                           key={department.id}
                           control={form.control}
-                          name="departmentIds"
+                          name="departmentId"
                           render={({ field }) => (
                             <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                               <FormControl>
                                 <Checkbox
-                                  checked={field.value?.includes(department.id)}
+                                  checked={field.value === department.id}
                                   onCheckedChange={(checked) => {
                                     return checked
-                                      ? field.onChange([
-                                          ...(field.value || []),
-                                          department.id,
-                                        ])
-                                      : field.onChange(
-                                          field.value?.filter(
-                                            (value) => value !== department.id
-                                          )
-                                        );
+                                      ? field.onChange(department.id)
+                                      : field.onChange("");
                                   }}
                                 />
                               </FormControl>

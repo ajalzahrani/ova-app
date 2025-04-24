@@ -23,7 +23,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/components/ui/use-toast";
-import { getRoles, deleteRole } from "@/actions-old/roles";
+import { getRoles, deleteRole } from "@/actions/roles";
 
 // Type for the role data
 interface Role {
@@ -145,7 +145,7 @@ export default function RolesPage() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => router.push(`/roles/${role.id}`)}>
+                          onClick={() => router.push(`/roles/${role.id}/edit`)}>
                           <Eye className="h-4 w-4" />
                           <span className="sr-only">View</span>
                         </Button>
