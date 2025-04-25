@@ -27,6 +27,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, ArrowLeft } from "lucide-react";
 import { getRoleById, updateRole, type RoleFormValues } from "@/actions/roles";
 import { useToast } from "@/components/ui/use-toast";
+import { use } from "react";
 
 // Form schema for role edit
 const roleFormSchema = z.object({
@@ -34,7 +35,17 @@ const roleFormSchema = z.object({
   description: z.string().optional(),
 });
 
-export default function EditRolePage({ params }: { params: { id: string } }) {
+interface PageParams {
+  id: string;
+}
+
+export default function EditRolePage({
+  params,
+}: {
+  params: PageParams | Promise<PageParams>;
+}) {
+  const resolvedParams = use(params as Promise<PageParams>);
+  const roleId = resolvedParams.id;
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -56,7 +67,7 @@ export default function EditRolePage({ params }: { params: { id: string } }) {
       setIsPageLoading(true);
       try {
         // Fetch role data
-        const roleResponse = await getRoleById(params.id);
+        const roleResponse = await getRoleById(roleId);
         if (roleResponse.success) {
           const role = roleResponse.role;
           form.reset({
@@ -80,7 +91,7 @@ export default function EditRolePage({ params }: { params: { id: string } }) {
     };
 
     fetchData();
-  }, [params.id, form, toast]);
+  }, [roleId, form, toast]);
 
   // Handle form submission
   const onSubmit = async (data: RoleFormValues) => {
@@ -88,7 +99,7 @@ export default function EditRolePage({ params }: { params: { id: string } }) {
     setError(null);
 
     try {
-      const result = await updateRole(params.id, data);
+      const result = await updateRole(roleId, data);
       if (result.success) {
         toast({
           title: "Success",

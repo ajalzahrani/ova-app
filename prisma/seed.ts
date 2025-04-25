@@ -159,6 +159,30 @@ async function main() {
     },
   });
 
+  const statusAnswered = await prisma.occurrenceStatus.upsert({
+    where: { name: "ANSWERED" },
+    update: {
+      name: "ANSWERED",
+      variant: "default",
+    },
+    create: {
+      name: "ANSWERED",
+      variant: "default",
+    },
+  });
+
+  const statusAnsweredPartially = await prisma.occurrenceStatus.upsert({
+    where: { name: "ANSWERED_PARTIALLY" },
+    update: {
+      name: "ANSWERED_PARTIALLY",
+      variant: "default",
+    },
+    create: {
+      name: "ANSWERED_PARTIALLY",
+      variant: "default",
+    },
+  });
+
   const statusCompleted = await prisma.occurrenceStatus.upsert({
     where: { name: "COMPLETED" },
     update: {
@@ -423,6 +447,8 @@ async function main() {
     statusClosed,
     statusAssigned,
     statusInProgress,
+    statusAnswered,
+    statusAnsweredPartially,
     statusCompleted,
     severityLow,
     severityMedium,

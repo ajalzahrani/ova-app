@@ -8,6 +8,7 @@ import { OccurrencesList } from "@/components/occurrences-list";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { getDepartmentOccurrences } from "@/actions/departments";
 
 export default async function OccurrencesPage() {
   const session = await getServerSession(authOptions);
@@ -16,9 +17,28 @@ export default async function OccurrencesPage() {
     redirect("/login");
   }
 
+  const user = await prisma.user.findUnique({
+    where: {
+      id: session?.user.id,
+    },
+    include: {
+      role: true,
+    },
+  });
+
+  const isAdmin = user?.role.name === "ADMIN";
+
   const occurrences = await prisma.occurrence.findMany({
-    orderBy: {
-      createdAt: "desc",
+    where: {
+      ...(isAdmin || !user?.departmentId
+        ? {}
+        : {
+            assignments: {
+              some: {
+                departmentId: user.departmentId,
+              },
+            },
+          }),
     },
     include: {
       assignments: {
@@ -33,6 +53,18 @@ export default async function OccurrencesPage() {
         },
       },
     },
+    orderBy: [
+      {
+        incident: {
+          severity: {
+            level: "desc",
+          },
+        },
+      },
+      {
+        createdAt: "desc",
+      },
+    ],
   });
 
   return (

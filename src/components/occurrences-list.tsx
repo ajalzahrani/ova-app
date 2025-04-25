@@ -1,6 +1,4 @@
 "use client";
-
-import { useState } from "react";
 import {
   Table,
   TableBody,
@@ -11,19 +9,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { cn } from "@/lib/utils";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Search,
   FileEdit,
   Eye,
   Trash2,
@@ -57,40 +43,6 @@ interface OccurrencesListProps {
 }
 
 export function OccurrencesList({ occurrences }: OccurrencesListProps) {
-  // Function to get badge variant based on severity
-  const getSeverityVariant = (severity: string) => {
-    switch (severity) {
-      case "LOW":
-        return "outline";
-      case "MEDIUM":
-        return "secondary";
-      case "HIGH":
-        return "destructive";
-      case "CRITICAL":
-        return "destructive";
-      default:
-        return "outline";
-    }
-  };
-
-  // Function to get badge variant based on status
-  const getStatusVariant = (status: string) => {
-    switch (status) {
-      case "NEW":
-        return "outline";
-      case "UNDER_INVESTIGATION":
-        return "secondary";
-      case "PENDING_REVIEW":
-        return "default";
-      case "RESOLVED":
-        return "default";
-      case "CLOSED":
-        return "secondary";
-      default:
-        return "outline";
-    }
-  };
-
   // Function to render severity icon
   const renderSeverityIcon = (severity: string) => {
     switch (severity) {
@@ -136,20 +88,34 @@ export function OccurrencesList({ occurrences }: OccurrencesListProps) {
               <TableRow key={occurrence.id}>
                 <TableCell className="font-medium">
                   <Link
-                    href={`/incidents/${occurrence.id}`}
+                    href={`/occurrences/${occurrence.id}`}
                     className="hover:underline">
                     {occurrence.title}
                   </Link>
                 </TableCell>
                 <TableCell>
-                  <Badge variant={occurrence.status.variant}>
+                  <Badge
+                    variant={
+                      occurrence.status.variant as
+                        | "default"
+                        | "destructive"
+                        | "outline"
+                        | "secondary"
+                    }>
                     {occurrence.status.name.replace("_", " ")}
                   </Badge>
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center">
                     {renderSeverityIcon(occurrence.incident.name)}
-                    <Badge variant={occurrence.incident.name}>
+                    <Badge
+                      variant={
+                        occurrence.incident.name as
+                          | "default"
+                          | "destructive"
+                          | "outline"
+                          | "secondary"
+                      }>
                       {occurrence.incident.name}
                     </Badge>
                   </div>
@@ -166,7 +132,14 @@ export function OccurrencesList({ occurrences }: OccurrencesListProps) {
                 <TableCell>
                   <div className="flex items-center">
                     {renderSeverityIcon(occurrence.incident.severity.name)}
-                    <Badge variant={occurrence.incident.severity.name}>
+                    <Badge
+                      variant={
+                        occurrence.incident.severity.name as
+                          | "default"
+                          | "destructive"
+                          | "outline"
+                          | "secondary"
+                      }>
                       {occurrence.incident.severity.name}
                     </Badge>
                   </div>

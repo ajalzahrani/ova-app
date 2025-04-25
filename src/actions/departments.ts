@@ -76,7 +76,7 @@ export async function getDepartmentOccurrences(departmentId: string) {
 
   const isAdmin = user?.role.name === "ADMIN";
   const isDepartmentManager =
-    user?.role.name === "QUALITY_MANAGER" &&
+    user?.role.name === "DEPARTMENT_MANAGER" &&
     user?.departmentId === departmentId;
 
   // If not admin or department manager of this department, deny access
@@ -93,9 +93,6 @@ export async function getDepartmentOccurrences(departmentId: string) {
           },
         },
       },
-      orderBy: {
-        createdAt: "desc",
-      },
       include: {
         assignments: {
           include: {
@@ -109,6 +106,18 @@ export async function getDepartmentOccurrences(departmentId: string) {
           },
         },
       },
+      orderBy: [
+        {
+          incident: {
+            severity: {
+              level: "desc",
+            },
+          },
+        },
+        {
+          createdAt: "desc",
+        },
+      ],
     });
 
     return occurrences;

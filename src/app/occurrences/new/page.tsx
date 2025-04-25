@@ -27,7 +27,7 @@ import {
 import { toast } from "@/components/ui/use-toast";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
-import { createOccurrence } from "./actions";
+import { createOccurrence } from "../actions";
 import { getOccurrenceLocations } from "@/actions/locations";
 import { IncidentSelector } from "@/app/occurrences/components/incident-selector";
 

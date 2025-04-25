@@ -2,30 +2,18 @@ import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
-import { ChevronLeft } from "lucide-react";
-import Link from "next/link";
-import { ReferOccurrenceDialog } from "@/app/occurrences/components/refer-occurrence-dialog";
 import { OccurrenceView } from "@/components/occurrence-view";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { redirect } from "next/navigation";
+import { OccurrenceActionForm } from "@/components/occurrence-action-form";
+
+import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default async function OccurrenceDetails({
   params,
 }: {
   params: { id: string };
 }) {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user) {
-    redirect("/login");
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    include: { role: true },
-  });
-
   const occurrence = await prisma.occurrence.findUnique({
     where: { id: params.id },
     include: {
@@ -43,8 +31,6 @@ export default async function OccurrenceDetails({
     return <div>Occurrence not found</div>;
   }
 
-  const departments = await prisma.department.findMany();
-
   return (
     <DashboardShell>
       <DashboardHeader
@@ -57,31 +43,20 @@ export default async function OccurrenceDetails({
               Back to Occurrences
             </Link>
           </Button>
-
-          {user?.role.name === "DEPARTMENT_MANAGER" ? (
-            <Button asChild>
-              <Link href={`/occurrences/${occurrence?.id}/action`}>
-                Action Plan
-              </Link>
-            </Button>
-          ) : (
-            <>
-              <ReferOccurrenceDialog
-                occurrenceId={occurrence.id}
-                departments={departments}
-              />
-              <Button asChild>
-                <Link href={`/occurrences/${occurrence?.id}/edit`}>
-                  Edit Occurrence
-                </Link>
-              </Button>
-            </>
-          )}
         </div>
       </DashboardHeader>
 
       <div className="grid gap-6">
         <OccurrenceView occurrence={occurrence} />
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Submit Action Plan</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <OccurrenceActionForm occurrenceId={occurrence.id} />
+          </CardContent>
+        </Card>
       </div>
     </DashboardShell>
   );

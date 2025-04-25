@@ -140,6 +140,7 @@ export default function UsersPage() {
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Roles</TableHead>
+                  <TableHead>Department</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -155,6 +156,7 @@ export default function UsersPage() {
                         </Badge>
                       </div>
                     </TableCell>
+                    <TableCell>{user.department?.name || "N/A"}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button
