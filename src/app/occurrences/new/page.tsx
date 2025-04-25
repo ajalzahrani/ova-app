@@ -34,9 +34,9 @@ import { IncidentSelector } from "@/app/occurrences/components/incident-selector
 const occurrenceSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
-  location: z.string().min(3, "Location is required"),
+  locationId: z.string().min(1, "Location is required"),
   incidentId: z.string().min(1, "Incident is required"),
-  dateOccurred: z.string().refine((val) => !isNaN(Date.parse(val)), {
+  occurrenceDate: z.string().refine((val) => !isNaN(Date.parse(val)), {
     message: "Invalid date",
   }),
 });
@@ -58,9 +58,9 @@ export default function NewOccurrencePage() {
     defaultValues: {
       title: "",
       description: "",
-      location: "",
+      locationId: "",
       incidentId: "",
-      dateOccurred: new Date().toISOString().split("T")[0],
+      occurrenceDate: new Date().toISOString().split("T")[0],
     },
   });
 
@@ -149,13 +149,13 @@ export default function NewOccurrencePage() {
               <div className="space-y-2">
                 <Label htmlFor="dateOccurred">Date Occurred</Label>
                 <Input
-                  id="dateOccurred"
+                  id="occurrenceDate"
                   type="date"
-                  {...register("dateOccurred")}
+                  {...register("occurrenceDate")}
                 />
-                {errors.dateOccurred && (
+                {errors.occurrenceDate && (
                   <p className="text-sm text-red-500">
-                    {errors.dateOccurred.message}
+                    {errors.occurrenceDate.message}
                   </p>
                 )}
               </div>
@@ -163,7 +163,7 @@ export default function NewOccurrencePage() {
               <div className="space-y-2">
                 <Label htmlFor="location">Location</Label>
                 <Select
-                  onValueChange={(value) => setValue("location", value)}
+                  onValueChange={(value) => setValue("locationId", value)}
                   defaultValue="">
                   <SelectTrigger id="location">
                     <SelectValue placeholder="Select location" />
@@ -176,9 +176,9 @@ export default function NewOccurrencePage() {
                     ))}
                   </SelectContent>
                 </Select>
-                {errors.location && (
+                {errors.locationId && (
                   <p className="text-sm text-red-500">
-                    {errors.location.message}
+                    {errors.locationId.message}
                   </p>
                 )}
               </div>

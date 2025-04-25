@@ -29,8 +29,8 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange>
           <AuthProvider>
-            <AuthCheck>{children}</AuthCheck>
             <Toaster />
+            <AuthCheck>{children}</AuthCheck>
           </AuthProvider>
         </ThemeProvider>
       </body>

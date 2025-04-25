@@ -9,6 +9,7 @@ import { OccurrenceView } from "@/components/occurrence-view";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { getOccurrenceById } from "../actions";
 
 export default async function OccurrenceDetails({
   params,
@@ -26,18 +27,9 @@ export default async function OccurrenceDetails({
     include: { role: true },
   });
 
-  const occurrence = await prisma.occurrence.findUnique({
-    where: { id: params.id },
-    include: {
-      createdBy: true,
-      assignments: {
-        include: {
-          department: true,
-        },
-      },
-      incident: { include: { severity: true } },
-    },
-  });
+  const occurrence = await getOccurrenceById(params.id).then(
+    (res) => res.occurrence
+  );
 
   if (!occurrence) {
     return <div>Occurrence not found</div>;

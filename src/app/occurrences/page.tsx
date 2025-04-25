@@ -52,6 +52,7 @@ export default async function OccurrencesPage() {
           severity: true,
         },
       },
+      location: true,
     },
     orderBy: [
       {
@@ -66,6 +67,8 @@ export default async function OccurrencesPage() {
       },
     ],
   });
+
+  console.log("occurrences", occurrences);
 
   return (
     <DashboardShell>

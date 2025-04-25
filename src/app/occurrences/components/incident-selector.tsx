@@ -15,15 +15,22 @@ import {
 
 interface IncidentSelectorProps {
   onIncidentChange: (incidentId: string) => void;
+  defaultIncidentId?: string;
 }
 
-export function IncidentSelector({ onIncidentChange }: IncidentSelectorProps) {
+export function IncidentSelector({
+  onIncidentChange,
+  defaultIncidentId,
+}: IncidentSelectorProps) {
   const [incidents, setIncidents] = useState<any[]>([]);
   const [subIncidents, setSubIncidents] = useState<any[]>([]);
   const [subSubIncidents, setSubSubIncidents] = useState<any[]>([]);
   const [selectedIncidentId, setSelectedIncidentId] = useState<string>("");
   const [selectedSubIncidentId, setSelectedSubIncidentId] =
     useState<string>("");
+  const [selectedSubSubIncidentId, setSelectedSubSubIncidentId] =
+    useState<string>("");
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Fetch top-level incidents on component mount
   useEffect(() => {
@@ -33,6 +40,62 @@ export function IncidentSelector({ onIncidentChange }: IncidentSelectorProps) {
     }
     fetchIncidents();
   }, []);
+
+  // Handle defaultIncidentId when incidents are loaded
+  useEffect(() => {
+    if (defaultIncidentId && incidents.length > 0 && !isInitialized) {
+      // Check if defaultIncidentId is a top-level incident
+      const foundTopLevel = incidents.find(
+        (inc) => inc.id === defaultIncidentId
+      );
+      if (foundTopLevel) {
+        setSelectedIncidentId(defaultIncidentId);
+        setIsInitialized(true);
+        return;
+      }
+
+      // If not found at top level, we'll need to check sub-levels for each top incident
+      async function findInHierarchy() {
+        for (const topIncident of incidents) {
+          // Check in sub-incidents
+          const subIncs = await getSubIncidents(topIncident.id);
+          const foundSub = subIncs?.find((sub) => sub.id === defaultIncidentId);
+
+          if (foundSub) {
+            setSelectedIncidentId(topIncident.id);
+            setSelectedSubIncidentId(defaultIncidentId || "");
+            setIsInitialized(true);
+            return;
+          }
+
+          // Check in sub-sub-incidents for each sub-incident
+          for (const subInc of subIncs || []) {
+            const subSubIncs = await getSubSubIncidents(subInc.id);
+            const foundSubSub = subSubIncs?.find(
+              (subSub) => subSub.id === defaultIncidentId
+            );
+
+            if (foundSubSub) {
+              setSelectedIncidentId(topIncident.id);
+              setSelectedSubIncidentId(subInc.id);
+              setSelectedSubSubIncidentId(defaultIncidentId || "");
+              setIsInitialized(true);
+              return;
+            }
+          }
+        }
+
+        // If we get here, the ID wasn't found in the hierarchy
+        // Just set it as the top level ID as fallback
+        if (defaultIncidentId) {
+          setSelectedIncidentId(defaultIncidentId);
+          setIsInitialized(true);
+        }
+      }
+
+      findInHierarchy();
+    }
+  }, [defaultIncidentId, incidents, isInitialized]);
 
   // Fetch sub-incidents when a parent is selected
   useEffect(() => {
@@ -60,30 +123,36 @@ export function IncidentSelector({ onIncidentChange }: IncidentSelectorProps) {
       setSubSubIncidents(data || []);
     }
     fetchSubSubIncidents();
-  }, [selectedSubIncidentId]);
+  }, [selectedIncidentId, selectedSubIncidentId]);
 
   // Handle top-level incident selection
   const handleIncidentChange = (value: string) => {
     setSelectedIncidentId(value);
     setSelectedSubIncidentId("");
+    setSelectedSubSubIncidentId("");
     onIncidentChange(value); // Update parent form
   };
 
   // Handle sub-incident selection
   const handleSubIncidentChange = (value: string) => {
     setSelectedSubIncidentId(value);
+    setSelectedSubSubIncidentId("");
     onIncidentChange(value); // Update parent form
   };
 
   // Handle sub-sub-incident selection
   const handleSubSubIncidentChange = (value: string) => {
+    setSelectedSubSubIncidentId(value);
     onIncidentChange(value); // Update parent form
   };
 
   return (
     <div className="space-y-2">
       <Label htmlFor="incidentType">Incident Type</Label>
-      <Select onValueChange={handleIncidentChange} defaultValue="">
+      <Select
+        onValueChange={handleIncidentChange}
+        value={selectedIncidentId}
+        defaultValue={selectedIncidentId}>
         <SelectTrigger id="incidentType">
           <SelectValue placeholder="Select incident type" />
         </SelectTrigger>
@@ -99,7 +168,10 @@ export function IncidentSelector({ onIncidentChange }: IncidentSelectorProps) {
       {subIncidents.length > 0 && (
         <div className="mt-4">
           <Label htmlFor="subIncidentType">Sub-Category</Label>
-          <Select onValueChange={handleSubIncidentChange} defaultValue="">
+          <Select
+            onValueChange={handleSubIncidentChange}
+            value={selectedSubIncidentId}
+            defaultValue={selectedSubIncidentId}>
             <SelectTrigger id="subIncidentType">
               <SelectValue placeholder="Select sub-category" />
             </SelectTrigger>
@@ -117,7 +189,10 @@ export function IncidentSelector({ onIncidentChange }: IncidentSelectorProps) {
       {subSubIncidents.length > 0 && (
         <div className="mt-4">
           <Label htmlFor="subSubIncidentType">Sub-Sub-Category</Label>
-          <Select onValueChange={handleSubSubIncidentChange} defaultValue="">
+          <Select
+            onValueChange={handleSubSubIncidentChange}
+            value={selectedSubSubIncidentId}
+            defaultValue={selectedSubSubIncidentId}>
             <SelectTrigger id="subSubIncidentType">
               <SelectValue placeholder="Select sub-sub-category" />
             </SelectTrigger>

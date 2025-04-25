@@ -8,24 +8,16 @@ import { OccurrenceActionForm } from "@/components/occurrence-action-form";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getOccurrenceById } from "../../actions";
 
 export default async function OccurrenceDetails({
   params,
 }: {
   params: { id: string };
 }) {
-  const occurrence = await prisma.occurrence.findUnique({
-    where: { id: params.id },
-    include: {
-      createdBy: true,
-      assignments: {
-        include: {
-          department: true,
-        },
-      },
-      incident: { include: { severity: true } },
-    },
-  });
+  const occurrence = await getOccurrenceById(params.id).then(
+    (res) => res.occurrence
+  );
 
   if (!occurrence) {
     return <div>Occurrence not found</div>;
@@ -54,7 +46,7 @@ export default async function OccurrenceDetails({
             <CardTitle>Submit Action Plan</CardTitle>
           </CardHeader>
           <CardContent>
-            <OccurrenceActionForm occurrenceId={occurrence.id} />
+            <OccurrenceActionForm occurrenceId={occurrence?.id} />
           </CardContent>
         </Card>
       </div>

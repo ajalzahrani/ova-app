@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Occurrence" ADD COLUMN     "occurrenceDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN     "updatedById" TEXT;

@@ -35,6 +35,7 @@ type OccurrenceWithRelations = Prisma.OccurrenceGetPayload<{
         severity: true;
       };
     };
+    location: true;
   };
 }>;
 
