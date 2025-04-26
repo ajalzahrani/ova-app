@@ -11,6 +11,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getOccurrenceById } from "../actions";
+import { PermissionButton } from "@/components/auth/permission-button";
+import { PermissionCheck } from "@/components/auth/permission-check";
 
 export default async function OccurrenceDetails({
   params,
@@ -40,12 +42,6 @@ export default async function OccurrenceDetails({
   const isManager = user?.role.name === "DEPARTMENT_MANAGER";
   const occurrenceStatus = occurrence.status.name;
 
-  // Determine which buttons to show based on user role and occurrence status
-  const shouldShowActionPlan = isManager;
-  const shouldShowReferOccurrence = !isManager && occurrenceStatus === "OPEN";
-  const shouldShowEditOccurrence = !isManager && occurrenceStatus === "OPEN";
-  const shouldShowResolve = !isManager && occurrenceStatus === "ANSWERED";
-
   return (
     <DashboardShell>
       <DashboardHeader
@@ -59,30 +55,41 @@ export default async function OccurrenceDetails({
             </Link>
           </Button>
 
-          {shouldShowActionPlan && (
+          {/* Action Plan - Only department managers can see this */}
+          <PermissionCheck required="view:action-plans">
             <Button asChild>
               <Link href={`/occurrences/${occurrence?.id}/action`}>
                 Action Plan
               </Link>
             </Button>
+          </PermissionCheck>
+
+          {/* Conditional buttons based on occurrence status */}
+          {occurrenceStatus === "OPEN" && (
+            <>
+              {/* Refer Occurrence - Need refer:occurrences permission */}
+              <PermissionCheck required="refer:occurrences">
+                <ReferOccurrenceDialog
+                  occurrenceId={occurrence.id}
+                  departments={departments}
+                />
+              </PermissionCheck>
+
+              {/* Edit Occurrence - Need edit:occurrences permission */}
+              <PermissionButton permission="edit:occurrences" asChild>
+                <Link href={`/occurrences/${occurrence?.id}/edit`}>
+                  Edit Occurrence
+                </Link>
+              </PermissionButton>
+            </>
           )}
 
-          {shouldShowReferOccurrence && (
-            <ReferOccurrenceDialog
-              occurrenceId={occurrence.id}
-              departments={departments}
-            />
+          {/* Resolve Button - Need resolve:occurrences permission and status must be ANSWERED */}
+          {occurrenceStatus === "ANSWERED" && (
+            <PermissionCheck required="resolve:occurrences">
+              <ResolveButton occurrenceId={occurrence.id} />
+            </PermissionCheck>
           )}
-
-          {shouldShowEditOccurrence && (
-            <Button asChild>
-              <Link href={`/occurrences/${occurrence?.id}/edit`}>
-                Edit Occurrence
-              </Link>
-            </Button>
-          )}
-
-          {shouldShowResolve && <ResolveButton occurrenceId={occurrence.id} />}
         </div>
       </DashboardHeader>
 

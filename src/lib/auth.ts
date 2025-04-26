@@ -51,6 +51,7 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           name: user.name,
           role: user.role.name,
+          roleId: user.role.id,
         };
       },
     }),
@@ -60,6 +61,14 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.role = user.role;
+
+        // Fetch user permissions based on role
+        const permissions = await prisma.rolePermission.findMany({
+          where: { roleId: user.roleId },
+          include: { permission: true },
+        });
+
+        token.permissions = permissions.map((rp: any) => rp.permission.code);
       }
       return token;
     },
@@ -67,6 +76,8 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         session.user.id = token.id;
         session.user.role = token.role;
+        session.user.roleId = token.roleId;
+        session.user.permissions = token.permissions;
       }
       return session;
     },

@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
+import { PermissionCheck } from "../auth/permission-check";
 
 export function MainNav() {
   const pathname = usePathname();
@@ -28,99 +29,115 @@ export function MainNav() {
         <span className="font-bold inline-block">OVA System</span>
       </Link>
       <nav className="flex gap-6 items-center">
-        <Link
-          href="/"
-          className={cn(
-            "text-sm font-medium transition-colors hover:text-primary",
-            pathname === "/" ? "text-primary" : "text-muted-foreground"
-          )}>
-          Dashboard
-        </Link>
-        <Link
-          href="/department-dashboard"
-          className={cn(
-            "text-sm font-medium transition-colors hover:text-primary",
-            pathname === "/department-dashboard"
-              ? "text-primary"
-              : "text-muted-foreground"
-          )}>
-          Department Dashboard
-        </Link>
-        <Link
-          href="/incidents"
-          className={cn(
-            "text-sm font-medium transition-colors hover:text-primary",
-            pathname === "/incidents" || pathname.startsWith("/incidents/")
-              ? "text-primary"
-              : "text-muted-foreground"
-          )}>
-          Incidents
-        </Link>
-        <Link
-          href="/occurrences"
-          className={cn(
-            "text-sm font-medium transition-colors hover:text-primary",
-            pathname === "/occurrences"
-              ? "text-primary"
-              : "text-muted-foreground"
-          )}>
-          Occurrences
-        </Link>
-        <Link
-          href="/departments"
-          className={cn(
-            "text-sm font-medium transition-colors hover:text-primary",
-            pathname === "/departments" || pathname.startsWith("/departments/")
-              ? "text-primary"
-              : "text-muted-foreground"
-          )}>
-          Departments
-        </Link>
-        <Link
-          href="/reports"
-          className={cn(
-            "text-sm font-medium transition-colors hover:text-primary",
-            pathname === "/reports" ? "text-primary" : "text-muted-foreground"
-          )}>
-          Reports
-        </Link>
-        {isAdmin && (
-          <>
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                className={cn(
-                  "flex items-center text-sm font-medium transition-colors hover:text-primary",
-                  pathname.startsWith("/users") || pathname.startsWith("/roles")
-                    ? "text-primary"
-                    : "text-muted-foreground"
-                )}>
-                Management <ChevronDown className="ml-1 h-4 w-4" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem asChild>
-                  <Link href="/users" className="w-full">
-                    Users
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/roles" className="w-full">
-                    Roles
-                  </Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <Link
-              href="/payments"
+        <PermissionCheck required="view:dashboard">
+          <Link
+            href="/"
+            className={cn(
+              "text-sm font-medium transition-colors hover:text-primary",
+              pathname === "/" ? "text-primary" : "text-muted-foreground"
+            )}>
+            Dashboard
+          </Link>
+        </PermissionCheck>
+        <PermissionCheck required="view:department-dashboard">
+          <Link
+            href="/department-dashboard"
+            className={cn(
+              "text-sm font-medium transition-colors hover:text-primary",
+              pathname === "/department-dashboard"
+                ? "text-primary"
+                : "text-muted-foreground"
+            )}>
+            Department Dashboard
+          </Link>
+        </PermissionCheck>
+        <PermissionCheck required="view:incidents">
+          <Link
+            href="/incidents"
+            className={cn(
+              "text-sm font-medium transition-colors hover:text-primary",
+              pathname === "/incidents" || pathname.startsWith("/incidents/")
+                ? "text-primary"
+                : "text-muted-foreground"
+            )}>
+            Incidents
+          </Link>
+        </PermissionCheck>
+        <PermissionCheck required="view:occurrences">
+          <Link
+            href="/occurrences"
+            className={cn(
+              "text-sm font-medium transition-colors hover:text-primary",
+              pathname === "/occurrences"
+                ? "text-primary"
+                : "text-muted-foreground"
+            )}>
+            Occurrences
+          </Link>
+        </PermissionCheck>
+        <PermissionCheck required="view:departments">
+          <Link
+            href="/departments"
+            className={cn(
+              "text-sm font-medium transition-colors hover:text-primary",
+              pathname === "/departments" ||
+                pathname.startsWith("/departments/")
+                ? "text-primary"
+                : "text-muted-foreground"
+            )}>
+            Departments
+          </Link>
+        </PermissionCheck>
+        <PermissionCheck required="view:reports">
+          <Link
+            href="/reports"
+            className={cn(
+              "text-sm font-medium transition-colors hover:text-primary",
+              pathname === "/reports" ? "text-primary" : "text-muted-foreground"
+            )}>
+            Reports
+          </Link>
+        </PermissionCheck>
+        <PermissionCheck required="manage:users">
+          <DropdownMenu>
+            <DropdownMenuTrigger
               className={cn(
-                "text-sm font-medium transition-colors hover:text-primary",
-                pathname === "/payments"
+                "flex items-center text-sm font-medium transition-colors hover:text-primary",
+                pathname.startsWith("/users") || pathname.startsWith("/roles")
                   ? "text-primary"
                   : "text-muted-foreground"
               )}>
-              Payments
-            </Link>
-          </>
-        )}
+              Management <ChevronDown className="ml-1 h-4 w-4" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem asChild>
+                <Link href="/users" className="w-full">
+                  Users
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/roles" className="w-full">
+                  Roles
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/permissions" className="w-full">
+                  Permissions
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <Link
+            href="/payments"
+            className={cn(
+              "text-sm font-medium transition-colors hover:text-primary",
+              pathname === "/payments"
+                ? "text-primary"
+                : "text-muted-foreground"
+            )}>
+            Payments
+          </Link>
+        </PermissionCheck>
         <Link
           href="/settings"
           className={cn(

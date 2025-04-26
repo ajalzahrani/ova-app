@@ -9,6 +9,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { OccurrencesTable } from "./components/occurrences-table";
+import { PermissionButton } from "@/components/auth/permission-button";
 
 export default async function OccurrencesPage({
   searchParams,
@@ -102,10 +103,10 @@ export default async function OccurrencesPage({
         heading="Occurrences"
         text="Manage and track reported occurrences">
         <Link href="/occurrences/new">
-          <Button>
+          <PermissionButton permission="create:occurrences" asChild>
             <PlusCircle className="mr-2 h-4 w-4" />
             Report Occurrence
-          </Button>
+          </PermissionButton>
         </Link>
       </DashboardHeader>
 

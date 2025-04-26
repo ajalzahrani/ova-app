@@ -152,9 +152,9 @@ async function main() {
   });
 
   const qaUser = await prisma.user.upsert({
-    where: { email: "qa@ova.com" },
+    where: { email: "sara@ova.com" },
     update: {
-      email: "qa@ova.com",
+      email: "sara@ova.com",
       name: "Sara",
       username: "sara",
       password: hashedPassword,
@@ -162,7 +162,7 @@ async function main() {
       departmentId: qualityDepartment.id,
     },
     create: {
-      email: "qa@ova.com",
+      email: "sara@ova.com",
       name: "Sara",
       username: "sara",
       password: hashedPassword,
@@ -172,9 +172,9 @@ async function main() {
   });
 
   const securityUser = await prisma.user.upsert({
-    where: { email: "security@ova.com" },
+    where: { email: "sec@ova.com" },
     update: {
-      email: "security@ova.com",
+      email: "sec@ova.com",
       name: "Security User",
       username: "security",
       password: hashedPassword,
@@ -182,7 +182,7 @@ async function main() {
       departmentId: securityDepartment.id,
     },
     create: {
-      email: "security@ova.com",
+      email: "sec@ova.com",
       name: "Security User",
       username: "security",
       password: hashedPassword,
@@ -537,6 +537,179 @@ async function main() {
     },
   });
 
+  // Create default permissions
+  const permissions = [
+    // Occurrence permissions
+    {
+      code: "view:occurrences",
+      name: "View Occurrences",
+      description: "Ability to view occurrences",
+    },
+    {
+      code: "create:occurrences",
+      name: "Create Occurrences",
+      description: "Ability to create new occurrences",
+    },
+    {
+      code: "edit:occurrences",
+      name: "Edit Occurrences",
+      description: "Ability to edit existing occurrences",
+    },
+    {
+      code: "delete:occurrences",
+      name: "Delete Occurrences",
+      description: "Ability to delete occurrences",
+    },
+    {
+      code: "resolve:occurrences",
+      name: "Resolve Occurrences",
+      description: "Ability to resolve occurrences",
+    },
+    {
+      code: "refer:occurrences",
+      name: "Refer Occurrences",
+      description: "Ability to refer occurrences to departments",
+    },
+    {
+      code: "action:occurrences",
+      name: "Create Action Plans",
+      description: "Ability to create action plans for occurrences",
+    },
+
+    // User management permissions
+    {
+      code: "view:users",
+      name: "View Users",
+      description: "Ability to view user profiles",
+    },
+    {
+      code: "create:users",
+      name: "Create Users",
+      description: "Ability to create new users",
+    },
+    {
+      code: "edit:users",
+      name: "Edit Users",
+      description: "Ability to edit user details",
+    },
+    {
+      code: "delete:users",
+      name: "Delete Users",
+      description: "Ability to delete users",
+    },
+
+    // Role permissions
+    {
+      code: "view:roles",
+      name: "View Roles",
+      description: "Ability to view roles",
+    },
+    {
+      code: "create:roles",
+      name: "Create Roles",
+      description: "Ability to create new roles",
+    },
+    {
+      code: "edit:roles",
+      name: "Edit Roles",
+      description: "Ability to edit roles",
+    },
+    {
+      code: "delete:roles",
+      name: "Delete Roles",
+      description: "Ability to delete roles",
+    },
+
+    // Permission management
+    {
+      code: "view:permissions",
+      name: "View Permissions",
+      description: "Ability to view permissions",
+    },
+    {
+      code: "manage:permissions",
+      name: "Manage Permissions",
+      description: "Ability to manage permissions",
+    },
+
+    // Admin permissions
+    {
+      code: "admin:all",
+      name: "Full Administrative Access",
+      description: "Full access to all system features",
+    },
+  ];
+
+  console.log("Creating permissions...");
+  const createdPermissions = [];
+
+  for (const perm of permissions) {
+    const permission = await prisma.permission.upsert({
+      where: { code: perm.code },
+      update: perm,
+      create: perm,
+    });
+    createdPermissions.push(permission);
+  }
+
+  // Define role permission assignments
+  const rolePermissions = {
+    ADMIN: ["admin:all"],
+    QUALITY_MANAGER: [
+      "view:occurrences",
+      "create:occurrences",
+      "edit:occurrences",
+      "resolve:occurrences",
+      "refer:occurrences",
+      "view:users",
+    ],
+    QUALITY_ASSURANCE: [
+      "view:occurrences",
+      "create:occurrences",
+      "edit:occurrences",
+      "resolve:occurrences",
+      "refer:occurrences",
+    ],
+    SAFETY_OFFICER: ["view:occurrences", "create:occurrences"],
+    EMPLOYEE: ["view:occurrences", "create:occurrences"],
+    DEPARTMENT_MANAGER: ["view:occurrences", "action:occurrences"],
+  };
+
+  console.log("Assigning permissions to roles...");
+
+  // Clear existing role-permission associations first to avoid duplicates
+  await prisma.rolePermission.deleteMany({});
+
+  // Create role-permission associations
+  for (const [roleName, permCodes] of Object.entries(rolePermissions)) {
+    const role = await prisma.role.findUnique({
+      where: { name: roleName },
+    });
+
+    if (!role) {
+      console.log(`Role ${roleName} not found, skipping permission assignment`);
+      continue;
+    }
+
+    for (const permCode of permCodes) {
+      const permission = await prisma.permission.findUnique({
+        where: { code: permCode },
+      });
+
+      if (!permission) {
+        console.log(`Permission ${permCode} not found, skipping`);
+        continue;
+      }
+
+      await prisma.rolePermission.create({
+        data: {
+          roleId: role.id,
+          permissionId: permission.id,
+        },
+      });
+    }
+  }
+
   console.log({
     adminRole,
     adminUser,
@@ -570,10 +743,7 @@ async function main() {
     location2,
     location3,
     location4,
-    occurrence1,
-    occurrence2,
-    occurrence3,
-    occurrence4,
+    permissions,
   });
 }
 
