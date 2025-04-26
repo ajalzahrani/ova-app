@@ -11,11 +11,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
+import { Input } from "@/components/ui/input";
+import { useRouter } from "next/navigation";
 export function MainNav() {
   const pathname = usePathname();
   const { data: session } = useSession();
-
+  const router = useRouter();
   // Check if the user has admin role
   const isAdmin = session?.user?.role === "ADMIN";
 
@@ -83,29 +84,41 @@ export function MainNav() {
           Reports
         </Link>
         {isAdmin && (
-          <DropdownMenu>
-            <DropdownMenuTrigger
+          <>
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                className={cn(
+                  "flex items-center text-sm font-medium transition-colors hover:text-primary",
+                  pathname.startsWith("/users") || pathname.startsWith("/roles")
+                    ? "text-primary"
+                    : "text-muted-foreground"
+                )}>
+                Management <ChevronDown className="ml-1 h-4 w-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem asChild>
+                  <Link href="/users" className="w-full">
+                    Users
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/roles" className="w-full">
+                    Roles
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Link
+              href="/payments"
               className={cn(
-                "flex items-center text-sm font-medium transition-colors hover:text-primary",
-                pathname.startsWith("/users") || pathname.startsWith("/roles")
+                "text-sm font-medium transition-colors hover:text-primary",
+                pathname === "/payments"
                   ? "text-primary"
                   : "text-muted-foreground"
               )}>
-              Management <ChevronDown className="ml-1 h-4 w-4" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem asChild>
-                <Link href="/users" className="w-full">
-                  Users
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/roles" className="w-full">
-                  Roles
-                </Link>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              Payments
+            </Link>
+          </>
         )}
         <Link
           href="/settings"
@@ -115,6 +128,17 @@ export function MainNav() {
           )}>
           Settings
         </Link>
+        {/* Add Search Bar on press of enter, search for occurrence no and redirect to occurrences page*/}
+        <Input
+          type="search"
+          placeholder="Occurrence No"
+          className="w-64"
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              router.push(`/occurrences/${e.target.value}`);
+            }
+          }}
+        />
       </nav>
     </div>
   );

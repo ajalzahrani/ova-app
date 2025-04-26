@@ -4,11 +4,11 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { PlusCircle } from "lucide-react";
 import { prisma } from "@/lib/prisma";
-import { OccurrencesList } from "@/components/occurrences-list";
+import { OccurrencesList } from "@/app/occurrences/components/occurrences-list";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { getDepartmentOccurrences } from "@/actions/departments";
+import { OccurrencesTable } from "./components/occurrences-table";
 
 export default async function OccurrencesPage() {
   const session = await getServerSession(authOptions);
@@ -68,7 +68,7 @@ export default async function OccurrencesPage() {
     ],
   });
 
-  console.log("occurrences", occurrences);
+  console.log({ occurrences });
 
   return (
     <DashboardShell>
@@ -82,8 +82,9 @@ export default async function OccurrencesPage() {
           </Button>
         </Link>
       </DashboardHeader>
+
       <div className="grid gap-4">
-        <OccurrencesList occurrences={occurrences} />
+        <OccurrencesTable occurrences={occurrences} />
       </div>
     </DashboardShell>
   );

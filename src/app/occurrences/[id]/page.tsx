@@ -6,7 +6,7 @@ import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { ReferOccurrenceDialog } from "@/app/occurrences/components/refer-occurrence-dialog";
 import { ResolveButton } from "@/app/occurrences/components/resovle-button";
-import { OccurrenceView } from "@/components/occurrence-view";
+import { OccurrenceView } from "@/app/occurrences/components/occurrence-view";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";

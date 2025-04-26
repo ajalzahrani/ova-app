@@ -10,44 +10,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
-const incidents = [
-  {
-    id: "INC-001",
-    date: "2023-04-15",
-    type: "Verbal Abuse",
-    status: "Resolved",
-    severity: "Medium",
-  },
-  {
-    id: "INC-002",
-    date: "2023-04-18",
-    type: "Physical Threat",
-    status: "In Progress",
-    severity: "High",
-  },
-  {
-    id: "INC-003",
-    date: "2023-04-20",
-    type: "Harassment",
-    status: "Open",
-    severity: "Medium",
-  },
-  {
-    id: "INC-004",
-    date: "2023-04-22",
-    type: "Verbal Abuse",
-    status: "Resolved",
-    severity: "Low",
-  },
-  {
-    id: "INC-005",
-    date: "2023-04-25",
-    type: "Physical Assault",
-    status: "In Progress",
-    severity: "High",
-  },
-];
-
 const recentOccurrences = await prisma.occurrence.findMany({
   orderBy: {
     createdAt: "desc",
@@ -81,7 +43,7 @@ export function RecentIncidents() {
         {recentOccurrences.map((occurrence) => (
           <TableRow key={occurrence.id}>
             <TableCell className="font-medium">
-              {occurrence.occurrenceId}
+              {occurrence.occurrenceNo}
             </TableCell>
             <TableCell>
               {occurrence?.occurrenceDate.toLocaleDateString()}

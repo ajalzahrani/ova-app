@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { OccurrencesList } from "@/components/occurrences-list";
+import { OccurrencesList } from "@/app/occurrences/components/occurrences-list";
 import Link from "next/link";
 import { PlusCircle, Building2 } from "lucide-react";
 import { prisma } from "@/lib/prisma";

@@ -2,8 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
-import { OccurrenceView } from "@/components/occurrence-view";
-import { OccurrenceActionForm } from "@/components/occurrence-action-form";
+import { OccurrenceView } from "@/app/occurrences/components/occurrence-view";
+import { OccurrenceActionForm } from "@/app/occurrences/components/occurrence-action-form";
 
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
