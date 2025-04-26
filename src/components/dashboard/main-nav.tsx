@@ -25,7 +25,7 @@ export function MainNav() {
         <Shield className="h-6 w-6" />
         <span className="font-bold inline-block">OVA System</span>
       </Link>
-      <nav className="flex gap-6">
+      <nav className="flex gap-6 items-center">
         <Link
           href="/"
           className={cn(
