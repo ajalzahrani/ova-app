@@ -130,24 +130,34 @@ export function OccurrenceView(props: { occurrence: OccurrenceWithRelations }) {
           </div>
         </CardContent>
         <CardFooter className="pt-0 text-sm text-muted-foreground flex items-center gap-4">
-          {occurrence.createdBy && (
+          <>
+            {occurrence.occurrenceDate && (
+              <>
+                <Clock className="h-4 w-4" />
+                <span>Occurred on: </span>
+                <span className="font-medium text-foreground">
+                  {occurrence.occurrenceDate.toLocaleDateString()}
+                </span>
+              </>
+            )}
             <>
               <User className="h-4 w-4" />
               <span>Reported by: </span>
               <span className="font-medium text-foreground">
-                {occurrence.createdBy?.name}
+                {occurrence.createdBy?.name || "Anonymous"}
               </span>
             </>
-          )}
-          {occurrence.updatedBy && (
-            <>
-              <User className="h-4 w-4" />
-              <span>Updated by: </span>
-              <span className="font-medium text-foreground">
-                {occurrence.updatedBy.name}
-              </span>
-            </>
-          )}
+
+            {occurrence.updatedBy && (
+              <>
+                <User className="h-4 w-4" />
+                <span>Updated by: </span>
+                <span className="font-medium text-foreground">
+                  {occurrence.updatedBy.name}
+                </span>
+              </>
+            )}
+          </>
         </CardFooter>
       </Card>
 

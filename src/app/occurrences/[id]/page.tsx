@@ -5,6 +5,7 @@ import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { ReferOccurrenceDialog } from "@/app/occurrences/components/refer-occurrence-dialog";
+import { ResolveButton } from "@/app/occurrences/components/resovle-button";
 import { OccurrenceView } from "@/components/occurrence-view";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -36,12 +37,20 @@ export default async function OccurrenceDetails({
   }
 
   const departments = await prisma.department.findMany();
+  const isManager = user?.role.name === "DEPARTMENT_MANAGER";
+  const occurrenceStatus = occurrence.status.name;
+
+  // Determine which buttons to show based on user role and occurrence status
+  const shouldShowActionPlan = isManager;
+  const shouldShowReferOccurrence = !isManager && occurrenceStatus === "OPEN";
+  const shouldShowEditOccurrence = !isManager && occurrenceStatus === "OPEN";
+  const shouldShowResolve = !isManager && occurrenceStatus === "ANSWERED";
 
   return (
     <DashboardShell>
       <DashboardHeader
         heading={occurrence?.title || "Occurrence details"}
-        text={occurrence?.description || "Occurrence details"}>
+        text={occurrence?.occurrenceNo || "Occurrence details"}>
         <div className="flex gap-2">
           <Button variant="outline" asChild>
             <Link href="/occurrences">
@@ -50,25 +59,30 @@ export default async function OccurrenceDetails({
             </Link>
           </Button>
 
-          {user?.role.name === "DEPARTMENT_MANAGER" ? (
+          {shouldShowActionPlan && (
             <Button asChild>
               <Link href={`/occurrences/${occurrence?.id}/action`}>
                 Action Plan
               </Link>
             </Button>
-          ) : (
-            <>
-              <ReferOccurrenceDialog
-                occurrenceId={occurrence.id}
-                departments={departments}
-              />
-              <Button asChild>
-                <Link href={`/occurrences/${occurrence?.id}/edit`}>
-                  Edit Occurrence
-                </Link>
-              </Button>
-            </>
           )}
+
+          {shouldShowReferOccurrence && (
+            <ReferOccurrenceDialog
+              occurrenceId={occurrence.id}
+              departments={departments}
+            />
+          )}
+
+          {shouldShowEditOccurrence && (
+            <Button asChild>
+              <Link href={`/occurrences/${occurrence?.id}/edit`}>
+                Edit Occurrence
+              </Link>
+            </Button>
+          )}
+
+          {shouldShowResolve && <ResolveButton occurrenceId={occurrence.id} />}
         </div>
       </DashboardHeader>
 

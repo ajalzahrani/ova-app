@@ -97,7 +97,10 @@ export async function assignToDepartments(
   await prisma.$transaction(async (tx) => {
     await tx.occurrence.update({
       where: { id: occurrenceId },
-      data: { status: { connect: { id: "ASSIGNED" } } },
+      data: {
+        assignedByQualityAt: new Date(),
+        status: { connect: { id: "ASSIGNED" } },
+      },
     });
 
     for (const deptId of departmentIds) {
@@ -114,7 +117,10 @@ export async function assignToDepartments(
 export async function resolveOccurrence(occurrenceId: string) {
   await prisma.occurrence.update({
     where: { id: occurrenceId },
-    data: { status: { connect: { id: "CLOSED" } } },
+    data: {
+      closedByQualityAt: new Date(),
+      status: { connect: { name: "CLOSED" } },
+    },
   });
 }
 

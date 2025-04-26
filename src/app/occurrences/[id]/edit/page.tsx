@@ -6,14 +6,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -26,8 +18,7 @@ import {
 } from "@/components/ui/card";
 import Link from "next/link";
 import { use } from "react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import {
   getOccurrenceById,
   updateOccurrence,
@@ -72,9 +63,6 @@ export default function EditOccurrencePage({
   const router = useRouter();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [isPageLoading, setIsPageLoading] = useState(true);
   const [locations, setLocations] = useState<any[]>([]);
 
   const form = useForm<OccurrenceFormValues>({
@@ -91,7 +79,6 @@ export default function EditOccurrencePage({
   // Fetch occurrence when component mounts
   useEffect(() => {
     const fetchData = async () => {
-      setIsPageLoading(true);
       try {
         // Fetch role data
         const occurrenceResponse = await getOccurrenceById(occurrenceId);
@@ -102,12 +89,11 @@ export default function EditOccurrencePage({
             description: occurrence?.description || "",
             locationId: occurrence?.locationId || "",
             incidentId: occurrence?.incidentId || "",
-            occurrenceDate: occurrence?.occurrenceDate?.toISOString() || "",
+            occurrenceDate: occurrence?.occurrenceDate
+              ? new Date(occurrence.occurrenceDate).toISOString().split("T")[0]
+              : "",
           });
         } else {
-          setError(
-            occurrenceResponse.error || "Failed to load occurrence data"
-          );
           toast({
             variant: "destructive",
             title: "Error",
@@ -117,9 +103,6 @@ export default function EditOccurrencePage({
         }
       } catch (err) {
         console.error("Error loading data:", err);
-        setError("An unexpected error occurred while loading data");
-      } finally {
-        setIsPageLoading(false);
       }
     };
 

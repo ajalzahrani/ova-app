@@ -42,6 +42,7 @@ model Department {
 
 model Occurrence {
   id                  String                 @id @default(uuid())
+  occurrenceNo        String                 @unique @default("OCC25-0000") // User-friendly ID
   title               String
   description         String
   statusId            String

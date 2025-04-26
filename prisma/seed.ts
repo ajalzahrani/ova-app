@@ -50,33 +50,12 @@ async function main() {
     },
   });
 
-  const investigatorRole = await prisma.role.upsert({
-    where: { name: "INVESTIGATOR" },
+  const departmentRole = await prisma.role.upsert({
+    where: { name: "DEPARTMENT_MANAGER" },
     update: {},
     create: {
-      name: "INVESTIGATOR",
-      description: "Specialized access for detailed incident investigation",
-    },
-  });
-
-  // Create admin user
-  const hashedPassword = await bcrypt.hash("adminpassword", 10);
-
-  const adminUser = await prisma.user.upsert({
-    where: { email: "admin@example.com" },
-    update: {
-      email: "admin@example.com",
-      name: "Admin User",
-      username: "admin",
-      password: hashedPassword,
-      roleId: adminRole.id,
-    },
-    create: {
-      email: "admin@example.com",
-      name: "Admin User",
-      username: "admin",
-      password: hashedPassword,
-      roleId: adminRole.id,
+      name: "DEPARTMENT_MANAGER",
+      description: "Department-level access and oversight",
     },
   });
 
@@ -108,6 +87,127 @@ async function main() {
     },
     create: {
       name: "Security",
+    },
+  });
+
+  const nursingDepartment = await prisma.department.upsert({
+    where: { name: "Nursing" },
+    update: {
+      name: "Nursing",
+    },
+    create: {
+      name: "Nursing",
+    },
+  });
+
+  const qualityDepartment = await prisma.department.upsert({
+    where: { name: "Quality" },
+    update: {
+      name: "Quality",
+    },
+    create: {
+      name: "Quality",
+    },
+  });
+
+  // Create admin user
+  const hashedPassword = await bcrypt.hash("adminpassword", 10);
+
+  const adminUser = await prisma.user.upsert({
+    where: { email: "admin@example.com" },
+    update: {
+      email: "admin@example.com",
+      name: "Admin User",
+      username: "admin",
+      password: hashedPassword,
+      roleId: adminRole.id,
+    },
+    create: {
+      email: "admin@example.com",
+      name: "Admin User",
+      username: "admin",
+      password: hashedPassword,
+      roleId: adminRole.id,
+    },
+  });
+
+  const hrUser = await prisma.user.upsert({
+    where: { email: "hr@ova.com" },
+    update: {
+      email: "hr@ova.com",
+      name: "HR User",
+      username: "hr",
+      password: hashedPassword,
+      roleId: adminRole.id,
+      departmentId: hrDepartment.id,
+    },
+    create: {
+      email: "hr@ova.com",
+      name: "HR User",
+      username: "hr",
+      password: hashedPassword,
+      roleId: adminRole.id,
+      departmentId: hrDepartment.id,
+    },
+  });
+
+  const qaUser = await prisma.user.upsert({
+    where: { email: "qa@ova.com" },
+    update: {
+      email: "qa@ova.com",
+      name: "Sara",
+      username: "sara",
+      password: hashedPassword,
+      roleId: qaRole.id,
+      departmentId: qualityDepartment.id,
+    },
+    create: {
+      email: "qa@ova.com",
+      name: "Sara",
+      username: "sara",
+      password: hashedPassword,
+      roleId: qaRole.id,
+      departmentId: qualityDepartment.id,
+    },
+  });
+
+  const securityUser = await prisma.user.upsert({
+    where: { email: "security@ova.com" },
+    update: {
+      email: "security@ova.com",
+      name: "Security User",
+      username: "security",
+      password: hashedPassword,
+      roleId: departmentRole.id,
+      departmentId: securityDepartment.id,
+    },
+    create: {
+      email: "security@ova.com",
+      name: "Security User",
+      username: "security",
+      password: hashedPassword,
+      roleId: departmentRole.id,
+      departmentId: securityDepartment.id,
+    },
+  });
+
+  const nursingUser = await prisma.user.upsert({
+    where: { email: "nursing@ova.com" },
+    update: {
+      email: "nursing@ova.com",
+      name: "Nursing User",
+      username: "nursing",
+      password: hashedPassword,
+      roleId: departmentRole.id,
+      departmentId: nursingDepartment.id,
+    },
+    create: {
+      email: "nursing@ova.com",
+      name: "Nursing User",
+      username: "nursing",
+      password: hashedPassword,
+      roleId: departmentRole.id,
+      departmentId: nursingDepartment.id,
     },
   });
 
@@ -437,9 +537,137 @@ async function main() {
     },
   });
 
+  const occurrence1 = await prisma.occurrence.upsert({
+    where: { occurrenceNo: "OCC25-0001" },
+    update: {
+      title: "Occurrence 1",
+      description: "Occurrence 1 description",
+      location: {
+        connect: { id: location1.id },
+      },
+      incident: {
+        connect: { id: incident2.id },
+      },
+      status: {
+        connect: { id: statusOpen.id },
+      },
+    },
+    create: {
+      occurrenceNo: "OCC25-0001",
+      title: "Occurrence 1",
+      description: "Occurrence 1 description",
+      location: {
+        connect: { id: location1.id },
+      },
+      incident: {
+        connect: { id: incident2.id },
+      },
+      status: {
+        connect: { id: statusOpen.id },
+      },
+    },
+  });
+
+  const occurrence2 = await prisma.occurrence.upsert({
+    where: { occurrenceNo: "OCC25-0002" },
+    update: {
+      title: "Occurrence 2",
+      description: "Occurrence 2 description",
+      location: {
+        connect: { id: location2.id },
+      },
+      incident: {
+        connect: { id: incident3.id },
+      },
+      status: {
+        connect: { id: statusOpen.id },
+      },
+    },
+    create: {
+      occurrenceNo: "OCC25-0002",
+      title: "Occurrence 2",
+      description: "Occurrence 2 description",
+      location: {
+        connect: { id: location2.id },
+      },
+      incident: {
+        connect: { id: incident3.id },
+      },
+      status: {
+        connect: { id: statusOpen.id },
+      },
+    },
+  });
+
+  const occurrence3 = await prisma.occurrence.upsert({
+    where: { occurrenceNo: "OCC25-0003" },
+    update: {
+      title: "Occurrence 3",
+      description: "Occurrence 3 description",
+      location: {
+        connect: { id: location3.id },
+      },
+      incident: {
+        connect: { id: incident4.id },
+      },
+      status: {
+        connect: { id: statusOpen.id },
+      },
+    },
+    create: {
+      occurrenceNo: "OCC25-0003",
+      title: "Occurrence 3",
+      description: "Occurrence 3 description",
+      location: {
+        connect: { id: location3.id },
+      },
+      incident: {
+        connect: { id: incident4.id },
+      },
+      status: {
+        connect: { id: statusOpen.id },
+      },
+    },
+  });
+
+  const occurrence4 = await prisma.occurrence.upsert({
+    where: { occurrenceNo: "OCC25-0004" },
+    update: {
+      title: "Occurrence 4",
+      description: "Occurrence 4 description",
+      location: {
+        connect: { id: location4.id },
+      },
+      incident: {
+        connect: { id: incident5.id },
+      },
+      status: {
+        connect: { id: statusOpen.id },
+      },
+    },
+    create: {
+      occurrenceNo: "OCC25-0004",
+      title: "Occurrence 4",
+      description: "Occurrence 4 description",
+      location: {
+        connect: { id: location4.id },
+      },
+      incident: {
+        connect: { id: incident5.id },
+      },
+      status: {
+        connect: { id: statusOpen.id },
+      },
+    },
+  });
+
   console.log({
     adminRole,
     adminUser,
+    hrUser,
+    qaUser,
+    securityUser,
+    nursingUser,
     itDepartment,
     hrDepartment,
     securityDepartment,
@@ -466,6 +694,10 @@ async function main() {
     location2,
     location3,
     location4,
+    occurrence1,
+    occurrence2,
+    occurrence3,
+    occurrence4,
   });
 }
 
