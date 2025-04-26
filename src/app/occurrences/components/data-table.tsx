@@ -15,6 +15,9 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
+  PaginationState,
+  OnChangeFn,
+  Updater,
 } from "@tanstack/react-table";
 
 import {
@@ -27,15 +30,21 @@ import {
 } from "@/components/ui/table";
 import { DataTablePagination } from "@/components/table-components/table-pagination";
 import { DataTableViewOptions } from "@/components/table-components/column-toggle";
+import { PaginationInfo } from "../components/occurrences-table";
+import { useEffect } from "react";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  paginationInfo?: PaginationInfo;
+  onPaginationChange?: (page: number, pageSize: number) => void;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  paginationInfo,
+  onPaginationChange,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -44,38 +53,75 @@ export function DataTable<TData, TValue>({
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
+  const [pagination, setPagination] = React.useState<PaginationState>({
+    pageIndex: paginationInfo ? paginationInfo.currentPage - 1 : 0,
+    pageSize: paginationInfo?.pageSize || 10,
+  });
+
+  // Update pagination state when paginationInfo changes
+  useEffect(() => {
+    if (paginationInfo) {
+      setPagination({
+        pageIndex: paginationInfo.currentPage - 1,
+        pageSize: paginationInfo.pageSize,
+      });
+    }
+  }, [paginationInfo]);
+
+  // Handle pagination changes
+  const handlePaginationChange: OnChangeFn<PaginationState> = (
+    updaterOrValue
+  ) => {
+    // Handle the updater function or direct value
+    const newPagination =
+      typeof updaterOrValue === "function"
+        ? updaterOrValue(pagination)
+        : updaterOrValue;
+
+    if (onPaginationChange) {
+      onPaginationChange(newPagination.pageIndex + 1, newPagination.pageSize);
+    } else {
+      setPagination(newPagination);
+    }
+  };
 
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    getPaginationRowModel: onPaginationChange
+      ? undefined
+      : getPaginationRowModel(),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    onPaginationChange: handlePaginationChange,
+    manualPagination: !!onPaginationChange,
+    pageCount: paginationInfo?.pageCount || -1,
 
     state: {
       sorting,
       columnFilters,
       columnVisibility,
       rowSelection,
+      pagination,
     },
   });
 
   return (
     <div>
       <div className="flex items-center py-4">
-        {/* <Input
-          placeholder="Filter emails..."
-          value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
+        <Input
+          placeholder="Filter by status..."
+          value={(table.getColumn("status")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("email")?.setFilterValue(event.target.value)
+            table.getColumn("status")?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
-        /> */}
+        />
         <DataTableViewOptions table={table} />
       </div>
       <div className="rounded-md border">
@@ -126,8 +172,11 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <div className=" py-4">
-        <DataTablePagination table={table} />
+      <div className="py-4">
+        <DataTablePagination
+          table={table}
+          totalCount={paginationInfo?.totalCount}
+        />
       </div>
     </div>
   );

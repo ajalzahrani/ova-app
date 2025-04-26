@@ -4,6 +4,8 @@ import { formatDistanceToNow } from "date-fns";
 import { Prisma } from "@prisma/client";
 import { columns, Occurrence } from "@/app/occurrences/components/columns";
 import { DataTable } from "@/app/occurrences/components/data-table";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useCallback } from "react";
 
 type OccurrenceWithRelations = Prisma.OccurrenceGetPayload<{
   include: {
@@ -22,13 +24,47 @@ type OccurrenceWithRelations = Prisma.OccurrenceGetPayload<{
   };
 }>;
 
-interface OccurrencesListProps {
-  occurrences: OccurrenceWithRelations[];
+export interface PaginationInfo {
+  totalCount: number;
+  pageCount: number;
+  currentPage: number;
+  pageSize: number;
 }
 
-export function OccurrencesTable({ occurrences }: OccurrencesListProps) {
+interface OccurrencesListProps {
+  occurrences: OccurrenceWithRelations[];
+  paginationInfo: PaginationInfo;
+}
+
+export function OccurrencesTable({
+  occurrences,
+  paginationInfo,
+}: OccurrencesListProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  // Create callback to update pagination
+  const onPaginationChange = useCallback(
+    (page: number, pageSize: number) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("page", page.toString());
+      params.set("pageSize", pageSize.toString());
+      router.push(`${pathname}?${params.toString()}`);
+    },
+    [pathname, router, searchParams]
+  );
+
   const tableData = convertOccurrencesToDataTable(occurrences);
-  return <DataTable columns={columns} data={tableData} />;
+
+  return (
+    <DataTable
+      columns={columns}
+      data={tableData}
+      paginationInfo={paginationInfo}
+      onPaginationChange={onPaginationChange}
+    />
+  );
 }
 
 function convertOccurrencesToDataTable(

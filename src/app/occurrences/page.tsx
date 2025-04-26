@@ -10,12 +10,21 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { OccurrencesTable } from "./components/occurrences-table";
 
-export default async function OccurrencesPage() {
+export default async function OccurrencesPage({
+  searchParams,
+}: {
+  searchParams: { page?: string; pageSize?: string };
+}) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {
     redirect("/login");
   }
+
+  // Parse pagination params with defaults
+  const page = Number(searchParams.page) || 1;
+  const pageSize = Number(searchParams.pageSize) || 10;
+  const skip = (page - 1) * pageSize;
 
   const user = await prisma.user.findUnique({
     where: {
@@ -28,18 +37,26 @@ export default async function OccurrencesPage() {
 
   const isAdmin = user?.role.name === "ADMIN";
 
-  const occurrences = await prisma.occurrence.findMany({
-    where: {
-      ...(isAdmin || !user?.departmentId
-        ? {}
-        : {
-            assignments: {
-              some: {
-                departmentId: user.departmentId,
-              },
+  // Base filter condition
+  const whereCondition =
+    isAdmin || !user?.departmentId
+      ? {}
+      : {
+          assignments: {
+            some: {
+              departmentId: user.departmentId,
             },
-          }),
-    },
+          },
+        };
+
+  // Get total count for pagination
+  const totalOccurrences = await prisma.occurrence.count({
+    where: whereCondition,
+  });
+
+  // Get paginated data
+  const occurrences = await prisma.occurrence.findMany({
+    where: whereCondition,
     include: {
       assignments: {
         include: {
@@ -66,9 +83,18 @@ export default async function OccurrencesPage() {
         createdAt: "desc",
       },
     ],
+    skip,
+    take: pageSize,
   });
 
   console.log({ occurrences });
+
+  const paginationInfo = {
+    totalCount: totalOccurrences,
+    pageCount: Math.ceil(totalOccurrences / pageSize),
+    currentPage: page,
+    pageSize,
+  };
 
   return (
     <DashboardShell>
@@ -84,7 +110,10 @@ export default async function OccurrencesPage() {
       </DashboardHeader>
 
       <div className="grid gap-4">
-        <OccurrencesTable occurrences={occurrences} />
+        <OccurrencesTable
+          occurrences={occurrences}
+          paginationInfo={paginationInfo}
+        />
       </div>
     </DashboardShell>
   );

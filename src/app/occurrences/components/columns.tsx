@@ -97,10 +97,19 @@ export const columns: ColumnDef<Occurrence>[] = [
         </Link>
       );
     },
+    enableHiding: false,
   },
   {
     accessorKey: "title",
     header: "Title",
+    cell: ({ row }) => {
+      const title = row.original.title;
+      // if title is longer than 20 characters, truncate it
+      if (title.length > 20) {
+        return `${title.slice(0, 20)}...`;
+      }
+      return title;
+    },
   },
   {
     accessorKey: "status",
@@ -122,18 +131,27 @@ export const columns: ColumnDef<Occurrence>[] = [
         </Badge>
       );
     },
+    enableColumnFilter: true,
   },
   {
     accessorKey: "incident",
     header: "Incident",
   },
-  {
-    accessorKey: "date",
-    header: "Date",
-  },
+  // {
+  //   accessorKey: "date",
+  //   header: "Date",
+  //   enableHiding: true,
+  //   meta: {
+  //     columnVisibility: false,
+  //   },
+  // },
   {
     accessorKey: "location",
     header: "Location",
+    enableHiding: true,
+    meta: {
+      columnVisibility: false,
+    },
   },
   {
     accessorKey: "reported",

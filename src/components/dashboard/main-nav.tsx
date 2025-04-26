@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
+
 export function MainNav() {
   const pathname = usePathname();
   const { data: session } = useSession();
@@ -129,16 +130,16 @@ export function MainNav() {
           Settings
         </Link>
         {/* Add Search Bar on press of enter, search for occurrence no and redirect to occurrences page*/}
-        <Input
+        {/* <Input
           type="search"
           placeholder="Occurrence No"
-          className="w-64"
+          // className="w-64"
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               router.push(`/occurrences/${e.target.value}`);
             }
           }}
-        />
+        /> */}
       </nav>
     </div>
   );
