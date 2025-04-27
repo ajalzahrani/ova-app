@@ -51,18 +51,6 @@ export function MainNav() {
             Department Dashboard
           </Link>
         </PermissionCheck>
-        <PermissionCheck required="view:incidents">
-          <Link
-            href="/incidents"
-            className={cn(
-              "text-sm font-medium transition-colors hover:text-primary",
-              pathname === "/incidents" || pathname.startsWith("/incidents/")
-                ? "text-primary"
-                : "text-muted-foreground"
-            )}>
-            Incidents
-          </Link>
-        </PermissionCheck>
         <PermissionCheck required="view:occurrences">
           <Link
             href="/occurrences"
@@ -73,19 +61,6 @@ export function MainNav() {
                 : "text-muted-foreground"
             )}>
             Occurrences
-          </Link>
-        </PermissionCheck>
-        <PermissionCheck required="view:departments">
-          <Link
-            href="/departments"
-            className={cn(
-              "text-sm font-medium transition-colors hover:text-primary",
-              pathname === "/departments" ||
-                pathname.startsWith("/departments/")
-                ? "text-primary"
-                : "text-muted-foreground"
-            )}>
-            Departments
           </Link>
         </PermissionCheck>
         <PermissionCheck required="view:reports">
@@ -123,6 +98,11 @@ export function MainNav() {
               <DropdownMenuItem asChild>
                 <Link href="/permissions" className="w-full">
                   Permissions
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/departments" className="w-full">
+                  Departments
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuContent>

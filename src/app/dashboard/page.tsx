@@ -5,15 +5,13 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Overview } from "@/components/dashboard/overview";
 import { RecentIncidents } from "@/components/dashboard/recent-incidents";
-import { DepartmentReferrals } from "@/components/dashboard/department-referrals";
 import Link from "next/link";
-import { PlusCircle, Building2, ArrowRightIcon } from "lucide-react";
+import { PlusCircle } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -67,43 +65,6 @@ export default async function DashboardPage() {
     totalOccurrences > 0
       ? Math.round((resolvedOccurrences / totalOccurrences) * 100)
       : 0;
-
-  // Get the user's departments
-  const userWithDepartments = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    include: { department: true },
-  });
-
-  // Get referrals for per department
-  const departmentReferrals = await prisma.occurrence.findMany({
-    where: {
-      assignments: {
-        some: {
-          departmentId: userWithDepartments?.department?.id,
-        },
-      },
-    },
-    include: {
-      incident: {
-        select: {
-          id: true,
-          name: true,
-          description: true,
-          severity: true,
-        },
-      },
-      assignments: {
-        select: {
-          department: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-        },
-      },
-    },
-  });
 
   return (
     <DashboardShell>

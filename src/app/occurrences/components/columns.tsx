@@ -26,6 +26,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { DataTableColumnHeader } from "@/components/table-components/column-header";
 import { formatDistanceToNow } from "date-fns";
 import { useRouter } from "next/navigation";
+import { PermissionCheck } from "@/components/auth/permission-check";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -92,24 +93,18 @@ export const columns: ColumnDef<Occurrence>[] = [
       const occurrenceNo = row.original.occurrenceNo;
       const rowId = row.original.id;
       return (
-        <Link href={`/occurrences/${rowId}`}>
-          <Badge>{occurrenceNo}</Badge>
-        </Link>
+        <PermissionCheck required="view:occurrence">
+          <Link href={`/occurrences/${rowId}`}>
+            <Badge>{occurrenceNo}</Badge>
+          </Link>
+        </PermissionCheck>
       );
     },
     enableHiding: false,
   },
   {
-    accessorKey: "title",
-    header: "Title",
-    cell: ({ row }) => {
-      const title = row.original.title;
-      // if title is longer than 20 characters, truncate it
-      if (title.length > 20) {
-        return `${title.slice(0, 20)}...`;
-      }
-      return title;
-    },
+    accessorKey: "incident",
+    header: "Incident",
   },
   {
     accessorKey: "status",
@@ -133,18 +128,6 @@ export const columns: ColumnDef<Occurrence>[] = [
     },
     enableColumnFilter: true,
   },
-  {
-    accessorKey: "incident",
-    header: "Incident",
-  },
-  // {
-  //   accessorKey: "date",
-  //   header: "Date",
-  //   enableHiding: true,
-  //   meta: {
-  //     columnVisibility: false,
-  //   },
-  // },
   {
     accessorKey: "location",
     header: "Location",
@@ -187,6 +170,7 @@ export const columns: ColumnDef<Occurrence>[] = [
   },
   {
     id: "actions",
+    header: "Actions",
     cell: ({ row }) => {
       const occurrenceNo = row.original.occurrenceNo;
       const router = useRouter();
@@ -205,16 +189,28 @@ export const columns: ColumnDef<Occurrence>[] = [
               Copy Occurrence NO.
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={() => router.push(`/occurrences/${row.original.id}`)}>
-              View Occurrence
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() =>
-                router.push(`/occurrences/${row.original.id}/edit`)
-              }>
-              Edit Occurrence
-            </DropdownMenuItem>
+            <PermissionCheck required="view:occurrence">
+              <DropdownMenuItem
+                onClick={() => router.push(`/occurrences/${row.original.id}`)}>
+                View Occurrence
+              </DropdownMenuItem>
+            </PermissionCheck>
+            <PermissionCheck required="edit:occurrence">
+              <DropdownMenuItem
+                onClick={() =>
+                  router.push(`/occurrences/${row.original.id}/edit`)
+                }>
+                Edit Occurrence
+              </DropdownMenuItem>
+            </PermissionCheck>
+            <PermissionCheck required="delete:occurrence">
+              <DropdownMenuItem
+                onClick={() =>
+                  router.push(`/occurrences/${row.original.id}/delete`)
+                }>
+                Delete Occurrence
+              </DropdownMenuItem>
+            </PermissionCheck>
           </DropdownMenuContent>
         </DropdownMenu>
       );

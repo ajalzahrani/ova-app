@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Eye, Edit, Trash2, AlertCircle } from "lucide-react";
+import { Plus, Eye, Edit, Trash2, AlertCircle, PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -24,7 +24,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/components/ui/use-toast";
 import { getPermissions, deletePermission } from "@/actions/permissions";
-
+import { DashboardShell } from "@/components/dashboard/dashboard-shell";
+import { DashboardHeader } from "@/components/dashboard/dashboard-header";
+import Link from "next/link";
 // Type for the permission data
 interface Permission {
   id: string;
@@ -134,13 +136,17 @@ export default function PermissionsPage() {
   };
 
   return (
-    <div className="container mx-auto py-10">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Permissions</h1>
-        <Button onClick={() => router.push("/permissions/new")}>
-          <Plus className="mr-2 h-4 w-4" /> Add Permission
-        </Button>
-      </div>
+    <DashboardShell>
+      <DashboardHeader
+        heading="Permissions"
+        text="Manage and track permissions">
+        <Link href="/permissions/new">
+          <Button>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Create Permission
+          </Button>
+        </Link>
+      </DashboardHeader>
 
       {error && (
         <Alert variant="destructive" className="mb-6">
@@ -243,6 +249,6 @@ export default function PermissionsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </DashboardShell>
   );
 }

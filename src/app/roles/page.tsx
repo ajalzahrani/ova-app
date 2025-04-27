@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Eye, Edit, Trash2, AlertCircle } from "lucide-react";
+import { Plus, Eye, Edit, Trash2, AlertCircle, PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -24,7 +24,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/components/ui/use-toast";
 import { getRoles, deleteRole } from "@/actions/roles";
-
+import { DashboardHeader } from "@/components/dashboard/dashboard-header";
+import { DashboardShell } from "@/components/dashboard/dashboard-shell";
+import Link from "next/link";
 // Type for the role data
 interface Role {
   id: string;
@@ -101,13 +103,15 @@ export default function RolesPage() {
   };
 
   return (
-    <div className="container mx-auto py-10 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Roles</h1>
-        <Button onClick={() => router.push("/roles/new")}>
-          <Plus className="mr-2 h-4 w-4" /> Add Role
-        </Button>
-      </div>
+    <DashboardShell>
+      <DashboardHeader heading="Roles" text="Manage and track roles">
+        <Link href="/roles/new">
+          <Button>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Create Role
+          </Button>
+        </Link>
+      </DashboardHeader>
 
       {error && (
         <Alert variant="destructive">
@@ -201,6 +205,6 @@ export default function RolesPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </DashboardShell>
   );
 }
