@@ -5,7 +5,14 @@ const prisma = new PrismaClient();
 
 // Arrays of sample data for random selection
 const severityNames = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
-const statusNames = ["OPEN", "ASSIGNED", "IN_PROGRESS", "ANSWERED", "CLOSED"];
+const statusNames = [
+  "OPEN",
+  "ASSIGNED",
+  "IN_PROGRESS",
+  "ANSWERED",
+  "ANSWERED_PARTIALLY",
+  "CLOSED",
+];
 const incidentTypes = [
   "Equipment Failure",
   "Safety Violation",
@@ -289,6 +296,8 @@ function getVariantForStatus(status: string): string {
     case "IN_PROGRESS":
       return "secondary";
     case "ANSWERED":
+      return "outline";
+    case "ANSWERED_PARTIALLY":
       return "outline";
     case "CLOSED":
       return "default";

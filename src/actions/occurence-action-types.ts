@@ -1,0 +1,53 @@
+const instanceOfFormData = z.instanceof(FormData);
+
+import { z } from "zod";
+
+export const occurrenceSchema = z.object({
+  formData: instanceOfFormData.optional(),
+  title: z.string().min(5, "Title must be at least 5 characters"),
+  description: z.string().min(10, "Description must be at least 10 characters"),
+  locationId: z.string().min(1, "Location is required"),
+  incidentId: z.string().min(1, "Incident is required"),
+  occurrenceDate: z.string().refine((val) => !isNaN(Date.parse(val)), {
+    message: "Invalid date",
+  }),
+});
+
+export type OccurrenceFormValues = z.infer<typeof occurrenceSchema>;
+
+export const anonymousOccurrenceSchema = z.object({
+  formData: instanceOfFormData.optional(),
+  title: z.string().min(5, "Title must be at least 5 characters"),
+  description: z.string().min(10, "Description must be at least 10 characters"),
+  locationId: z.string().min(1, "Location is required"),
+  incidentId: z.string().min(1, "Incident is required"),
+  occurrenceDate: z.string(),
+  contactEmail: z.string().email("Invalid email").optional().or(z.literal("")),
+  contactPhone: z.string().optional().or(z.literal("")),
+});
+
+export type AnonymousOccurrenceInput = z.infer<
+  typeof anonymousOccurrenceSchema
+>;
+
+// Schema for referring occurrences to departments
+export const referOccurrenceSchema = z.object({
+  occurrenceId: z.string().uuid("Invalid occurrence ID"),
+  departmentIds: z
+    .array(z.string().uuid("Invalid department ID"))
+    .min(1, "At least one department must be selected"),
+  message: z.string().optional(),
+});
+
+export type ReferOccurrenceInput = z.infer<typeof referOccurrenceSchema>;
+
+// Schema for updating occurrence action
+export const updateOccurrenceActionSchema = z.object({
+  occurrenceId: z.string().uuid("Invalid occurrence ID"),
+  rootCause: z.string().min(5, "Root cause must be at least 5 characters"),
+  actionPlan: z.string().min(10, "Action plan must be at least 10 characters"),
+});
+
+export type UpdateOccurrenceActionInput = z.infer<
+  typeof updateOccurrenceActionSchema
+>;
