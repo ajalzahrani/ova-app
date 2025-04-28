@@ -56,7 +56,7 @@ export default async function OccurrenceDetails({
           </Button>
 
           {/* Action Plan - Only department managers can see this */}
-          <PermissionCheck required="view:action-plans">
+          <PermissionCheck required="view:action-plan">
             <Button asChild>
               <Link href={`/occurrences/${occurrence?.id}/action`}>
                 Action Plan
@@ -68,7 +68,7 @@ export default async function OccurrenceDetails({
           {occurrenceStatus === "OPEN" && (
             <>
               {/* Refer Occurrence - Need refer:occurrences permission */}
-              <PermissionCheck required="refer:occurrences">
+              <PermissionCheck required="refer:occurrence">
                 <ReferOccurrenceDialog
                   occurrenceId={occurrence.id}
                   departments={departments}
@@ -76,7 +76,7 @@ export default async function OccurrenceDetails({
               </PermissionCheck>
 
               {/* Edit Occurrence - Need edit:occurrences permission */}
-              <PermissionButton permission="edit:occurrences" asChild>
+              <PermissionButton permission="edit:occurrence" asChild>
                 <Link href={`/occurrences/${occurrence?.id}/edit`}>
                   Edit Occurrence
                 </Link>
@@ -86,7 +86,7 @@ export default async function OccurrenceDetails({
 
           {/* Resolve Button - Need resolve:occurrences permission and status must be ANSWERED */}
           {occurrenceStatus === "ANSWERED" && (
-            <PermissionCheck required="resolve:occurrences">
+            <PermissionCheck required="resolve:occurrence">
               <ResolveButton occurrenceId={occurrence.id} />
             </PermissionCheck>
           )}

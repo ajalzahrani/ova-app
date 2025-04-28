@@ -1,4 +1,23 @@
 // lib/server-permissions.ts
+
+/**
+ * This file is used to check if a user has a specific permission in the server side
+ * You can use this to check if a user has a permission to access server side data
+ * You can use as the following:
+ * // In a server component or page
+ *
+
+import { checkServerPermission } from "@/lib/server-permissions";
+export default async function ProtectedPage() {
+  // Check permission before rendering the page
+  await checkServerPermission('view:occurrences');
+   // Rest of your page code
+  // ...
+}
+
+ *
+ *
+ */
 import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";

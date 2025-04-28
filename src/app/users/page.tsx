@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Eye, Edit, Trash2, AlertCircle } from "lucide-react";
+import Link from "next/link";
+import { Eye, Edit, Trash2, AlertCircle, PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -26,6 +27,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/components/ui/use-toast";
 import { getUsers, deleteUser } from "@/actions/users";
 import { useEffect } from "react";
+import { DashboardShell } from "@/components/dashboard/dashboard-shell";
+import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 
 // Type for the user data
 interface User {
@@ -108,13 +111,15 @@ export default function UsersPage() {
   };
 
   return (
-    <div className="container mx-auto py-10 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Users</h1>
-        <Button onClick={() => router.push("/users/new")}>
-          <Plus className="mr-2 h-4 w-4" /> Add User
-        </Button>
-      </div>
+    <DashboardShell>
+      <DashboardHeader heading="Users" text="Manage and track users">
+        <Link href="/users/new">
+          <Button>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Create User
+          </Button>
+        </Link>
+      </DashboardHeader>
 
       {error && (
         <Alert variant="destructive">
@@ -218,6 +223,6 @@ export default function UsersPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </DashboardShell>
   );
 }

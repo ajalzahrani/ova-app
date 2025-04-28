@@ -21,6 +21,7 @@ import {
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { Prisma } from "@prisma/client";
+import { PermissionCheck } from "@/components/auth/permission-check";
 
 type OccurrenceWithRelations = Prisma.OccurrenceGetPayload<{
   include: {
@@ -147,22 +148,30 @@ export function OccurrencesList({ occurrences }: OccurrencesListProps) {
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
-                    <Button variant="ghost" size="icon" asChild>
-                      <Link href={`/occurrences/${occurrence.id}`}>
-                        <Eye className="h-4 w-4" />
-                        <span className="sr-only">View</span>
-                      </Link>
-                    </Button>
-                    <Button variant="ghost" size="icon" asChild>
-                      <Link href={`/occurrences/${occurrence.id}/edit`}>
-                        <FileEdit className="h-4 w-4" />
-                        <span className="sr-only">Edit</span>
-                      </Link>
-                    </Button>
-                    <Button variant="ghost" size="icon">
-                      <Trash2 className="h-4 w-4" />
-                      <span className="sr-only">Delete</span>
-                    </Button>
+                    <PermissionCheck required="view:occurrence">
+                      <Button variant="ghost" size="icon" asChild>
+                        <Link href={`/occurrences/${occurrence.id}`}>
+                          <Eye className="h-4 w-4" />
+                          <span className="sr-only">View</span>
+                        </Link>
+                      </Button>
+                    </PermissionCheck>
+                    <PermissionCheck required="edit:occurrence">
+                      <Button variant="ghost" size="icon" asChild>
+                        <Link href={`/occurrences/${occurrence.id}/edit`}>
+                          <FileEdit className="h-4 w-4" />
+                          <span className="sr-only">Edit</span>
+                        </Link>
+                      </Button>
+                    </PermissionCheck>
+                    <PermissionCheck required="delete:occurrence">
+                      <Button variant="ghost" size="icon" asChild>
+                        <Link href={`/occurrences/${occurrence.id}/delete`}>
+                          <Trash2 className="h-4 w-4" />
+                          <span className="sr-only">Delete</span>
+                        </Link>
+                      </Button>
+                    </PermissionCheck>
                   </div>
                 </TableCell>
               </TableRow>

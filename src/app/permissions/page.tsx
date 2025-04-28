@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Eye, Edit, Trash2, AlertCircle } from "lucide-react";
+import { Plus, Eye, Edit, Trash2, AlertCircle, PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -24,13 +24,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/components/ui/use-toast";
 import { getPermissions, deletePermission } from "@/actions/permissions";
-
+import { DashboardShell } from "@/components/dashboard/dashboard-shell";
+import { DashboardHeader } from "@/components/dashboard/dashboard-header";
+import Link from "next/link";
 // Type for the permission data
 interface Permission {
   id: string;
   code: string;
   name: string;
   description: string | null;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export default function PermissionsPage() {
@@ -43,14 +47,20 @@ export default function PermissionsPage() {
   const [permissionToDelete, setPermissionToDelete] =
     useState<Permission | null>(null);
 
-  // Group permissions by category (based on code prefix before ":")
+  // Group permissions by object (based on code suffix after ":")
   const groupedPermissions = permissions.reduce(
     (groups: Record<string, Permission[]>, permission) => {
-      const category = permission.code.split(":")[0] || "other";
-      if (!groups[category]) {
-        groups[category] = [];
+      const parts = permission.code.split(":");
+      const object =
+        parts.length > 1
+          ? parts[1][parts[1].length - 1] == "s"
+            ? parts[1].slice(0, -1)
+            : parts[1]
+          : "other";
+      if (!groups[object]) {
+        groups[object] = [];
       }
-      groups[category].push(permission);
+      groups[object].push(permission);
       return groups;
     },
     {}
@@ -67,7 +77,7 @@ export default function PermissionsPage() {
       try {
         const response = await getPermissions();
         if (response.success) {
-          setPermissions(response.permissions);
+          setPermissions(response.permissions || []);
         } else {
           setError(response.error || "Failed to fetch permissions");
           toast({
@@ -134,13 +144,17 @@ export default function PermissionsPage() {
   };
 
   return (
-    <div className="container mx-auto py-10">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Permissions</h1>
-        <Button onClick={() => router.push("/permissions/new")}>
-          <Plus className="mr-2 h-4 w-4" /> Add Permission
-        </Button>
-      </div>
+    <DashboardShell>
+      <DashboardHeader
+        heading="Permissions"
+        text="Manage and track permissions">
+        <Link href="/permissions/new">
+          <Button>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Create Permission
+          </Button>
+        </Link>
+      </DashboardHeader>
 
       {error && (
         <Alert variant="destructive" className="mb-6">
@@ -160,7 +174,7 @@ export default function PermissionsPage() {
             <Card key={category}>
               <CardHeader>
                 <CardTitle className="capitalize">
-                  {category} Permissions
+                  {category} Management
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -243,6 +257,6 @@ export default function PermissionsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </DashboardShell>
   );
 }
