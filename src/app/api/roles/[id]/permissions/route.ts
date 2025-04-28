@@ -2,12 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { use } from "react";
 
+interface RoleParams {
+  id: string;
+}
 // GET route to retrieve all permissions for a specific role
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  params: RoleParams | Promise<RoleParams>
 ) {
+  const resolvedParams = use(params as Promise<RoleParams>);
+  const roleId = resolvedParams.id;
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {
@@ -18,8 +24,6 @@ export async function GET(
   }
 
   try {
-    const roleId = params.id;
-
     // Fetch role permissions
     const rolePermissions = await prisma.rolePermission.findMany({
       where: { roleId },

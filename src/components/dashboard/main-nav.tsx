@@ -29,7 +29,7 @@ export function MainNav() {
         <span className="font-bold inline-block">OVA System</span>
       </Link>
       <nav className="flex gap-6 items-center">
-        <PermissionCheck required="view:dashboard">
+        <PermissionCheck required="manage:dashboard">
           <Link
             href="/"
             className={cn(
@@ -39,7 +39,7 @@ export function MainNav() {
             Dashboard
           </Link>
         </PermissionCheck>
-        <PermissionCheck required="view:department-dashboard">
+        <PermissionCheck required="manage:department-dashboard">
           <Link
             href="/department-dashboard"
             className={cn(
@@ -51,7 +51,7 @@ export function MainNav() {
             Department Dashboard
           </Link>
         </PermissionCheck>
-        <PermissionCheck required="view:occurrences">
+        <PermissionCheck required="manage:occurrences">
           <Link
             href="/occurrences"
             className={cn(
@@ -63,7 +63,7 @@ export function MainNav() {
             Occurrences
           </Link>
         </PermissionCheck>
-        <PermissionCheck required="view:reports">
+        <PermissionCheck required="manage:reports">
           <Link
             href="/reports"
             className={cn(

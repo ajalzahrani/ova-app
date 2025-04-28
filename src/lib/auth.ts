@@ -2,7 +2,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import { NextAuthOptions, getServerSession } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import bcrypt from "bcrypt";
+import { authenticateUser, getUserPermissions } from "@/actions/auths";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -24,25 +24,12 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        const user = await prisma.user.findUnique({
-          where: {
-            email: credentials.email,
-          },
-          include: {
-            role: true,
-          },
-        });
-
-        if (!user || !user.password) {
-          return null;
-        }
-
-        const isValidPassword = await bcrypt.compare(
-          credentials.password,
-          user.password
+        const user = await authenticateUser(
+          credentials.email,
+          credentials.password
         );
 
-        if (!isValidPassword) {
+        if (!user) {
           return null;
         }
 
@@ -64,12 +51,7 @@ export const authOptions: NextAuthOptions = {
         token.roleId = user.roleId;
 
         // Fetch user permissions based on role
-        const permissions = await prisma.rolePermission.findMany({
-          where: { roleId: user.roleId },
-          include: { permission: true },
-        });
-
-        token.permissions = permissions.map((rp: any) => rp.permission.code);
+        token.permissions = await getUserPermissions(user.id);
       }
       return token;
     },
