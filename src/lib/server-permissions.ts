@@ -1,6 +1,10 @@
 // lib/server-permissions.ts
 
 /**
+ * 
+ * USE THE NEW WAY OF CHECKING SERVER PERMISSIONS INSTEAD OF THIS FILE AT src/actions/auths.ts
+ * 
+ * USE THIS FOR TESTING PURPOSES ONLY.
  * This file is used to check if a user has a specific permission in the server side
  * You can use this to check if a user has a permission to access server side data
  * You can use as the following:
@@ -15,6 +19,8 @@ export default async function ProtectedPage() {
   // ...
 }
 
+This is the old way to check server permissions where we query the database for the user's permissions while I implement the new way to check server permissions using the 
+CACHED getUserPermissions and getCurrentUser functions from the auths.ts file. for better performance.
  *
  *
  */
