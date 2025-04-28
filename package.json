@@ -11,8 +11,8 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "prisma:seed": "ts-node --compiler-options '{\"module\":\"CommonJS\"}' prisma/seed.ts",
-    "generate:occurrences": "bun run scripts/generate-occurrences.ts",
-    "delete:occurrences": "bun run scripts/delete-occurrences.ts"
+    "generate:occurrences": "ts-node --compiler-options '{\"module\":\"CommonJS\"}' scripts/generate-occurrences.ts",
+    "delete:occurrences": "ts-node --compiler-options '{\"module\":\"CommonJS\"}' scripts/delete-occurrences.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.8.0",

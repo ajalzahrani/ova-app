@@ -49,7 +49,7 @@ export function OccurrenceCommunication({
 
   useEffect(() => {
     fetchMessages();
-    const interval = setInterval(fetchMessages, 10000); // Poll every 10s
+    const interval = setInterval(fetchMessages, 100000); // Poll every 100s
     return () => clearInterval(interval);
   }, [occurrenceId]);
 

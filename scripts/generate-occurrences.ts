@@ -183,7 +183,7 @@ async function generateOccurrences(count: number): Promise<void> {
             from: occurrenceDate,
             to: new Date(),
           }),
-          status: { connect: { id: status.id } },
+          status: { connect: { id: status?.id } },
           location: { connect: { id: location.id } },
           incident: { connect: { id: incident.id } },
           createdBy: { connect: { id: createdBy.id } },

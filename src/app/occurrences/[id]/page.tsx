@@ -7,28 +7,17 @@ import Link from "next/link";
 import { ReferOccurrenceDialog } from "@/app/occurrences/components/refer-occurrence-dialog";
 import { ResolveButton } from "@/app/occurrences/components/resovle-button";
 import { OccurrenceView } from "@/app/occurrences/components/occurrence-view";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { redirect } from "next/navigation";
 import { getOccurrenceById } from "../actions";
 import { PermissionButton } from "@/components/auth/permission-button";
 import { PermissionCheck } from "@/components/auth/permission-check";
+import { checkServerPermission } from "@/lib/server-permissions";
 
 export default async function OccurrenceDetails({
   params,
 }: {
   params: { id: string };
 }) {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user) {
-    redirect("/login");
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    include: { role: true },
-  });
+  await checkServerPermission("view:occurrence");
 
   const occurrence = await getOccurrenceById(params.id).then(
     (res) => res.occurrence
@@ -39,7 +28,6 @@ export default async function OccurrenceDetails({
   }
 
   const departments = await prisma.department.findMany();
-  const isManager = user?.role.name === "DEPARTMENT_MANAGER";
   const occurrenceStatus = occurrence.status.name;
 
   return (
@@ -56,13 +44,13 @@ export default async function OccurrenceDetails({
           </Button>
 
           {/* Action Plan - Only department managers can see this */}
-          <PermissionCheck required="view:action-plan">
+          {/* <PermissionCheck required="view:action-plan">
             <Button asChild>
               <Link href={`/occurrences/${occurrence?.id}/action`}>
                 Action Plan
               </Link>
             </Button>
-          </PermissionCheck>
+          </PermissionCheck> */}
 
           {/* Conditional buttons based on occurrence status */}
           {occurrenceStatus === "OPEN" && (

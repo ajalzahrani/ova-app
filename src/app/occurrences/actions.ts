@@ -459,6 +459,17 @@ export async function sendOccurrenceMessage(data: SendMessageInput) {
   }
   try {
     const validatedData = sendMessageSchema.parse(data);
+
+    // check if occurrence status is not closed
+    const occurrence = await prisma.occurrence.findUnique({
+      where: { id: validatedData.occurrenceId },
+      select: { status: true },
+    });
+
+    if (occurrence?.status.name === "CLOSED") {
+      return { success: false, error: "Occurrence is closed" };
+    }
+
     const message = await prisma.occurrenceMessage.create({
       data: {
         occurrenceId: validatedData.occurrenceId,
@@ -476,6 +487,62 @@ export async function sendOccurrenceMessage(data: SendMessageInput) {
         },
       },
     });
+
+    // Get current user department
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { departmentId: true },
+    });
+
+    if (!user?.departmentId) {
+      return { success: false, error: "User not assigned to a department" };
+    }
+
+    // Get all assigned departments for this occurrence
+    const assignedDepartments = await prisma.occurrenceAssignment.findMany({
+      where: { occurrenceId: validatedData.occurrenceId },
+      select: { departmentId: true },
+    });
+    const assignedDepartmentIds = assignedDepartments.map(
+      (a) => a.departmentId
+    );
+
+    // For each assigned department, check if it has sent at least one message for this occurrence
+    const departmentsWithMessages = await prisma.occurrenceMessage.findMany({
+      where: {
+        occurrenceId: validatedData.occurrenceId,
+        sender: {
+          departmentId: { in: assignedDepartmentIds },
+        },
+      },
+      select: { sender: { select: { departmentId: true } } },
+    });
+    const departmentsThatAnswered = new Set(
+      departmentsWithMessages.map((m) => m.sender.departmentId)
+    );
+
+    if (assignedDepartmentIds.length === 1) {
+      // Only one department assigned
+      if (departmentsThatAnswered.has(assignedDepartmentIds[0])) {
+        await prisma.occurrence.update({
+          where: { id: validatedData.occurrenceId },
+          data: { status: { connect: { name: "ANSWERED" } } },
+        });
+      }
+    } else if (assignedDepartmentIds.length > 1) {
+      // More than one department assigned
+      if (departmentsThatAnswered.size < assignedDepartmentIds.length) {
+        await prisma.occurrence.update({
+          where: { id: validatedData.occurrenceId },
+          data: { status: { connect: { name: "ANSWERED_PARTIALLY" } } },
+        });
+      } else {
+        await prisma.occurrence.update({
+          where: { id: validatedData.occurrenceId },
+          data: { status: { connect: { name: "ANSWERED" } } },
+        });
+      }
+    }
     revalidatePath(`/occurrences/${validatedData.occurrenceId}`);
     return { success: true, message };
   } catch (error) {
@@ -509,7 +576,7 @@ export async function getOccurrenceMessages(occurrenceId: string) {
     if (!user) return { success: false, error: "User not found" };
     // Check if user is QA or assigned department
     let isAllowed = false;
-    if (user.role.name === "QUALITY_ASSURANCE") {
+    if (user.role.name === "QUALITY_ASSURANCE" || user.role.name === "ADMIN") {
       isAllowed = true;
     } else if (user.departmentId) {
       const assignment = await prisma.occurrenceAssignment.findFirst({
