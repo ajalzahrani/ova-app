@@ -116,51 +116,88 @@ async function generateOccurrences(count: number): Promise<void> {
     // Generate occurrences
     for (let i = 0; i < count; i++) {
       const createdBy = users[Math.floor(Math.random() * users.length)];
-      const status = statuses[Math.floor(Math.random() * statuses.length)];
       const location = locations[Math.floor(Math.random() * locations.length)];
       const incident = incidents[Math.floor(Math.random() * incidents.length)];
-
-      // Create a random date in the past 30 days
       const occurrenceDate = faker.date.recent({ days: 30 });
-
-      // Generate unique occurrence number
       const occurrenceNo = await generateNextOccurrenceNo();
 
-      // Create the occurrence with type assertion to bypass type checking
-      const occurrenceData: any = {
-        occurrenceNo,
-        title: faker.lorem.sentence(4),
-        description: faker.lorem.paragraph(),
-        occurrenceDate,
-        createdAt: faker.date.between({
-          from: occurrenceDate,
-          to: new Date(),
-        }),
-        status: { connect: { id: status.id } },
-        location: { connect: { id: location.id } },
-        incident: { connect: { id: incident.id } },
-        createdBy: { connect: { id: createdBy.id } },
-      };
+      // Randomly decide if this occurrence will have assignments
+      const willHaveAssignments = Math.random() > 0.3; // ~70% will have assignments
 
-      const occurrence = await prisma.occurrence.create({
-        data: occurrenceData,
-      });
+      // Default status
+      let statusName = "OPEN";
+      let assignmentsData: any[] = [];
 
-      // Assign to 1-3 random departments
-      const assignmentCount = Math.floor(Math.random() * 3) + 1;
-      const selectedDeptIndices = new Set<number>();
+      if (willHaveAssignments) {
+        // Assign to 1-3 random departments
+        const assignmentCount = Math.floor(Math.random() * 3) + 1;
+        const selectedDeptIndices = new Set<number>();
+        while (selectedDeptIndices.size < assignmentCount) {
+          selectedDeptIndices.add(
+            Math.floor(Math.random() * departments.length)
+          );
+        }
 
-      while (selectedDeptIndices.size < assignmentCount) {
-        selectedDeptIndices.add(Math.floor(Math.random() * departments.length));
+        // Generate assignments
+        for (const deptIndex of selectedDeptIndices) {
+          // Randomly decide rootCause and actionPlan
+          const rootCause = Math.random() > 0.5 ? faker.lorem.sentence() : null;
+          const actionPlan =
+            Math.random() > 0.5 ? faker.lorem.paragraph() : null;
+          assignmentsData.push({
+            rootCause,
+            actionPlan,
+            departmentId: departments[deptIndex].id,
+          });
+        }
+
+        // Determine status based on assignments
+        const allAnswered = assignmentsData.every(
+          (a) => a.rootCause && a.actionPlan
+        );
+        const allUnanswered = assignmentsData.every(
+          (a) => !a.rootCause && !a.actionPlan
+        );
+        const somePartial = assignmentsData.some(
+          (a) =>
+            (a.rootCause && !a.actionPlan) || (!a.rootCause && a.actionPlan)
+        );
+
+        if (allAnswered) statusName = "ANSWERED";
+        else if (allUnanswered) statusName = "ASSIGNED";
+        else if (somePartial) statusName = "ANSWERED_PARTIALLY";
+        else statusName = "ASSIGNED"; // fallback
       }
 
-      for (const deptIndex of selectedDeptIndices) {
+      // Find status id
+      const status = statuses.find((s) => s.name === statusName);
+
+      // Create occurrence
+      const occurrence = await prisma.occurrence.create({
+        data: {
+          occurrenceNo,
+          title: faker.lorem.sentence(4),
+          description: faker.lorem.paragraph(),
+          occurrenceDate,
+          createdAt: faker.date.between({
+            from: occurrenceDate,
+            to: new Date(),
+          }),
+          status: { connect: { id: status.id } },
+          location: { connect: { id: location.id } },
+          incident: { connect: { id: incident.id } },
+          createdBy: { connect: { id: createdBy.id } },
+        },
+      });
+
+      // Create assignments if any
+      for (const assignment of assignmentsData) {
         await prisma.occurrenceAssignment.create({
           data: {
             occurrence: { connect: { id: occurrence.id } },
-            department: { connect: { id: departments[deptIndex].id } },
-            rootCause: Math.random() > 0.5 ? faker.lorem.sentence() : null,
-            actionPlan: Math.random() > 0.5 ? faker.lorem.paragraph() : null,
+            department: { connect: { id: assignment.departmentId } },
+            rootCause: assignment.rootCause,
+            actionPlan: assignment.actionPlan,
             isCompleted: Math.random() > 0.7,
             completedAt:
               Math.random() > 0.7 ? faker.date.recent({ days: 7 }) : null,
@@ -172,7 +209,7 @@ async function generateOccurrences(count: number): Promise<void> {
       console.log(
         `Created occurrence #${i + 1} with ID: ${
           occurrence.id
-        } (${occurrenceNo})`
+        } (${occurrenceNo}) - Status: ${statusName}`
       );
     }
 
