@@ -4,7 +4,7 @@ import { Button, ButtonProps } from "@/components/ui/button";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { hasPermission } from "@/lib/permissions";
-
+import { getUserPermissions } from "@/actions/auths";
 interface PermissionButtonProps extends ButtonProps {
   permission: string | string[];
   fallback?: React.ReactNode;
@@ -22,9 +22,12 @@ export function PermissionButton({
 
   useEffect(() => {
     if (status === "authenticated") {
-      const userPermissions = session?.user?.permissions || [];
-      const allowed = hasPermission(userPermissions, permission);
-      setCanAccess(allowed);
+      const checkPermission = async () => {
+        const userPermissions = await getUserPermissions(session?.user?.id);
+        const allowed = hasPermission(userPermissions, permission) || false;
+        setCanAccess(allowed);
+      };
+      checkPermission();
     }
   }, [permission, session, status]);
 

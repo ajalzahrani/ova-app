@@ -20,6 +20,7 @@ import {
   getDepartmentOccurrences,
   getDepartmentStats,
 } from "@/actions/departments";
+import { PermissionCheck } from "@/components/auth/permission-check";
 
 export default async function DepartmentDashboardPage() {
   const session = await getServerSession(authOptions);
@@ -86,12 +87,14 @@ export default async function DepartmentDashboardPage() {
       <DashboardHeader
         heading={`${departmentName} Dashboard`}
         text={`Manage and track occurrences for the ${departmentName} department`}>
-        <Link href="/occurrences/new">
-          <Button>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Report Occurrence
-          </Button>
-        </Link>
+        <PermissionCheck required="create:occurrence">
+          <Link href="/occurrences/new">
+            <Button>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Report Occurrence
+            </Button>
+          </Link>
+        </PermissionCheck>
       </DashboardHeader>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

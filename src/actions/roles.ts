@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { z } from "zod";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 // Role schema for validation
 const roleSchema = z.object({
@@ -151,6 +151,10 @@ export async function updateRole(roleId: string, data: RoleFormValues) {
 
       return updatedRole;
     });
+
+    // Revalidate user & role permissions
+    revalidateTag(`user-session`);
+    revalidateTag(`user-permissions-${session.user.id}`);
 
     // Revalidate roles pages
     revalidatePath("/roles");
