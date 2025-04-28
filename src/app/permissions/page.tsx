@@ -33,6 +33,8 @@ interface Permission {
   code: string;
   name: string;
   description: string | null;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export default function PermissionsPage() {
@@ -45,14 +47,20 @@ export default function PermissionsPage() {
   const [permissionToDelete, setPermissionToDelete] =
     useState<Permission | null>(null);
 
-  // Group permissions by category (based on code prefix before ":")
+  // Group permissions by object (based on code suffix after ":")
   const groupedPermissions = permissions.reduce(
     (groups: Record<string, Permission[]>, permission) => {
-      const category = permission.code.split(":")[0] || "other";
-      if (!groups[category]) {
-        groups[category] = [];
+      const parts = permission.code.split(":");
+      const object =
+        parts.length > 1
+          ? parts[1][parts[1].length - 1] == "s"
+            ? parts[1].slice(0, -1)
+            : parts[1]
+          : "other";
+      if (!groups[object]) {
+        groups[object] = [];
       }
-      groups[category].push(permission);
+      groups[object].push(permission);
       return groups;
     },
     {}
@@ -69,7 +77,7 @@ export default function PermissionsPage() {
       try {
         const response = await getPermissions();
         if (response.success) {
-          setPermissions(response.permissions);
+          setPermissions(response.permissions || []);
         } else {
           setError(response.error || "Failed to fetch permissions");
           toast({
@@ -166,7 +174,7 @@ export default function PermissionsPage() {
             <Card key={category}>
               <CardHeader>
                 <CardTitle className="capitalize">
-                  {category} Permissions
+                  {category} Management
                 </CardTitle>
               </CardHeader>
               <CardContent>

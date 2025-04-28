@@ -52,17 +52,8 @@ interface Permission {
   description?: string | null;
 }
 
-interface PageParams {
-  id: string;
-}
-
-export default function EditRolePage({
-  params,
-}: {
-  params: PageParams | Promise<PageParams>;
-}) {
-  const resolvedParams = use(params as Promise<PageParams>);
-  const roleId = resolvedParams.id;
+export default function EditRolePage({ params }: { params: { id: string } }) {
+  const roleId = params.id;
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
