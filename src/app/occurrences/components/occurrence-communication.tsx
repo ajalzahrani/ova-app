@@ -11,7 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { formatDistanceToNow } from "date-fns";
 import { sendOccurrenceMessage, getOccurrenceMessages } from "../actions";
-
+import { useToast } from "@/components/ui/use-toast";
 const messageSchema = z.object({
   message: z.string().min(1, "Message cannot be empty"),
 });
@@ -25,6 +25,7 @@ interface OccurrenceCommunicationProps {
 export function OccurrenceCommunication({
   occurrenceId,
 }: OccurrenceCommunicationProps) {
+  const { toast } = useToast();
   const [messages, setMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
@@ -66,6 +67,13 @@ export function OccurrenceCommunication({
     if (res.success) {
       form.reset();
       fetchMessages();
+    }
+    if (res.error) {
+      toast({
+        title: "Error",
+        description: res.error,
+        variant: "destructive",
+      });
     }
     setSending(false);
   };
