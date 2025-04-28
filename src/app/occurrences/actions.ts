@@ -16,6 +16,7 @@ import {
   updateOccurrenceActionSchema,
   UpdateOccurrenceActionInput,
 } from "@/actions/occurence-action-types";
+import { Prisma } from "@prisma/client";
 
 export async function createOccurrence(formValues: OccurrenceFormValues) {
   const user = await getCurrentUser();
@@ -436,5 +437,104 @@ export async function updateOccurrence(
       };
     }
     return { success: false, error: "Failed to create occurrence" };
+  }
+}
+
+// --- Occurrence Communication & Feedback ---
+
+const sendMessageSchema = z.object({
+  occurrenceId: z.string().uuid("Invalid occurrence ID"),
+  message: z.string().min(1, "Message cannot be empty"),
+});
+
+type SendMessageInput = z.infer<typeof sendMessageSchema>;
+
+/**
+ * Send a message in an occurrence conversation (group thread)
+ */
+export async function sendOccurrenceMessage(data: SendMessageInput) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    return { success: false, error: "Not authenticated" };
+  }
+  try {
+    const validatedData = sendMessageSchema.parse(data);
+    const message = await prisma.occurrenceMessage.create({
+      data: {
+        occurrenceId: validatedData.occurrenceId,
+        senderId: session.user.id,
+        recipientDepartmentId: null, // group message
+        message: validatedData.message,
+      },
+      include: {
+        sender: {
+          select: {
+            id: true,
+            name: true,
+            department: { select: { id: true, name: true } },
+          },
+        },
+      },
+    });
+    revalidatePath(`/occurrences/${validatedData.occurrenceId}`);
+    return { success: true, message };
+  } catch (error) {
+    console.error("Error sending occurrence message:", error);
+    if (error instanceof z.ZodError) {
+      return {
+        success: false,
+        error: "Validation failed",
+        issues: error.errors,
+      };
+    }
+    return { success: false, error: "Failed to send message" };
+  }
+}
+
+/**
+ * Get all messages for an occurrence (group thread)
+ */
+export async function getOccurrenceMessages(occurrenceId: string) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    return { success: false, error: "Not authenticated" };
+  }
+  try {
+    // Only show messages to users involved in the occurrence (QA or assigned departments)
+    // (Assume QA role is 'QUALITY_ASSURANCE')
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { departmentId: true, role: { select: { name: true } } },
+    });
+    if (!user) return { success: false, error: "User not found" };
+    // Check if user is QA or assigned department
+    let isAllowed = false;
+    if (user.role.name === "QUALITY_ASSURANCE") {
+      isAllowed = true;
+    } else if (user.departmentId) {
+      const assignment = await prisma.occurrenceAssignment.findFirst({
+        where: { occurrenceId, departmentId: user.departmentId },
+      });
+      if (assignment) isAllowed = true;
+    }
+    if (!isAllowed) return { success: false, error: "Not authorized" };
+    // Fetch all group messages for this occurrence
+    const messages = await prisma.occurrenceMessage.findMany({
+      where: { occurrenceId, recipientDepartmentId: null },
+      include: {
+        sender: {
+          select: {
+            id: true,
+            name: true,
+            department: { select: { id: true, name: true } },
+          },
+        },
+      },
+      orderBy: { createdAt: "asc" },
+    });
+    return { success: true, messages };
+  } catch (error) {
+    console.error("Error getting occurrence messages:", error);
+    return { success: false, error: "Failed to get occurrence messages" };
   }
 }

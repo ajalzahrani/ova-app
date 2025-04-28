@@ -1,0 +1,67 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Occurrence Feedback and Communication Flow
+
+## Overview
+This rule defines the implementation approach for the department feedback and communication flow feature. This feature enhances the occurrence management process by enabling structured feedback collection from departments and facilitating multi-party conversations until resolution.
+
+## Implementation Approach
+
+The feature leverages the existing `OccurrenceMessage` model to implement the feedback and communication flow. This approach eliminates the need for schema changes and simplifies the implementation.
+
+```prisma
+# Existing model in prisma/schema.prisma
+model OccurrenceMessage {
+  id                    String      @id @default(uuid())
+  occurrenceId          String
+  senderId              String
+  recipientDepartmentId String?     # Optional, can be null for group messages
+  message               String
+  createdAt             DateTime    @default(now())
+  occurrence            Occurrence  @relation(fields: [occurrenceId], references: [id])
+  recipientDepartment   Department? @relation(fields: [recipientDepartmentId], references: [id])
+  sender                User        @relation(fields: [senderId], references: [id])
+}
+```
+
+## Implementation Guidelines
+
+### 1. Process Flow
+- Quality Assurance assigns occurrence to department(s)
+- All assigned departments and QA participate in a group conversation
+- Departments provide feedback and QA responds in a shared thread
+- Multi-party conversations continue until resolution
+- QA resolves the occurrence when satisfied with feedback
+- All communications are stored as OccurrenceMessages
+
+### 2. Server Actions Requirements
+- Send message server action for group communication
+- Get messages server action for viewing shared conversation history
+- Integration with existing occurrence resolution functionality
+
+### 3. Messaging Pattern
+- All messages are visible to all parties involved in the occurrence
+- The recipientDepartmentId is not used for filtering visibility (set to null)
+- Messages are chronologically ordered to form a conversation thread
+- The conversation serves as both feedback and communication
+- User roles and departments are displayed to identify message sources
+
+### 4. Security Considerations
+- Only departments assigned to an occurrence can see its messages
+- QA has access to all occurrence messages
+- Appropriate permission checks required based on user role
+
+### 5. UI Components
+- Simple message composition interface for all participants
+- Shared threaded conversation view showing all messages
+- Clear visual indicators for message sender, role, and department
+- Integration with existing occurrence resolution UI
+
+### 6. Testing Strategy
+- Test message submission flow
+- Test multi-department group conversation scenarios 
+- Test QA resolution after group feedback collection
+- Verify correct message visibility for assigned departments

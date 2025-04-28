@@ -61,6 +61,7 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.role = user.role;
+        token.roleId = user.roleId;
 
         // Fetch user permissions based on role
         const permissions = await prisma.rolePermission.findMany({

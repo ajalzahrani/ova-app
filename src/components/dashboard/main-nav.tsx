@@ -118,14 +118,6 @@ export function MainNav() {
             Payments
           </Link>
         </PermissionCheck>
-        <Link
-          href="/settings"
-          className={cn(
-            "text-sm font-medium transition-colors hover:text-primary",
-            pathname === "/settings" ? "text-primary" : "text-muted-foreground"
-          )}>
-          Settings
-        </Link>
         {/* Add Search Bar on press of enter, search for occurrence no and redirect to occurrences page*/}
         {/* <Input
           type="search"

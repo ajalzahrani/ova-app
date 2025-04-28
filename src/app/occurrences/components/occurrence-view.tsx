@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { OccurrenceStatus, Prisma } from "@prisma/client";
+import { OccurrenceCommunication } from "./occurrence-communication";
 
 type OccurrenceWithRelations = Prisma.OccurrenceGetPayload<{
   include: {
@@ -248,63 +249,8 @@ export function OccurrenceView(props: { occurrence: OccurrenceWithRelations }) {
         </CardContent>
       </Card>
 
-      {/* Department responses */}
-      <div className="space-y-6">
-        {occurrence.assignments.length > 0 && (
-          <h3 className="text-lg font-semibold">Department Responses</h3>
-        )}
-        {occurrence.assignments.map(
-          (assignment: {
-            department: { id: string; name: string };
-            rootCause: string | null;
-            actionPlan: string | null;
-          }) => (
-            <Card
-              key={assignment.department.id}
-              className="border-l-4 border-l-indigo-500">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Building2 className="h-5 w-5 text-indigo-500" />
-                    <CardTitle>{assignment.department.name}</CardTitle>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Root Cause Section */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                    <Search className="h-4 w-4" />
-                    <h4 className="uppercase tracking-wider">
-                      Root Cause Analysis
-                    </h4>
-                  </div>
-                  <Separator />
-                  <div className="rounded-md bg-muted/50 p-4">
-                    <p className="text-sm">
-                      {assignment.rootCause || "No root cause provided"}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Action Plan Section */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                    <ClipboardList className="h-4 w-4" />
-                    <h4 className="uppercase tracking-wider">Action Plan</h4>
-                  </div>
-                  <Separator />
-                  <div className="rounded-md bg-muted/50 p-4">
-                    <p className="text-sm">
-                      {assignment.actionPlan || "No action plan provided"}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )
-        )}
-      </div>
+      {/* Add the group communication and feedback thread */}
+      <OccurrenceCommunication occurrenceId={occurrence.id} />
     </div>
   );
 }
