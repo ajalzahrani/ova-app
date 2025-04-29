@@ -8,7 +8,7 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { OccurrencesTable } from "./components/occurrences-table";
 import { PermissionButton } from "@/components/auth/permission-button";
-import { checkServerPermission } from "@/lib/server-permissions";
+import { checkServerPermission } from "@/actions/auths";
 
 export default async function OccurrencesPage({
   searchParams,
@@ -21,7 +21,7 @@ export default async function OccurrencesPage({
     redirect("/login");
   }
 
-  await checkServerPermission("view:occurrences");
+  await checkServerPermission("manage:occurrences");
 
   // Parse pagination params with defaults
   const page = Number(searchParams.page) || 1;
