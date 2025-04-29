@@ -30,7 +30,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { use } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
-import { getPermissions } from "@/actions/permissions";
+import { getPermissions, getPermissionsByRoleId } from "@/actions/permissions";
 
 // Form schema for role edit
 const roleFormSchema = z.object({
@@ -88,22 +88,26 @@ export default function EditRolePage({ params }: { params: { id: string } }) {
           const role = roleResponse.role;
 
           // Fetch role permissions
-          // TODO: This is a temporary solution to fetch role permissions
-          // TODO: We should use server actions to fetch role permissions
-          const rolePermissionsResponse = await fetch(
-            `/api/roles/${roleId}/permissions`
-          );
-          const rolePermissionsData = await rolePermissionsResponse.json();
+          const rolePermissionsData = await getPermissionsByRoleId(roleId);
 
-          const permissionIds = rolePermissionsData.success
-            ? rolePermissionsData.permissions.map((p: any) => p.id)
-            : [];
+          console.log("rolePermissionsData", rolePermissionsData);
 
-          form.reset({
-            name: role?.name || "",
-            description: role?.description || "",
-            permissionIds,
-          });
+          if (rolePermissionsData.success && rolePermissionsData.permissions) {
+            form.reset({
+              name: role?.name || "",
+              description: role?.description || "",
+              permissionIds: rolePermissionsData.permissions.map(
+                (p: any) => p.id
+              ),
+            });
+          } else {
+            toast({
+              variant: "destructive",
+              title: "Error",
+              description:
+                rolePermissionsData.error || "Failed to load role permissions",
+            });
+          }
         } else {
           setError(roleResponse.error || "Failed to load role data");
           toast({

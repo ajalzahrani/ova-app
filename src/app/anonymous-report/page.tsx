@@ -32,11 +32,21 @@ import {
   anonymousOccurrenceSchema,
   AnonymousOccurrenceInput,
 } from "@/actions/occurence-action-types";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 export default function AnonymousReportPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [locations, setLocations] = useState<any[]>([]);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [newOccurrenceNo, setNewOccurrenceNo] = useState<string | null>(null);
 
   const {
     register,
@@ -97,6 +107,12 @@ export default function AnonymousReportPage() {
           title: "Success",
           description: "Incident reported successfully",
         });
+
+        // Show a modal to the user with the occurrence id
+        setNewOccurrenceNo(
+          result.occurrence.occurrenceNo || result.occurrence.id
+        );
+        setShowSuccessModal(true);
       } else {
         const errorMessage = result.error || "Failed to report incident";
         console.error("Error in submission:", errorMessage);
@@ -268,6 +284,31 @@ export default function AnonymousReportPage() {
           </p>
         </div>
       </footer>
+
+      {/* Success Modal */}
+      <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Occurrence Submitted</DialogTitle>
+            <DialogDescription>
+              Your occurrence has been submitted successfully.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 text-center">
+            <p className="text-lg font-semibold">Occurrence Number:</p>
+            <p className="text-2xl font-bold text-primary">{newOccurrenceNo}</p>
+          </div>
+          <DialogFooter>
+            <Button
+              onClick={() => {
+                setShowSuccessModal(false);
+                router.push("/");
+              }}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

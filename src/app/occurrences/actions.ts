@@ -70,9 +70,9 @@ export async function createAnonymousOccurrence(
       JSON.stringify(data)
     );
 
-    const user = await getCurrentUser();
+    // const user = await getCurrentUser();
 
-    if (!user) throw new Error("Unauthorized");
+    // if (!user) throw new Error("Unauthorized");
 
     // Validate data
     const validatedData = anonymousOccurrenceSchema.parse(data);
@@ -97,7 +97,9 @@ export async function createAnonymousOccurrence(
       location: { connect: { id: validatedData.locationId } },
       status: { connect: { name: "OPEN" } },
       incident: { connect: { id: validatedData.incidentId } },
-      createdBy: { connect: { id: user.id } },
+
+      // TODO: Create a user for anonymous reports
+      // createdBy: { connect: { id: "anonymous" } },
       occurrenceDate: validatedData.occurrenceDate
         ? new Date(validatedData.occurrenceDate)
         : null,

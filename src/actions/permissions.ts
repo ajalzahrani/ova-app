@@ -212,3 +212,24 @@ export async function deletePermission(permissionId: string) {
     return { success: false, error: "Failed to delete permission" };
   }
 }
+
+// Get permissions by role id
+export async function getPermissionsByRoleId(roleId: string) {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user || session.user.role !== "ADMIN") {
+    return { success: false, error: "Not authorized" };
+  }
+
+  try {
+    // Get permission details
+    const permissions = await prisma.permission.findMany({
+      where: { roles: { some: { roleId } } },
+    });
+
+    return { success: true, permissions };
+  } catch (error) {
+    console.error("Error fetching permissions by role id:", error);
+    return { success: false, error: "Failed to fetch permissions by role id" };
+  }
+}
