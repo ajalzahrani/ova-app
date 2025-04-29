@@ -8,14 +8,15 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { OccurrencesTable } from "./components/occurrences-table";
 import { PermissionButton } from "@/components/auth/permission-button";
-import { checkServerPermission } from "@/actions/auths";
+import { checkServerPermission } from "@/lib/server-permissions";
 
 export default async function OccurrencesPage({
   searchParams,
 }: {
-  searchParams: { page?: string; pageSize?: string };
+  searchParams: Promise<{ page?: string; pageSize?: string }>;
 }) {
   const session = await getServerSession(authOptions);
+  const resolvedSearchParams = await searchParams;
 
   if (!session?.user) {
     redirect("/login");
@@ -24,8 +25,8 @@ export default async function OccurrencesPage({
   await checkServerPermission("manage:occurrences");
 
   // Parse pagination params with defaults
-  const page = Number(searchParams.page) || 1;
-  const pageSize = Number(searchParams.pageSize) || 10;
+  const page = Number(resolvedSearchParams.page) || 1;
+  const pageSize = Number(resolvedSearchParams.pageSize) || 10;
   const skip = (page - 1) * pageSize;
 
   const user = await prisma.user.findUnique({
@@ -37,11 +38,12 @@ export default async function OccurrencesPage({
     },
   });
 
-  const isAdmin = user?.role.name === "ADMIN";
+  const isAllowedToViewAllOccurrences =
+    user?.role.name === "ADMIN" || user?.role.name === "QUALITY_ASSURANCE";
 
   // Base filter condition
   const whereCondition =
-    isAdmin || !user?.departmentId
+    isAllowedToViewAllOccurrences || !user?.departmentId
       ? {}
       : {
           assignments: {

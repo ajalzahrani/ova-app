@@ -100,7 +100,7 @@ actions:
          // This is a Server Component by default (no 'use client' directive)
          import { ClientComponent } from '@/components/ClientComponent'
          import { prisma } from '@/lib/prisma'
-         import { checkServerPermission } from "@/actions/auths";
+         import { checkServerPermission } from "@/lib/server-permissions";
          
          export default async function IncidentsPage() {
             await checkServerPermission("manage:incidents");
@@ -147,7 +147,7 @@ actions:
          // This is a Server Component by default (no 'use client' directive)
          import { ClientComponent } from '@/components/ClientComponent'
          import { prisma } from '@/lib/prisma'
-         import { checkServerPermission } from "@/actions/auths";
+         import { checkServerPermission } from "@/lib/server-permissions";
          
          async function Page({ params }) {
             // asynchronous access of `params.id`.

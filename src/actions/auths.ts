@@ -55,6 +55,7 @@ function createUserPermissionsCache(userId: string) {
 }
 
 export const getUserPermissions = async (userId: string) => {
+  if (!userId) return [];
   const permissionsCache = createUserPermissionsCache(userId);
   return await permissionsCache();
 };
