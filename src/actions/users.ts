@@ -6,21 +6,12 @@ import { authOptions } from "@/lib/auth";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcrypt";
-
-const userSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  username: z.string().min(2, "Username must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .optional(),
-  roleId: z.string().min(1, "At least one role must be selected"),
-  departmentId: z.string().optional(),
-});
-
-export type UserFormValues = z.infer<typeof userSchema>;
-
+import {
+  userFormSchema,
+  userSchema,
+  type UserFormValues,
+  type UserFormValuesWithRolesAndDepartments,
+} from "./users.validations";
 // Get all users with their roles
 export async function getUsers() {
   const session = await getServerSession(authOptions);
@@ -90,7 +81,7 @@ export async function getUserById(userId: string) {
 }
 
 // Create a new user
-export async function createUser(data: UserFormValues) {
+export async function createUser(data: UserFormValuesWithRolesAndDepartments) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user || session.user.role !== "ADMIN") {
@@ -99,7 +90,7 @@ export async function createUser(data: UserFormValues) {
 
   try {
     // Validate data
-    const validatedData = userSchema.parse(data);
+    const validatedData = userFormSchema.parse(data);
 
     // Hash password if provided
     const hashedPassword = validatedData.password
@@ -123,12 +114,12 @@ export async function createUser(data: UserFormValues) {
         email: validatedData.email,
         password: hashedPassword || "",
         role: {
-          connect: { id: validatedData.roleId },
+          connect: { id: validatedData.role.id },
         },
-        ...(validatedData.departmentId
+        ...(validatedData.department
           ? {
               department: {
-                connect: { id: validatedData.departmentId },
+                connect: { id: validatedData.department.id },
               },
             }
           : {}),
@@ -138,17 +129,6 @@ export async function createUser(data: UserFormValues) {
         department: true,
       },
     });
-
-    // // Log audit
-    // await prisma.auditLog.create({
-    //   data: {
-    //     userId: session.user.id,
-    //     action: "CREATE",
-    //     entity: "USER",
-    //     entityId: user.id,
-    //     details: `Created user: ${user.name} (${user.email})`,
-    //   },
-    // });
 
     // Revalidate users pages
     revalidatePath("/users");
@@ -168,7 +148,10 @@ export async function createUser(data: UserFormValues) {
 }
 
 // Update an existing user
-export async function updateUser(userId: string, data: UserFormValues) {
+export async function updateUser(
+  userId: string,
+  data: UserFormValuesWithRolesAndDepartments
+) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user || session.user.role !== "ADMIN") {
@@ -177,7 +160,7 @@ export async function updateUser(userId: string, data: UserFormValues) {
 
   try {
     // Validate data
-    const validatedData = userSchema.parse(data);
+    const validatedData = userFormSchema.parse(data);
 
     // Hash password if provided and not empty
     let hashedPassword: string | undefined;
@@ -221,24 +204,13 @@ export async function updateUser(userId: string, data: UserFormValues) {
         where: { id: userId },
         data: {
           department: {
-            connect: { id: validatedData.departmentId },
+            connect: { id: validatedData.department.id },
           },
         },
       });
 
       return updatedUser;
     });
-
-    // // Log audit
-    // await prisma.auditLog.create({
-    //   data: {
-    //     userId: session.user.id,
-    //     action: "UPDATE",
-    //     entity: "USER",
-    //     entityId: userId,
-    //     details: `Updated user: ${user.name} (${user.email})`,
-    //   },
-    // });
 
     // Revalidate users pages
     revalidatePath("/users");

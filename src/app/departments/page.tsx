@@ -1,35 +1,13 @@
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { prisma } from "@/lib/prisma";
+import { PlusCircle } from "lucide-react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Building2, PlusCircle } from "lucide-react";
 import { DepartmentList } from "./components/department-list";
-
-interface Department {
-  id: string;
-  name: string;
-  description: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-interface DepartmentWithStats extends Department {
-  referralsCount: number;
-  pendingReferralsCount: number;
-  memberCount: number;
-}
+import { getDepartments } from "@/actions/departments";
 
 export default async function DepartmentsPage() {
   const session = await getServerSession(authOptions);
@@ -38,7 +16,11 @@ export default async function DepartmentsPage() {
     redirect("/login");
   }
 
-  const departments = await prisma.department.findMany();
+  const departments = await getDepartments();
+
+  if (!departments) {
+    return <div>No departments found</div>;
+  }
 
   return (
     <DashboardShell>

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Eye, Edit, Trash2, AlertCircle, PlusCircle } from "lucide-react";
+import { Edit, Trash2, AlertCircle, PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -29,30 +29,18 @@ import { getUsers, deleteUser } from "@/actions/users";
 import { useEffect } from "react";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
-
-// Type for the user data
-interface User {
-  id: string;
-  name: string;
-  username: string;
-  email: string;
-  role: {
-    id: string;
-    name: string;
-  };
-  department: {
-    id: string;
-    name: string;
-  } | null;
-}
+import { UserFormValuesWithRolesAndDepartments } from "@/actions/users.validations";
 
 export default function UsersPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<UserFormValuesWithRolesAndDepartments[]>(
+    []
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [userToDelete, setUserToDelete] =
+    useState<UserFormValuesWithRolesAndDepartments | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Fetch users on component mount
@@ -62,7 +50,7 @@ export default function UsersPage() {
       try {
         const result = await getUsers();
         if (result.success) {
-          setUsers(result.users);
+          setUsers(result.users as UserFormValuesWithRolesAndDepartments[]);
         } else {
           setError(result.error || "Failed to load users");
         }
@@ -83,7 +71,7 @@ export default function UsersPage() {
 
     setIsDeleting(true);
     try {
-      const result = await deleteUser(userToDelete.id);
+      const result = await deleteUser(userToDelete.id || "");
       if (result.success) {
         toast({
           title: "Success",
@@ -164,13 +152,6 @@ export default function UsersPage() {
                     <TableCell>{user.department?.name || "N/A"}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => router.push(`/users/${user.id}`)}>
-                          <Eye className="h-4 w-4" />
-                          <span className="sr-only">View</span>
-                        </Button>
                         <Button
                           variant="ghost"
                           size="icon"

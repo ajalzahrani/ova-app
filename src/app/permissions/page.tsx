@@ -203,14 +203,6 @@ export default function PermissionsPage() {
                               variant="outline"
                               size="icon"
                               onClick={() =>
-                                router.push(`/permissions/${permission.id}`)
-                              }>
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={() =>
                                 router.push(
                                   `/permissions/${permission.id}/edit`
                                 )

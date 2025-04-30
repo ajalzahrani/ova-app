@@ -5,14 +5,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { z } from "zod";
 import { revalidatePath, revalidateTag } from "next/cache";
-
-// Role schema for validation
-const roleSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  description: z.string().optional(),
-});
-
-export type RoleFormValues = z.infer<typeof roleSchema>;
+import { RoleFormValues, roleSchema } from "./roles.validation";
 
 // Get all roles with their permissions
 export async function getRoles() {
@@ -26,6 +19,9 @@ export async function getRoles() {
     const roles = await prisma.role.findMany({
       orderBy: {
         name: "asc",
+      },
+      include: {
+        permissions: true,
       },
     });
 
@@ -216,5 +212,49 @@ export async function deleteRole(roleId: string) {
   } catch (error) {
     console.error("Error deleting role:", error);
     return { success: false, error: "Failed to delete role" };
+  }
+}
+
+// Update role permissions
+export async function updateRolePermissions(
+  roleId: string,
+  permissionIds: string[]
+) {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user || session.user.role !== "ADMIN") {
+    return { success: false, error: "Not authorized" };
+  }
+
+  try {
+    await prisma.$transaction(async (tx) => {
+      // First, remove all existing permissions for this role
+      await tx.rolePermission.deleteMany({
+        where: { roleId },
+      });
+
+      // Then, add the new permissions
+      if (permissionIds.length > 0) {
+        await tx.rolePermission.createMany({
+          data: permissionIds.map((permissionId) => ({
+            roleId,
+            permissionId,
+          })),
+        });
+      }
+    });
+
+    // Revalidate user & role permissions
+    revalidateTag(`user-session`);
+    revalidateTag(`user-permissions-${session.user.id}`);
+
+    // Revalidate roles pages
+    revalidatePath("/roles");
+    revalidatePath(`/roles/${roleId}`);
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating role permissions:", error);
+    return { success: false, error: "Failed to update role permissions" };
   }
 }

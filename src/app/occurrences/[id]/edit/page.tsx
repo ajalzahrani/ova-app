@@ -111,7 +111,7 @@ export default function EditOccurrencePage({
     };
 
     fetchData();
-  }, [occurrenceId, form, toast]);
+  }, [occurrenceId, form]);
 
   const onSubmit = async (data: OccurrenceFormValues) => {
     console.log("onSubmit called", data);

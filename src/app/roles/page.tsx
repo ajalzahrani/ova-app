@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Eye, Edit, Trash2, AlertCircle, PlusCircle } from "lucide-react";
+import { PlusCircle, Eye, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -21,30 +21,21 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/components/ui/use-toast";
 import { getRoles, deleteRole } from "@/actions/roles";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import Link from "next/link";
-// Type for the role data
-interface Role {
-  id: string;
-  name: string;
-  description: string | null;
-  permissions: {
-    id: string;
-    name: string;
-  }[];
-}
+import { RoleFormWithPermissions } from "@/actions/roles.validation";
 
 export default function RolesPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const [roles, setRoles] = useState<Role[]>([]);
+  const [roles, setRoles] = useState<RoleFormWithPermissions[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [roleToDelete, setRoleToDelete] = useState<Role | null>(null);
+
+  const [roleToDelete, setRoleToDelete] =
+    useState<RoleFormWithPermissions | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Fetch roles on component mount
@@ -54,12 +45,20 @@ export default function RolesPage() {
       try {
         const result = await getRoles();
         if (result.success) {
-          setRoles(result.roles);
+          setRoles(result.roles as unknown as RoleFormWithPermissions[]);
         } else {
-          setError(result.error || "Failed to load roles");
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: result.error || "Failed to load roles",
+          });
         }
       } catch (err) {
-        setError("An error occurred while fetching roles");
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "An error occurred while fetching roles",
+        });
         console.error(err);
       } finally {
         setLoading(false);
@@ -75,7 +74,7 @@ export default function RolesPage() {
 
     setIsDeleting(true);
     try {
-      const result = await deleteRole(roleToDelete.id);
+      const result = await deleteRole(roleToDelete.id || "");
       if (result.success) {
         toast({
           title: "Success",
@@ -113,14 +112,6 @@ export default function RolesPage() {
         </Link>
       </DashboardHeader>
 
-      {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-
       <Card>
         <CardHeader>
           <CardTitle>Role Management</CardTitle>
@@ -146,13 +137,6 @@ export default function RolesPage() {
                     <TableCell>{role.description || "—"}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => router.push(`/roles/${role.id}/edit`)}>
-                          <Eye className="h-4 w-4" />
-                          <span className="sr-only">View</span>
-                        </Button>
                         <Button
                           variant="ghost"
                           size="icon"

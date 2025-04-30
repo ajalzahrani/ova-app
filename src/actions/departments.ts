@@ -3,7 +3,10 @@
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-
+import {
+  DepartmentFormValues,
+  departmentSchema,
+} from "./departments.validation";
 /**
  * Get all departments
  */
@@ -11,7 +14,7 @@ export async function getDepartments() {
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {
-    return null;
+    return { success: false, error: "Unauthorized" };
   }
 
   try {
@@ -21,10 +24,10 @@ export async function getDepartments() {
       },
     });
 
-    return departments;
+    return { success: true, departments };
   } catch (error) {
     console.error("Error fetching departments:", error);
-    return null;
+    return { success: false, error: "Error fetching departments" };
   }
 }
 
@@ -35,7 +38,7 @@ export async function getDepartmentById(departmentId: string) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {
-    return null;
+    return { success: false, error: "Unauthorized" };
   }
 
   try {
@@ -49,7 +52,7 @@ export async function getDepartmentById(departmentId: string) {
     return department;
   } catch (error) {
     console.error("Error fetching department:", error);
-    return null;
+    return { success: false, error: "Error fetching department" };
   }
 }
 
@@ -60,7 +63,7 @@ export async function getDepartmentOccurrences(departmentId: string) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {
-    return null;
+    return { success: false, error: "Unauthorized" };
   }
 
   // Check if user is a department manager for this department
@@ -81,7 +84,7 @@ export async function getDepartmentOccurrences(departmentId: string) {
 
   // If not admin or department manager of this department, deny access
   if (!isAdmin && !isDepartmentManager) {
-    return null;
+    return { success: false, error: "Unauthorized" };
   }
 
   try {
@@ -123,7 +126,7 @@ export async function getDepartmentOccurrences(departmentId: string) {
     return occurrences;
   } catch (error) {
     console.error("Error fetching department occurrences:", error);
-    return null;
+    return { success: false, error: "Error fetching department occurrences" };
   }
 }
 
@@ -134,7 +137,7 @@ export async function getDepartmentStats(departmentId: string) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {
-    return null;
+    return { success: false, error: "Unauthorized" };
   }
 
   try {
@@ -181,6 +184,88 @@ export async function getDepartmentStats(departmentId: string) {
     };
   } catch (error) {
     console.error("Error fetching department stats:", error);
-    return null;
+    return { success: false, error: "Error fetching department stats" };
+  }
+}
+
+/**
+ * Create a new department
+ */
+export async function createDepartment(department: DepartmentFormValues) {
+  const session = await getServerSession(authOptions);
+
+  const validatedFields = departmentSchema.safeParse(department);
+
+  if (!validatedFields.success) {
+    return { error: "Invalid fields" };
+  }
+
+  if (!session?.user) {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  try {
+    const newDepartment = await prisma.department.create({
+      data: department,
+    });
+
+    return newDepartment;
+  } catch (error) {
+    console.error("Error creating department:", error);
+    return { success: false, error: "Error creating department" };
+  }
+}
+
+/**
+ * Update a department
+ */
+export async function updateDepartment(
+  departmentId: string,
+  department: DepartmentFormValues
+) {
+  const session = await getServerSession(authOptions);
+
+  const validatedFields = departmentSchema.safeParse(department);
+
+  if (!validatedFields.success) {
+    return { error: "Invalid fields" };
+  }
+
+  if (!session?.user) {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  try {
+    const updatedDepartment = await prisma.department.update({
+      where: { id: departmentId },
+      data: department,
+    });
+
+    return updatedDepartment;
+  } catch (error) {
+    console.error("Error updating department:", error);
+    return { success: false, error: "Error updating department" };
+  }
+}
+
+/**
+ * Delete a department
+ */
+export async function deleteDepartment(departmentId: string) {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user) {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  try {
+    await prisma.department.delete({
+      where: { id: departmentId },
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting department:", error);
+    return { success: false, error: "Error deleting department" };
   }
 }
