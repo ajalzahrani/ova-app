@@ -1,0 +1,371 @@
+id,name,parentId,level
+1,Falls,null,level 1
+2,Medication,null,level 1
+3,Intravenous,null,level 1
+4,Burns,null,level 1
+5,Near miss,null,level 1
+6,Patient Injury,null,level 1
+7,Needle Stick,null,level 1
+8,Equipment/ Items,null,level 1
+9,Events,null,level 1
+10,Surgery,null,level 1
+11,Patient Care Issues,null,level 1
+12,Patient Identification,null,level 1
+13,Radiology,null,level 1
+14,Patient ATD or Referral,null,level 1
+15,Laboratory,null,level 1
+16,Staff Related Workplace Incident,null,level 1
+17,Documentation Or Records,null,level 1
+18,Sentinel Event,null,level 1
+19,Environmental and Facility,null,level 1
+20,Dietary Related Issues,null,level 1
+21,Obstetrical,null,level 1
+22,Infection Control,null,level 1
+23,Bed Sore,null,level 1
+24,Spillage,null,level 1
+25,Others,null,level 1
+1,With Injury,1,level 2
+2,Without Injury,1,level 2
+3,Ordering,2,level 2
+4,Dispensing,2,level 2
+5,Administration,2,level 2
+6,Wrong,3,level 2
+7,Disconnected,3,level 2
+8,Infiltration,3,level 2
+9,Transfusion Problem,3,level 2
+10,Electrical,4,level 2
+11,Chemical,4,level 2
+12,Heating,4,level 2
+13,Spills,4,level 2
+14,Fire,4,level 2
+15,Outside Hospital,6,level 2
+16,Inside Hospital,6,level 2
+17,Before Procedure,7,level 2
+18,During Procedure,7,level 2
+19,After Procedure,7,level 2
+20,Failure,8,level 2
+21,Broken,8,level 2
+22,Malfunction,8,level 2
+23,Procurement - Out of Stock,8,level 2
+24,Procurement - Delay delivery,8,level 2
+25,Inappropriate Use,8,level 2
+26,CSSD- Instrument Delay Delivery,8,level 2
+27,CSSD- Missing Items/Improper Sterilization,8,level 2
+28,Unavailable,8,level 2
+29,Foreign object found in laundry,8,level 2
+30,LAMA Inpatient,9,level 2
+31,LAMA ER,9,level 2
+32,Dead on arrival,9,level 2
+33,ETHICAL/Behavioral Issues,9,level 2
+34,Patient Dissatisfied,9,level 2
+35,Staff  Dissatisfied,9,level 2
+36,Patient absconded,9,level 2
+37,Property loss or damage,9,level 2
+38,Refused treatment,9,level 2
+39,Expired patient,9,level 2
+40,Code blue,9,level 2
+41,Code red,9,level 2
+42,Code white,9,level 2
+43,Code pink,9,level 2
+44,Code trauma,9,level 2
+45,Communication issue ,9,level 2
+46,Confidentiality issue,9,level 2
+47,Consent/Authorization,10,level 2
+48,Patient Identification,10,level 2
+49,Unplanned return to OR,10,level 2
+50,Cancelled OR Delay,10,level 2
+51,"Incorrect instrument count (Sponge ,Neddle etc)",10,level 2
+52,Surgical site not marked,10,level 2
+53,Wrong Site,10,level 2
+54,Foreign body left in during procedure,10,level 2
+55,Postoperative acute myocardial infarction,10,level 2
+56,Postoperative hemorrhage or hematoma,10,level 2
+57,Postoperative iatrogenic complication - Cardiac System,10,level 2
+58,Postoperative Respiratory Complication - Acute respiratory  failure,10,level 2
+59,Postoperative Respiratory Complication - Aspiration Pneumonia,10,level 2
+60,Postoperative Respiratory Complications - Post extubation Laryngeal spasm,10,level 2
+61,Postoperative Respiratory Complication - Acute Pulmonary Edema,10,level 2
+62,Postoperative pulmonary embolism or deep venous thrombosis,10,level 2
+63,Iatrogenic pneumothorax,10,level 2
+64,Malignant Hyperthermia,10,level 2
+65,Body parts,10,level 2
+66,Patient Care Delay,11,level 2
+67,Procedure Delay,11,level 2
+68,"Line, Tube, Drain or Catheter",11,level 2
+69,Aspiration pneumonia,11,level 2
+70,Complication of anesthesia,11,level 2
+71,Privacy of patient,11,level 2
+72,Major discrepancy between pre & post diagnosis,11,level 2
+73,Readmission within 24 hours,11,level 2
+74,Pregnancy - contract indication,11,level 2
+75,Restraint,11,level 2
+76,Consent related issues,11,level 2
+77,Wrong patient name,12,level 2
+78,Wrong MRN,12,level 2
+79,Process Delay,13,level 2
+80,Preparation instruction are not followed,13,level 2
+81,Consent for special procedure,13,level 2
+82,Wrong side or site,13,level 2
+83,Radiation or laser safety (Patient),13,level 2
+84,Radiation or laser safety (staff),13,level 2
+85,Radiation or laser safety (patient) not checked for pregnancy test,13,level 2
+86,Radiation or laser safety (patient) not instructed to wear Radiation Safety Equipment,13,level 2
+87,Radiation or laser safety (staff) No TLD Badge available,13,level 2
+88,Radiation or laser safety,13,level 2
+89,TLD badge not check monthly(staff),13,level 2
+90,Radiation or laser safety (staff) No proper radiation safety equipment,13,level 2
+91,Incorrect procedure,13,level 2
+92,Transfer - related issues,14,level 2
+93,Discharge - related issues,14,level 2
+94,Referral - related issues,14,level 2
+95,Processing delay,15,level 2
+96,Incorrect  test,15,level 2
+97,Incorrect result entry,15,level 2
+98,Incorrect  result,15,level 2
+99,Wrong specimen label,15,level 2
+100,Inconsistent results,15,level 2
+101,Delay results,15,level 2
+102,Fall,16,level 2
+103,Blood or body fluid exposure,16,level 2
+104,Hazardous substance exposure,16,level 2
+105,Manual handling / back pain,16,level 2
+106,Medical record unavailable or delayed,17,level 2
+107,Illegible entry or order,17,level 2
+108,Filed in wrong health record,17,level 2
+109,Unapproved Abbreviations,17,level 2
+110,Incomplete or inaccurate documentation,17,level 2
+111,Missed MR documentation,17,level 2
+112,Information Technology Related,17,level 2
+113,Unanticipated death not related to the natural course of illness,18,level 2
+114,Major permanent  loss of function,18,level 2
+115,Wrong site surgery,18,level 2
+116,Wrong procedure,18,level 2
+117,Wrong patient surgery,18,level 2
+118,Suicide,18,level 2
+119,Infant discharge to the wrong family,18,level 2
+120,Rape,18,level 2
+121,Hemolytic transfusion related to blood group incompatibilities,18,level 2
+122,Infant abduction,18,level 2
+123,Elevators,19,level 2
+124,Non-clinical equipment,19,level 2
+125,Housekeeping,19,level 2
+126,Infection Control,19,level 2
+127,Water Leakage,19,level 2
+128,"Major gas, power, water or heating failure",19,level 2
+129,Waste Management,19,level 2
+130,Tube system,19,level 2
+131,Hemolytic transfusion related to blood group incompatibilities,19,level 2
+132,Pest control,19,level 2
+133,Breast feeding contraindication,20,level 2
+134,Physician failed to enter diagnosis of the patient,20,level 2
+135,Nurse failed to refer the patient in the dietary module,20,level 2
+136,Nurse entered a wrong diet,20,level 2
+137,Food Services Issue,20,level 2
+138,Foreign body found in the food,20,level 2
+139,Birth trauma - injury to neonate,21,level 2
+140,Obstetric Trauma - Cesarean Delivery,21,level 2
+141,Obstetric Trauma - Vaginal instrument,21,level 2
+142,Obstetric Trauma - Vaginal without instrument,21,level 2
+143,Obstetric wound complications - Cesarean delivery,21,level 2
+144,Obstetric wound complications - Vaginal delivery,21,level 2
+145,Other obstetric complications,21,level 2
+146,Bleeding after delivery (CS /SVD),21,level 2
+147,Transmission of Chronic or Fatal disease as a result of blood transfusion or organ transplant,18,level 2
+148,Hospital acquired infection - Ventilators,22,level 2
+149,Hospital acquired infection - Postpartum Urinary Tract Infection (UTI),22,level 2
+150,Hand hygiene,22,level 2
+151,Hospital acquired infection - Postoperative sepsis,22,level 2
+152,Community  acquired,23,level 2
+153,Hospital acquired,23,level 2
+154,Chemical spill,24,level 2
+155,Blood,24,level 2
+156,Body Secretion,24,level 2
+157,Others,25,level 2
+158,Timeout Process not followed,13,level 2
+159,Incomplete MRN,12,level 2
+160,Incomplete Patient Name,12,level 2
+161,Using wrong ID sticker,12,level 2
+162,No name or No MRN,12,level 2
+163,Incorrect Patient Identification Process,12,level 2
+164,Order Error,17,level 2
+165,Transcription Error,17,level 2
+166,Security,19,level 2
+167,Safety,19,level 2
+168,Medical Equipment,19,level 2
+169,Hazardous Material,19,level 2
+170,Fire,19,level 2
+171,Sharp Injury,22,level 2
+172,Isolation Precausion Compliance,22,level 2
+173,Used Instrument Collection,22,level 2
+174,Others,22,level 2
+175,Hemolytic shock as result of blood transfusion,18,level 2
+176,Unlabeled Specimen Container,15,level 2
+177,No Requisition,15,level 2
+178,Incomplete Orders,15,level 2
+179,No Signature / No Date,15,level 2
+180,Specimen transport,15,level 2
+181,Missed Specimen,15,level 2
+182,Sample Mix up,15,level 2
+183,Technical Error,15,level 2
+184,Phlebotomy Complications,15,level 2
+185,Patient Injury(Hematoma etc.),15,level 2
+186,Request / Specimen mismatch,15,level 2
+187,Infection,15,level 2
+188,Others,15,level 2
+189,Timeout Process,10,level 2
+190,Break in Sterile Technique,10,level 2
+191,Patient Preparation,10,level 2
+192,Unanticipated Patient Injury,10,level 2
+193,Not Complaining to Timeout,10,level 2
+194,Others,10,level 2
+195,Test Unavailable,15,level 2
+196,COVID-19 Swab Issue,22,level 2
+1,Found on the floor,1,level 3
+2,Out of bed,1,level 3
+3,While standing,1,level 3
+4,While walking,1,level 3
+5,While sitting,1,level 3
+6,Found on the floor,2,level 3
+7,Out of bed,2,level 3
+8,While standing,2,level 3
+9,While walking,2,level 3
+10,While sitting,2,level 3
+11,Demograpics,3,level 3
+12,Legibility,3,level 3
+13,Unapproved Abbreviations,3,level 3
+14,Medication Wastage,3,level 3
+15,Narcotic Wastage,3,level 3
+16,Delay,3,level 3
+17,"Incomplete prescription (missing Generic name drug form, strength, dose, duration etc.)",3,level 3
+18,Not available,3,level 3
+19,"Drug Incompatibilities (disease, food, lab test)",3,level 3
+20,Dose adjustment is needed,3,level 3
+21,Medication Wastage,4,level 3
+22,Narcotic Wastage,4,level 3
+23,Delay,4,level 3
+24,Wrong medication,4,level 3
+25,Not available,4,level 3
+26,Wrong Label,4,level 3
+27,--,4,level 3
+28,Wrong Solution or Dilution,4,level 3
+29,Medication Wastage,5,level 3
+30,Narcotic Wastage,5,level 3
+31,Wrong Patient,5,level 3
+32,Wrong medication,5,level 3
+33,Wrong Route,5,level 3
+34,Wrong Time,5,level 3
+35,Wrong Label,5,level 3
+36,Wrong Solution or Dilution,5,level 3
+37,Wrong pump setting,5,level 3
+38,Wrong dose,5,level 3
+39,Medical Interaction or Reaction,5,level 3
+40,Medication Allergy,5,level 3
+41,Patient,6,level 3
+42,Solution,6,level 3
+43,Rate,6,level 3
+44,Order,6,level 3
+45,Compounding,6,level 3
+46,Site,8,level 3
+47,Red,8,level 3
+48,Sore,8,level 3
+49,Blood or blood product,9,level 3
+50,Sepsis,9,level 3
+51,Reaction,9,level 3
+52,Extravasation,9,level 3
+53,Blister,15,level 3
+54,Ulceration,15,level 3
+55,Fracture,15,level 3
+56,Dislocation,15,level 3
+57,Hematoma,15,level 3
+58,Damage teeth,15,level 3
+59,Abrasion,15,level 3
+60,Necrosis,15,level 3
+61,Laceration,15,level 3
+62,Ecchymosis,15,level 3
+63,Redness,15,level 3
+64,Cut wound,15,level 3
+65,Discoloration,15,level 3
+66,Blister,16,level 3
+67,Ulceration,16,level 3
+68,Fracture,16,level 3
+69,Dislocation,16,level 3
+70,Hematoma,16,level 3
+71,Damage teeth,16,level 3
+72,Abrasion,16,level 3
+73,Necrosis,16,level 3
+74,Laceration,16,level 3
+75,Ecchymosis,16,level 3
+76,Redness,16,level 3
+77,Cut wound,16,level 3
+78,Discoloration,16,level 3
+79,Personal reason,30,level 3
+80,Social reason,30,level 3
+81,Transfer to another facility/hospital,30,level 3
+82,Not satisfied with the staff,30,level 3
+83,Not satisfied with services,30,level 3
+84,For 2nd opinion,30,level 3
+85,Patient refused operation/procedure,30,level 3
+86,Patient Felt Better,30,level 3
+87,Refused investigation,30,level 3
+88,Refused to be seen by male staff,30,level 3
+89,Refused  treatment,30,level 3
+90,Personal reason,31,level 3
+91,Social reason,31,level 3
+92,Transfer to another facility/hospital,31,level 3
+93,Not satisfied with the staff,31,level 3
+94,Not satisfied with services,31,level 3
+95,For 2nd opinion,31,level 3
+96,Patient refused operation/procedure,31,level 3
+97,Patient Felt Better,31,level 3
+98,Refused investigation,31,level 3
+99,Refused to be seen by male staff,31,level 3
+100,Refused  treatment,31,level 3
+101,ER- refused to wait lab result,31,level 3
+102,ER- refused admission,31,level 3
+103,OPD follow up,31,level 3
+104,Patient,33,level 3
+105,Staff,33,level 3
+106,Others,33,level 3
+107,Hospital,37,level 3
+108,Patient,37,level 3
+109,Staff,37,level 3
+110,Visitor,37,level 3
+111,Communication devices - Operator or pager,45,level 3
+112,Panic value,45,level 3
+113,Hand over,45,level 3
+114,Verbal/Telephone order,45,level 3
+115,Diabitic Foot,15,level 3
+116,Brusis,15,level 3
+117,Skin Pealing,15,level 3
+118,Catury Marks,15,level 3
+119,Old Injury,15,level 3
+120,Diabitic Foot,16,level 3
+122,Brusis,16,level 3
+123,Skin Pealing,16,level 3
+124,Catury Marks,16,level 3
+125,Old Injury,16,level 3
+126,Paging / Phoning,45,level 3
+127,Delay in Responding,45,level 3
+128,Co-Ordination,45,level 3
+129,Off Bedside commode,1,level 3
+130,Off Scales or Equipment,1,level 3
+131,Off Table or Strecher,1,level 3
+132,Unknown,1,level 3
+133,Off Bedside commode,2,level 3
+134,Off Scales or Equipment,2,level 3
+135,Off Table or Strecher,2,level 3
+136,Unknown,2,level 3
+137,Incorrect Gropuing,9,level 3
+138,Mislabeled,9,level 3
+139,Not Documented,9,level 3
+140,Omitted,9,level 3
+141,Refuse Transfusion,9,level 3
+142,Rate of Flow,9,level 3
+143,Site Problem,9,level 3
+144,Tubing Pulled out / Broken,9,level 3
+145,Tubing Not Changed,9,level 3
+146,Refusal of Cannulation,9,level 3
+147,Others,9,level 3
+148,No COVID-19 Swab Test Done,196,level 3
+149,Patient Refused to take COVID-19 Swab,196,level 3
+150,COVID-19 Swab Missing,196,level 3
