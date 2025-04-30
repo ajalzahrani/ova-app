@@ -24,62 +24,57 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, ArrowLeft, Building2 } from "lucide-react";
+import { AlertCircle, ArrowLeft, Building2, Link } from "lucide-react";
 import { createUser } from "@/actions/users";
 import { getRoles } from "@/actions/roles";
-import { getDepartments } from "@/actions-old/departments";
+import { getDepartments } from "@/actions/departments";
 import { useToast } from "@/components/ui/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
-
-// Define form schema
-const formSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
-  username: z.string().min(2, "Username must be at least 2 characters"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-  roleId: z.string().min(1, "At least one role must be selected"),
-  departmentId: z.string().optional(),
-});
-
-// Get type from schema
-type FormValues = z.infer<typeof formSchema>;
-
-// Interface for roles
-interface Role {
-  name: string;
-  id: string;
-  createdAt: Date;
-  description: string | null;
-  updatedAt: Date;
-}
-
-// Interface for departments
-interface Department {
-  id: string;
-  name: string;
-  description?: string | null;
-}
+import {
+  userFormSchema,
+  UserFormValuesWithRolesAndDepartments,
+} from "@/actions/users.validations";
+import { DashboardHeader } from "@/components/dashboard/dashboard-header";
+import { DashboardShell } from "@/components/dashboard/dashboard-shell";
+import { RoleFormValues } from "@/actions/roles.validation";
+import { DepartmentFormValues } from "@/actions/departments.validation";
+import { Label } from "@/components/ui/label";
 
 export default function NewUserPage() {
   const router = useRouter();
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [roles, setRoles] = useState<Role[]>([]);
-  const [departments, setDepartments] = useState<Department[]>([]);
+  const [roles, setRoles] = useState<RoleFormValues[]>([]);
+  const [departments, setDepartments] = useState<DepartmentFormValues[]>([]);
   const [isPageLoading, setIsPageLoading] = useState(true);
 
   // Initialize the form
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+  const {
+    register,
+    handleSubmit,
+    reset,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<UserFormValuesWithRolesAndDepartments>({
+    resolver: zodResolver(userFormSchema),
     defaultValues: {
       username: "",
       name: "",
       email: "",
       password: "",
-      roleId: "",
-      departmentId: "",
+      role: {
+        id: "",
+        name: "",
+        description: "",
+      },
+      department: {
+        id: "",
+        name: "",
+      },
     },
   });
 
@@ -91,7 +86,7 @@ export default function NewUserPage() {
         // Fetch roles
         const rolesResponse = await getRoles();
         if (rolesResponse.success) {
-          setRoles(rolesResponse.roles || []);
+          setRoles(rolesResponse.roles as RoleFormValues[]);
         } else {
           setError("Failed to load roles");
         }
@@ -99,7 +94,9 @@ export default function NewUserPage() {
         // Fetch departments
         const departmentsResponse = await getDepartments();
         if (departmentsResponse.success) {
-          setDepartments(departmentsResponse.departments || []);
+          setDepartments(
+            departmentsResponse.departments as DepartmentFormValues[]
+          );
         } else {
           setError("Failed to load departments");
         }
@@ -115,12 +112,14 @@ export default function NewUserPage() {
   }, []);
 
   // Handle form submission
-  const onSubmit = async (data: FormValues) => {
+  const onSubmit = async (data: UserFormValuesWithRolesAndDepartments) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const result = await createUser(data);
+      const result = await createUser(
+        data as unknown as UserFormValuesWithRolesAndDepartments
+      );
       if (result.success) {
         toast({
           title: "Success",
@@ -155,205 +154,165 @@ export default function NewUserPage() {
   }
 
   return (
-    <div className="container mx-auto py-10 space-y-6">
-      <div className="flex items-center space-x-2">
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => router.push("/users")}>
-          <ArrowLeft className="h-4 w-4" />
+    <DashboardShell>
+      <DashboardHeader heading="New User" text="Create a new user">
+        <Button variant="outline" asChild>
+          <Link href="/users">
+            <ArrowLeft className="h-4 w-4" />
+            Back to Users
+          </Link>
         </Button>
-        <h1 className="text-3xl font-bold">Add New User</h1>
-      </div>
+      </DashboardHeader>
 
-      {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="name">Name</Label>
+            <Input
+              id="name"
+              {...register("name")}
+              placeholder="Enter user name"
+              className="mt-1"
+            />
+            {errors.name && (
+              <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>
+            )}
+          </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>User Information</CardTitle>
-          <CardDescription>Enter user details and assign roles</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid gap-6">
-                <FormField
-                  control={form.control}
-                  name="username"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Username</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter username" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+          <div className="space-y-2">
+            <Label htmlFor="username">Username</Label>
+            <Input
+              id="username"
+              {...register("username")}
+              placeholder="Enter username"
+              className="mt-1"
+            />
+            {errors.username && (
+              <p className="mt-1 text-sm text-red-500">
+                {errors.username.message}
+              </p>
+            )}
+          </div>
 
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter user name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              {...register("email")}
+              placeholder="Enter email address"
+              className="mt-1"
+            />
+            {errors.email && (
+              <p className="mt-1 text-sm text-red-500">
+                {errors.email.message}
+              </p>
+            )}
+          </div>
 
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter email address" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              {...register("password")}
+              placeholder="Enter new password (leave blank to keep current)"
+              className="mt-1"
+            />
+            {errors.password && (
+              <p className="mt-1 text-sm text-red-500">
+                {errors.password.message}
+              </p>
+            )}
+          </div>
 
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Password</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="password"
-                          placeholder="Enter password"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+          <Separator />
 
-                <Separator />
-
-                <div>
-                  <FormLabel>Roles</FormLabel>
-                  <FormDescription>
-                    Select one or more roles for this user
-                  </FormDescription>
-                  <div className="grid gap-2 mt-2">
-                    {roles.map((role) => (
-                      <FormField
-                        key={role.id}
-                        control={form.control}
-                        name="roleId"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value === role.id}
-                                onCheckedChange={(checked) => {
-                                  return checked
-                                    ? field.onChange(role.id)
-                                    : field.onChange("");
-                                }}
-                              />
-                            </FormControl>
-                            <div className="space-y-1 leading-none">
-                              <FormLabel className="cursor-pointer">
-                                {role.name}
-                              </FormLabel>
-                              {role.description && (
-                                <FormDescription>
-                                  {role.description}
-                                </FormDescription>
-                              )}
-                            </div>
-                          </FormItem>
-                        )}
-                      />
-                    ))}
-                  </div>
-                  <FormMessage />
+          <div className="space-y-2">
+            <Label>Role</Label>
+            <div className="grid gap-4">
+              {roles.map((role) => (
+                <div key={role.id} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`role-${role.id}`}
+                    checked={watch("role")?.id === role.id}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setValue("role", {
+                          id: role.id,
+                          name: role.name,
+                          description: role.description,
+                        });
+                      }
+                    }}
+                  />
+                  <Label
+                    htmlFor={`role-${role.id}`}
+                    className="text-sm font-medium">
+                    {role.name}
+                  </Label>
                 </div>
+              ))}
+            </div>
+            {errors.role?.id && (
+              <p className="mt-1 text-sm text-red-500">
+                {errors.role.id.message}
+              </p>
+            )}
+          </div>
 
-                <Separator />
+          <Separator />
 
-                <div>
-                  <FormLabel className="flex items-center">
-                    <Building2 className="mr-2 h-4 w-4" />
-                    Departments
-                  </FormLabel>
-                  <FormDescription>
-                    Assign departments to this user
-                  </FormDescription>
-                  <div className="grid gap-2 mt-2">
-                    {departments.length > 0 ? (
-                      departments.map((department) => (
-                        <FormField
-                          key={department.id}
-                          control={form.control}
-                          name="departmentId"
-                          render={({ field }) => (
-                            <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                              <FormControl>
-                                <Checkbox
-                                  checked={field.value === department.id}
-                                  onCheckedChange={(checked) => {
-                                    return checked
-                                      ? field.onChange(department.id)
-                                      : field.onChange("");
-                                  }}
-                                />
-                              </FormControl>
-                              <div className="space-y-1 leading-none">
-                                <FormLabel className="cursor-pointer">
-                                  {department.name}
-                                </FormLabel>
-                                {department.description && (
-                                  <FormDescription>
-                                    {department.description}
-                                  </FormDescription>
-                                )}
-                              </div>
-                            </FormItem>
-                          )}
-                        />
-                      ))
-                    ) : (
-                      <p className="text-sm text-muted-foreground">
-                        No departments available
-                      </p>
-                    )}
-                  </div>
-                  <FormMessage />
+          <div className="space-y-2">
+            <Label className="flex items-center">
+              <Building2 className="mr-2 h-4 w-4" />
+              Department
+            </Label>
+            <div className="grid gap-4">
+              {departments.map((department) => (
+                <div
+                  key={department.id}
+                  className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`department-${department.id}`}
+                    checked={watch("department")?.id === department.id}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setValue("department", {
+                          id: department.id,
+                          name: department.name,
+                        });
+                      }
+                    }}
+                  />
+                  <Label
+                    htmlFor={`department-${department.id}`}
+                    className="text-sm font-medium">
+                    {department.name}
+                  </Label>
                 </div>
-              </div>
+              ))}
+            </div>
+            {errors.department?.id && (
+              <p className="mt-1 text-sm text-red-500">
+                {errors.department.id.message}
+              </p>
+            )}
+          </div>
+        </div>
 
-              <div className="flex gap-2 justify-end">
-                <Button
-                  variant="outline"
-                  onClick={() => router.push("/users")}
-                  type="button">
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={isLoading}>
-                  {isLoading ? "Creating..." : "Create User"}
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-    </div>
+        <div className="flex gap-2 justify-end">
+          <Button
+            variant="outline"
+            onClick={() => router.push(`/users`)}
+            type="button">
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Creating..." : "Create User"}
+          </Button>
+        </div>
+      </form>
+    </DashboardShell>
   );
 }

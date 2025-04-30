@@ -141,13 +141,6 @@ export default function RolesPage() {
                           variant="ghost"
                           size="icon"
                           onClick={() => router.push(`/roles/${role.id}/edit`)}>
-                          <Eye className="h-4 w-4" />
-                          <span className="sr-only">View</span>
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => router.push(`/roles/${role.id}/edit`)}>
                           <Edit className="h-4 w-4" />
                           <span className="sr-only">Edit</span>
                         </Button>
