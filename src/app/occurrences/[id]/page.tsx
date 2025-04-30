@@ -1,4 +1,3 @@
-import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
@@ -11,15 +10,12 @@ import { getOccurrenceById } from "../actions";
 import { PermissionButton } from "@/components/auth/permission-button";
 import { PermissionCheck } from "@/components/auth/permission-check";
 import { checkServerPermission } from "@/lib/server-permissions";
-import { getCurrentUser } from "@/lib/auth";
-import { getCurrentUserFromDB } from "@/actions/auths";
-import { redirect } from "next/navigation";
 import { checkBusinessPermission } from "@/lib/business-permissions";
-
+import { getDepartments } from "@/actions/departments";
 export default async function OccurrenceDetails({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
   await checkServerPermission("view:occurrence");
@@ -32,7 +28,7 @@ export default async function OccurrenceDetails({
 
   await checkBusinessPermission(occurrence);
 
-  const departments = await prisma.department.findMany();
+  const departments = await getDepartments();
   const occurrenceStatus = occurrence.status.name;
 
   return (
@@ -62,7 +58,7 @@ export default async function OccurrenceDetails({
               <PermissionCheck required="refer:occurrence">
                 <ReferOccurrenceDialog
                   occurrenceId={occurrence.id}
-                  departments={departments}
+                  departments={departments ?? []}
                 />
               </PermissionCheck>
 

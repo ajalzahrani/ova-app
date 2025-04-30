@@ -6,29 +6,19 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
+import { getDepartmentById } from "@/actions/departments";
 
 export default async function DepartmentPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const departmentId = params.id;
+  const departmentId = (await params).id;
 
   // Get department by ID
-  const department = await prisma.department.findUnique({
-    where: {
-      id: departmentId,
-    },
-    include: {
-      users: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        },
-      },
-    },
-  });
+  const department = await getDepartmentById(departmentId);
+
+  console.log(department);
 
   if (!department) {
     notFound();
@@ -38,7 +28,7 @@ export default async function DepartmentPage({
     <DashboardShell>
       <DashboardHeader
         heading={`${department.name} Department`}
-        text="Manage incidents referred to your department">
+        text="Manage department">
         <div className="flex gap-2">
           <Button variant="outline" asChild>
             <Link href="/departments">

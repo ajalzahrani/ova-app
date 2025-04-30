@@ -3,7 +3,10 @@
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-
+import {
+  DepartmentFormValues,
+  departmentSchema,
+} from "./departments.validation";
 /**
  * Get all departments
  */
@@ -182,5 +185,87 @@ export async function getDepartmentStats(departmentId: string) {
   } catch (error) {
     console.error("Error fetching department stats:", error);
     return null;
+  }
+}
+
+/**
+ * Create a new department
+ */
+export async function createDepartment(department: DepartmentFormValues) {
+  const session = await getServerSession(authOptions);
+
+  const validatedFields = departmentSchema.safeParse(department);
+
+  if (!validatedFields.success) {
+    return { error: "Invalid fields" };
+  }
+
+  if (!session?.user) {
+    return null;
+  }
+
+  try {
+    const newDepartment = await prisma.department.create({
+      data: department,
+    });
+
+    return newDepartment;
+  } catch (error) {
+    console.error("Error creating department:", error);
+    return null;
+  }
+}
+
+/**
+ * Update a department
+ */
+export async function updateDepartment(
+  departmentId: string,
+  department: DepartmentFormValues
+) {
+  const session = await getServerSession(authOptions);
+
+  const validatedFields = departmentSchema.safeParse(department);
+
+  if (!validatedFields.success) {
+    return { error: "Invalid fields" };
+  }
+
+  if (!session?.user) {
+    return null;
+  }
+
+  try {
+    const updatedDepartment = await prisma.department.update({
+      where: { id: departmentId },
+      data: department,
+    });
+
+    return updatedDepartment;
+  } catch (error) {
+    console.error("Error updating department:", error);
+    return null;
+  }
+}
+
+/**
+ * Delete a department
+ */
+export async function deleteDepartment(departmentId: string) {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user) {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  try {
+    await prisma.department.delete({
+      where: { id: departmentId },
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting department:", error);
+    return { success: false, error: "Error deleting department" };
   }
 }

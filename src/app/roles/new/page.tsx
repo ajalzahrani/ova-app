@@ -25,14 +25,9 @@ import {
 } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, ArrowLeft } from "lucide-react";
-import { createRole, type RoleFormValues } from "@/actions/roles";
+import { createRole } from "@/actions/roles";
 import { useToast } from "@/components/ui/use-toast";
-
-// Form schema for role creation
-const roleFormSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  description: z.string().optional(),
-});
+import { RoleFormValues, roleSchema } from "@/actions/roles.validation";
 
 export default function NewRolePage() {
   const router = useRouter();
@@ -42,7 +37,7 @@ export default function NewRolePage() {
 
   // Initialize the form
   const form = useForm<RoleFormValues>({
-    resolver: zodResolver(roleFormSchema),
+    resolver: zodResolver(roleSchema),
     defaultValues: {
       name: "",
       description: "",

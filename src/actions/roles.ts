@@ -5,14 +5,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { z } from "zod";
 import { revalidatePath, revalidateTag } from "next/cache";
-
-// Role schema for validation
-const roleSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  description: z.string().optional(),
-});
-
-export type RoleFormValues = z.infer<typeof roleSchema>;
+import { RoleFormValues, roleSchema } from "./roles.validation";
 
 // Get all roles with their permissions
 export async function getRoles() {
@@ -26,6 +19,9 @@ export async function getRoles() {
     const roles = await prisma.role.findMany({
       orderBy: {
         name: "asc",
+      },
+      include: {
+        permissions: true,
       },
     });
 

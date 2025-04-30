@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,12 +25,12 @@ import {
 } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, ArrowLeft } from "lucide-react";
-import { getRoleById, updateRole, type RoleFormValues } from "@/actions/roles";
+import { getRoleById, updateRole } from "@/actions/roles";
 import { useToast } from "@/components/ui/use-toast";
-import { use } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { getPermissions, getPermissionsByRoleId } from "@/actions/permissions";
+import { RoleFormValues } from "@/actions/roles.validation";
 
 // Form schema for role edit
 const roleFormSchema = z.object({
@@ -52,8 +52,17 @@ interface Permission {
   description?: string | null;
 }
 
-export default function EditRolePage({ params }: { params: { id: string } }) {
-  const roleId = params.id;
+interface PageParams {
+  id: string;
+}
+
+export default function EditRolePage({
+  params,
+}: {
+  params: PageParams | Promise<PageParams>;
+}) {
+  const resolvedParams = use(params as Promise<PageParams>);
+  const roleId = resolvedParams.id;
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);

@@ -15,6 +15,8 @@ filters:
   - type: content
     pattern: "(?s)import.*?next|'use client'|'use server'|NextResponse|NextRequest"
 
+- Server component and client computer with params always we should await params.
+
 actions:
   - type: suggest
     message: |
@@ -86,11 +88,15 @@ actions:
       3. Client Component with params:
       ```tsx
         'use client'
-        import * as React from 'react'
+        import { use } React from 'react'
         
-        function Page({ params }) {
-            // asynchronous access of `params.id`.
-            const { id } = React.use(params)
+        interface PageParams {
+            id: string;
+        }
+
+        function Page({ params }: {params: PageParams | Promise<PageParams>}) {
+            const resolvedParams = use(params as Promise<PageParams>);
+            const id = resolvedParams.id
             return <p>ID: {id}</p>
         }
       ```
@@ -149,9 +155,12 @@ actions:
          import { prisma } from '@/lib/prisma'
          import { checkServerPermission } from "@/lib/server-permissions";
          
-         async function Page({ params }) {
-            // asynchronous access of `params.id`.
-            const { id } = await params
+         aexport default async function DepartmentPage({
+            params,
+         }: {
+            params: Promise<{ id: string }>;
+         }) {
+            const id = (await params).id;
             return <p>ID: {id}</p>
          }
          ```
