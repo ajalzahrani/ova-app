@@ -37,6 +37,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Select } from "@/components/ui/select";
+import { checkBusinessPermission } from "@/lib/business-permissions";
 
 // Form schema for occurrence edit
 const occurrenceSchema = z.object({
@@ -80,6 +81,9 @@ export default function EditOccurrencePage({
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // TODO: Check if user has permission to edit occurrence
+        // await checkBusinessPermission(occurrenceId);
+
         // Fetch role data
         const occurrenceResponse = await getOccurrenceById(occurrenceId);
         if (occurrenceResponse.success) {

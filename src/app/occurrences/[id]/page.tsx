@@ -11,20 +11,26 @@ import { getOccurrenceById } from "../actions";
 import { PermissionButton } from "@/components/auth/permission-button";
 import { PermissionCheck } from "@/components/auth/permission-check";
 import { checkServerPermission } from "@/lib/server-permissions";
+import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUserFromDB } from "@/actions/auths";
+import { redirect } from "next/navigation";
+import { checkBusinessPermission } from "@/lib/business-permissions";
 
 export default async function OccurrenceDetails({
   params,
 }: {
   params: { id: string };
 }) {
+  const { id } = await params;
   await checkServerPermission("view:occurrence");
 
-  const { id } = await params;
   const occurrence = await getOccurrenceById(id).then((res) => res.occurrence);
 
   if (!occurrence) {
     return <div>Occurrence not found</div>;
   }
+
+  await checkBusinessPermission(occurrence);
 
   const departments = await prisma.department.findMany();
   const occurrenceStatus = occurrence.status.name;

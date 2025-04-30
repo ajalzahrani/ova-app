@@ -21,14 +21,8 @@ const getCachedUserById = cache(
 );
 
 // Get current user by first getting session outside cache, then using cached function
-export async function getCurrentUser() {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user) {
-    redirect("/login");
-  }
-
-  return getCachedUserById(session.user.id);
+export async function getCurrentUserFromDB(userId: string) {
+  return getCachedUserById(userId);
 }
 
 // Create a cache function factory that generates unique cache functions per user

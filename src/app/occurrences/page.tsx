@@ -9,6 +9,7 @@ import { redirect } from "next/navigation";
 import { OccurrencesTable } from "./components/occurrences-table";
 import { PermissionButton } from "@/components/auth/permission-button";
 import { checkServerPermission } from "@/lib/server-permissions";
+import { getCurrentUserFromDB } from "@/actions/auths";
 
 export default async function OccurrencesPage({
   searchParams,
@@ -29,14 +30,8 @@ export default async function OccurrencesPage({
   const pageSize = Number(resolvedSearchParams.pageSize) || 10;
   const skip = (page - 1) * pageSize;
 
-  const user = await prisma.user.findUnique({
-    where: {
-      id: session?.user.id,
-    },
-    include: {
-      role: true,
-    },
-  });
+  // TODO: Include user department in user session
+  const user = await getCurrentUserFromDB(session?.user.id);
 
   const isAllowedToViewAllOccurrences =
     user?.role.name === "ADMIN" || user?.role.name === "QUALITY_ASSURANCE";
