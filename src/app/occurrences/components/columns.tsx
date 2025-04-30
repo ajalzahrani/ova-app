@@ -101,6 +101,11 @@ export const columns: ColumnDef<Occurrence>[] = [
       );
     },
     enableHiding: false,
+    filterFn: (row, id, value) => {
+      return row.original.occurrenceNo
+        .toLowerCase()
+        .includes(value.toLowerCase());
+    },
   },
   {
     accessorKey: "incident",
@@ -127,6 +132,11 @@ export const columns: ColumnDef<Occurrence>[] = [
       );
     },
     enableColumnFilter: true,
+    filterFn: (row, id, value) => {
+      return row.original.status.name
+        .toLowerCase()
+        .includes(value.toLowerCase());
+    },
   },
   {
     accessorKey: "location",
@@ -140,10 +150,29 @@ export const columns: ColumnDef<Occurrence>[] = [
     accessorKey: "reported",
     header: "Reported",
     cell: ({ row }) => {
-      const date = row.original.date;
+      const date = row.original.reported;
       return formatDistanceToNow(new Date(date), {
         addSuffix: true,
       });
+    },
+    filterFn: (row, id, value: { from?: Date; to?: Date }) => {
+      if (!value.from && !value.to) return true;
+
+      const rowDate = new Date(row.original.reported);
+
+      if (value.from && value.to) {
+        return rowDate >= value.from && rowDate <= value.to;
+      }
+
+      if (value.from) {
+        return rowDate >= value.from;
+      }
+
+      if (value.to) {
+        return rowDate <= value.to;
+      }
+
+      return true;
     },
   },
   {
