@@ -15,7 +15,7 @@ import {
   ReferOccurrenceInput,
   updateOccurrenceActionSchema,
   UpdateOccurrenceActionInput,
-} from "@/actions/occurence-action-types";
+} from "@/actions/occurrences.validations";
 import { Prisma } from "@prisma/client";
 
 export async function createOccurrence(formValues: OccurrenceFormValues) {
@@ -29,7 +29,7 @@ export async function createOccurrence(formValues: OccurrenceFormValues) {
 
     // Use a type assertion to bypass the type checking issue
     const createData: any = {
-      title: validatedData.title,
+      mrn: validatedData.mrn,
       description: validatedData.description,
       location: { connect: { id: validatedData.locationId } },
       status: { connect: { name: "OPEN" } },
@@ -92,7 +92,7 @@ export async function createAnonymousOccurrence(
 
     // Use a type assertion to bypass the type checking issue
     const createData: any = {
-      title: validatedData.title,
+      mrn: validatedData.mrn,
       description: validatedData.description,
       location: { connect: { id: validatedData.locationId } },
       status: { connect: { name: "OPEN" } },
@@ -395,16 +395,16 @@ export async function updateOccurrence(
 
     // Check if title already exists (for another occurrence)
     const existingOccurrence = await prisma.occurrence.findFirst({
-      where: { title: validatedData.title, NOT: { id: occurrenceId } },
+      where: { mrn: validatedData.mrn, NOT: { id: occurrenceId } },
     });
 
     if (existingOccurrence) {
-      return { success: false, error: "Occurrence title already in use" };
+      return { success: false, error: "Occurrence MRN already in use" };
     }
 
     // Use a type assertion to bypass the type checking issue
     const createData: any = {
-      title: validatedData.title,
+      mrn: validatedData.mrn,
       description: validatedData.description,
       location: { connect: { id: validatedData.locationId } },
       status: { connect: { name: "OPEN" } },

@@ -8,7 +8,7 @@ import { OccurrenceActionForm } from "@/app/occurrences/components/occurrence-ac
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getOccurrenceById } from "../../actions";
+import { getOccurrenceById } from "../../../../actions/occurrences";
 
 export default async function OccurrenceDetails({
   params,

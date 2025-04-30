@@ -24,22 +24,22 @@ model User {
 }
 
 model Role {
-  id          String   @id @default(cuid())
-  name        String   @unique
+  id          String           @id @default(cuid())
+  name        String           @unique
   description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
   users       User[]
   permissions RolePermission[]
 }
 
 model Permission {
-  id          String   @id @default(cuid())
-  code        String   @unique // e.g., "manage:occurrences", "view:dashboard"
-  name        String   
+  id          String           @id @default(cuid())
+  code        String           @unique // e.g., "manage:occurrences", "view:dashboard"
+  name        String
   description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
   roles       RolePermission[]
 }
 
@@ -64,8 +64,8 @@ model Department {
 model Occurrence {
   id                  String                 @id @default(uuid())
   occurrenceNo        String                 @unique @default("OCC25-0000") // User-friendly ID
-  title               String
-description         String
+  mrn                 String                 @default("0000000000")
+  description         String
   statusId            String
   incidentId          String
   occurrenceDate      DateTime               @default(now())

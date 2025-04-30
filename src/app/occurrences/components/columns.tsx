@@ -33,7 +33,7 @@ import { PermissionCheck } from "@/components/auth/permission-check";
 export type Occurrence = {
   id: string;
   occurrenceNo: string;
-  title: string;
+  mrn: string;
   status: {
     name: string;
     variant: string;
@@ -105,6 +105,13 @@ export const columns: ColumnDef<Occurrence>[] = [
       return row.original.occurrenceNo
         .toLowerCase()
         .includes(value.toLowerCase());
+    },
+  },
+  {
+    accessorKey: "mrn",
+    header: "MRN",
+    cell: ({ row }) => {
+      return row.original.mrn;
     },
   },
   {

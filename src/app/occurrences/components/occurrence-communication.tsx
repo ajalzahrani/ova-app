@@ -10,7 +10,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { formatDistanceToNow } from "date-fns";
-import { sendOccurrenceMessage, getOccurrenceMessages } from "../actions";
+import {
+  sendOccurrenceMessage,
+  getOccurrenceMessages,
+} from "../../../actions/occurrences";
 import { useToast } from "@/components/ui/use-toast";
 const messageSchema = z.object({
   message: z.string().min(1, "Message cannot be empty"),

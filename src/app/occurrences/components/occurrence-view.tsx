@@ -23,7 +23,7 @@ import {
 import { cn } from "@/lib/utils";
 import { OccurrenceStatus, Prisma } from "@prisma/client";
 import { OccurrenceCommunication } from "./occurrence-communication";
-
+import { format } from "date-fns";
 type OccurrenceWithRelations = Prisma.OccurrenceGetPayload<{
   include: {
     assignments: {
@@ -137,7 +137,7 @@ export function OccurrenceView(props: { occurrence: OccurrenceWithRelations }) {
                 <Clock className="h-4 w-4" />
                 <span>Occurred on: </span>
                 <span className="font-medium text-foreground">
-                  {occurrence.occurrenceDate.toLocaleDateString()}
+                  {format(occurrence.occurrenceDate, "dd/MM/yyyy hh:mm a")}
                 </span>
               </>
             )}
@@ -153,7 +153,7 @@ export function OccurrenceView(props: { occurrence: OccurrenceWithRelations }) {
               <Clock className="h-4 w-4" />
               <span>Reported on: </span>
               <span className="font-medium text-foreground">
-                {occurrence.createdAt.toLocaleDateString()}
+                {format(occurrence.createdAt, "dd/MM/yyyy hh:mm a")}
               </span>
             </>
 
@@ -166,7 +166,7 @@ export function OccurrenceView(props: { occurrence: OccurrenceWithRelations }) {
                 </span>
                 <span>Updated on: </span>
                 <span className="font-medium text-foreground">
-                  {occurrence.updatedAt.toLocaleDateString()}
+                  {format(occurrence.updatedAt, "dd/MM/yyyy hh:mm a")}
                 </span>
               </>
             )}

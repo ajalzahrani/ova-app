@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import { updateOccurrenceAction } from "@/app/occurrences/actions";
+import { updateOccurrenceAction } from "@/actions/occurrences";
 import { useRouter } from "next/navigation";
 
 const actionFormSchema = z.object({

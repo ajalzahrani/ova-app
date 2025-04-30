@@ -23,7 +23,7 @@ import {
   getOccurrenceById,
   updateOccurrence,
   type OccurrenceFormValues,
-} from "@/app/occurrences/actions";
+} from "@/actions/occurrences";
 import { useToast } from "@/components/ui/use-toast";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";

@@ -74,7 +74,7 @@ function convertOccurrencesToDataTable(
     const result: Occurrence = {
       id: occurrence.id,
       occurrenceNo: (occurrence as any).occurrenceNo || occurrence.id,
-      title: (occurrence as any).title || "",
+      mrn: (occurrence as any).mrn || "",
       status: {
         name: occurrence.status?.name || "",
         variant: occurrence.status?.variant || "default",

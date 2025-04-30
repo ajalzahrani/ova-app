@@ -6,7 +6,7 @@ import Link from "next/link";
 import { ReferOccurrenceDialog } from "@/app/occurrences/components/refer-occurrence-dialog";
 import { ResolveButton } from "@/app/occurrences/components/resovle-button";
 import { OccurrenceView } from "@/app/occurrences/components/occurrence-view";
-import { getOccurrenceById } from "../actions";
+import { getOccurrenceById } from "../../../actions/occurrences";
 import { PermissionButton } from "@/components/auth/permission-button";
 import { PermissionCheck } from "@/components/auth/permission-check";
 import { checkServerPermission } from "@/lib/server-permissions";
@@ -58,7 +58,7 @@ export default async function OccurrenceDetails({
               <PermissionCheck required="refer:occurrence">
                 <ReferOccurrenceDialog
                   occurrenceId={occurrence.id}
-                  departments={departments ?? []}
+                  departments={departments.departments ?? []}
                 />
               </PermissionCheck>
 

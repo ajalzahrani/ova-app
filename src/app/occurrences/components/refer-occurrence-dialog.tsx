@@ -17,18 +17,15 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
 import { Share2 } from "lucide-react";
-import { referOccurrenceToDepartments } from "@/app/occurrences/actions";
+import { referOccurrenceToDepartments } from "@/actions/occurrences";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 
-interface Department {
-  id: string;
-  name: string;
-}
+import { DepartmentFormValues } from "@/actions/departments.validation";
 
 interface ReferOccurrenceDialogProps {
   occurrenceId: string;
-  departments: Department[];
+  departments: DepartmentFormValues[];
 }
 
 export function ReferOccurrenceDialog({
@@ -124,9 +121,14 @@ export function ReferOccurrenceDialog({
                   className="flex items-center space-x-2">
                   <Checkbox
                     id={`department-${department.id}`}
-                    checked={selectedDepartmentIds.includes(department.id)}
+                    checked={selectedDepartmentIds.includes(
+                      department.id || ""
+                    )}
                     onCheckedChange={(checked) =>
-                      handleDepartmentChange(department.id, checked as boolean)
+                      handleDepartmentChange(
+                        department.id || "",
+                        checked as boolean
+                      )
                     }
                   />
                   <Label

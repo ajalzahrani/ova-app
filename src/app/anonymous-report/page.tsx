@@ -26,12 +26,12 @@ import {
 import { toast } from "@/components/ui/use-toast";
 import { ShieldAlert } from "lucide-react";
 import { IncidentSelector } from "@/app/occurrences/components/incident-selector";
-import { createAnonymousOccurrence } from "@/app/occurrences/actions";
+import { createAnonymousOccurrence } from "@/actions/occurrences";
 import { getOccurrenceLocations } from "@/actions/locations";
 import {
   anonymousOccurrenceSchema,
   AnonymousOccurrenceInput,
-} from "@/actions/occurence-action-types";
+} from "@/actions/occurrences.validations";
 import {
   Dialog,
   DialogContent,
@@ -56,11 +56,11 @@ export default function AnonymousReportPage() {
   } = useForm<AnonymousOccurrenceInput>({
     resolver: zodResolver(anonymousOccurrenceSchema),
     defaultValues: {
-      title: "",
+      mrn: "",
       description: "",
       locationId: "",
       incidentId: "",
-      occurrenceDate: new Date().toISOString().split("T")[0],
+      occurrenceDate: new Date(),
       contactEmail: "",
       contactPhone: "",
     },
@@ -70,18 +70,13 @@ export default function AnonymousReportPage() {
     setIsSubmitting(true);
 
     // Validate required fields
-    if (
-      !data.title ||
-      !data.description ||
-      !data.locationId ||
-      !data.incidentId ||
-      !data.occurrenceDate
-    ) {
+    const { success, error } = anonymousOccurrenceSchema.safeParse(data);
+    if (!success) {
       setIsSubmitting(false);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Please fill in all required fields",
+        description: error.message,
       });
       return;
     }
@@ -178,16 +173,14 @@ export default function AnonymousReportPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="title">Title</Label>
+                  <Label htmlFor="mrn">MRN</Label>
                   <Input
-                    id="title"
-                    placeholder="Brief description of the occurrence"
-                    {...register("title")}
+                    id="mrn"
+                    placeholder="Enter the MRN"
+                    {...register("mrn")}
                   />
-                  {errors.title && (
-                    <p className="text-sm text-red-500">
-                      {errors.title.message}
-                    </p>
+                  {errors.mrn && (
+                    <p className="text-sm text-red-500">{errors.mrn.message}</p>
                   )}
                 </div>
 

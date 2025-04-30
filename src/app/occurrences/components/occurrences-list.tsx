@@ -92,7 +92,7 @@ export function OccurrencesList({ occurrences }: OccurrencesListProps) {
                   <Link
                     href={`/occurrences/${occurrence.id}`}
                     className="hover:underline">
-                    {occurrence.title}
+                    {occurrence.mrn}
                   </Link>
                 </TableCell>
                 <TableCell>

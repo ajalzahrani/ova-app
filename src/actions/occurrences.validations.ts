@@ -1,27 +1,33 @@
-const instanceOfFormData = z.instanceof(FormData);
-
 import { z } from "zod";
 
 export const occurrenceSchema = z.object({
-  formData: instanceOfFormData.optional(),
-  title: z.string().min(5, "Title must be at least 5 characters"),
+  mrn: z
+    .string()
+    .min(10, "MRN must be at least 10 characters")
+    .max(10, "MRN must be 10 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
   locationId: z.string().min(1, "Location is required"),
   incidentId: z.string().min(1, "Incident is required"),
-  occurrenceDate: z.string().refine((val) => !isNaN(Date.parse(val)), {
-    message: "Invalid date",
+  occurrenceDate: z.date({
+    required_error: "Occurrence date and time is required",
+    invalid_type_error: "Invalid date and time format",
   }),
 });
 
 export type OccurrenceFormValues = z.infer<typeof occurrenceSchema>;
 
 export const anonymousOccurrenceSchema = z.object({
-  formData: instanceOfFormData.optional(),
-  title: z.string().min(5, "Title must be at least 5 characters"),
+  mrn: z
+    .string()
+    .min(10, "MRN must be at least 10 characters")
+    .max(10, "MRN must be 10 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
   locationId: z.string().min(1, "Location is required"),
   incidentId: z.string().min(1, "Incident is required"),
-  occurrenceDate: z.string(),
+  occurrenceDate: z.date({
+    required_error: "Occurrence date and time is required",
+    invalid_type_error: "Invalid date and time format",
+  }),
   contactEmail: z.string().email("Invalid email").optional().or(z.literal("")),
   contactPhone: z.string().optional().or(z.literal("")),
 });

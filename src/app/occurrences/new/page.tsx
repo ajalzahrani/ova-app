@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,57 +26,46 @@ import {
 import { toast } from "@/components/ui/use-toast";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
-import { createOccurrence } from "../actions";
+import { createOccurrence } from "@/actions/occurrences";
 import { getOccurrenceLocations } from "@/actions/locations";
 import { IncidentSelector } from "@/app/occurrences/components/incident-selector";
-
-const occurrenceSchema = z.object({
-  title: z.string().min(5, "Title must be at least 5 characters"),
-  description: z.string().min(10, "Description must be at least 10 characters"),
-  locationId: z.string().min(1, "Location is required"),
-  incidentId: z.string().min(1, "Incident is required"),
-  occurrenceDate: z.string().refine((val) => !isNaN(Date.parse(val)), {
-    message: "Invalid date",
-  }),
-});
-
-type OccurrenceFormValues = z.infer<typeof occurrenceSchema>;
+import { DateTimePicker } from "@/app/occurrences/components/datetime-picker";
+import {
+  OccurrenceFormValues,
+  occurrenceSchema,
+} from "@/actions/occurrences.validations";
+import { Form } from "@/components/ui/form";
 
 export default function NewOccurrencePage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [locations, setLocations] = useState<any[]>([]);
 
+  const form = useForm<OccurrenceFormValues>({
+    resolver: zodResolver(occurrenceSchema),
+    defaultValues: {
+      mrn: "",
+      description: "",
+      locationId: "",
+      incidentId: "",
+      occurrenceDate: new Date(),
+    },
+  });
+
   const {
     register,
     handleSubmit,
     setValue,
     formState: { errors },
-  } = useForm<OccurrenceFormValues>({
-    resolver: zodResolver(occurrenceSchema),
-    defaultValues: {
-      title: "",
-      description: "",
-      locationId: "",
-      incidentId: "",
-      occurrenceDate: new Date().toISOString().split("T")[0],
-    },
-  });
+    control,
+    getValues,
+  } = form;
 
   const onSubmit = async (data: OccurrenceFormValues) => {
     console.log("onSubmit called", data);
     setIsSubmitting(true);
     try {
-      // Create empty FormData instance to satisfy schema requirement
-      const formDataInstance = new FormData();
-
-      console.log("data", { data, formDataInstance });
-
-      // Call with formData property included
-      const result = await createOccurrence({
-        ...data,
-        formData: formDataInstance,
-      });
+      const result = await createOccurrence(data);
 
       if (result.success) {
         toast({
@@ -125,110 +113,112 @@ export default function NewOccurrencePage() {
         text="Report a new occurrence"
       />
       <div className="grid gap-6">
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <Card>
-            <CardHeader>
-              <CardTitle>Occurrence Details</CardTitle>
-              <CardDescription>
-                Provide details about the occurrence that occurred
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="title">Title</Label>
-                <Input
-                  id="title"
-                  placeholder="Brief description of the occurrence"
-                  {...register("title")}
-                />
-                {errors.title && (
-                  <p className="text-sm text-red-500">{errors.title.message}</p>
-                )}
-              </div>
+        <Form {...form}>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <Card>
+              <CardHeader>
+                <CardTitle>Occurrence Details</CardTitle>
+                <CardDescription>
+                  Provide details about the occurrence that occurred
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="mrn">MRN</Label>
+                  <Input
+                    id="mrn"
+                    placeholder="Enter the MRN"
+                    {...register("mrn")}
+                  />
+                  {errors.mrn && (
+                    <p className="text-sm text-red-500">{errors.mrn.message}</p>
+                  )}
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="dateOccurred">Date Occurred</Label>
-                <Input
-                  id="occurrenceDate"
-                  type="date"
-                  {...register("occurrenceDate")}
+                <div className="space-y-2">
+                  {/* <Label htmlFor="dateOccurred">Date Occurred</Label> */}
+                  <DateTimePicker
+                    form={form}
+                    name="occurrenceDate"
+                    label="Date and Time"
+                  />
+                  {errors.occurrenceDate && (
+                    <p className="text-sm text-red-500">
+                      {errors.occurrenceDate.message}
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="location">Location</Label>
+                  <Select
+                    onValueChange={(value) => setValue("locationId", value)}
+                    defaultValue="">
+                    <SelectTrigger id="location">
+                      <SelectValue placeholder="Select location" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {locations.map((location) => (
+                        <SelectItem key={location.id} value={location.id}>
+                          {location.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.locationId && (
+                    <p className="text-sm text-red-500">
+                      {errors.locationId.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Incident selector component */}
+                <IncidentSelector
+                  onIncidentChange={(value) => setValue("incidentId", value)}
                 />
-                {errors.occurrenceDate && (
+                {errors.incidentId && (
                   <p className="text-sm text-red-500">
-                    {errors.occurrenceDate.message}
+                    {errors.incidentId.message}
                   </p>
                 )}
-              </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="location">Location</Label>
-                <Select
-                  onValueChange={(value) => setValue("locationId", value)}
-                  defaultValue="">
-                  <SelectTrigger id="location">
-                    <SelectValue placeholder="Select location" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {locations.map((location) => (
-                      <SelectItem key={location.id} value={location.id}>
-                        {location.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.locationId && (
-                  <p className="text-sm text-red-500">
-                    {errors.locationId.message}
-                  </p>
-                )}
-              </div>
-
-              {/* Incident selector component */}
-              <IncidentSelector
-                onIncidentChange={(value) => setValue("incidentId", value)}
-              />
-              {errors.incidentId && (
-                <p className="text-sm text-red-500">
-                  {errors.incidentId.message}
-                </p>
-              )}
-
-              <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  placeholder="Detailed description of what happened"
-                  className="min-h-[100px]"
-                  {...register("description")}
-                />
-                {errors.description && (
-                  <p className="text-sm text-red-500">
-                    {errors.description.message}
-                  </p>
-                )}
-              </div>
-            </CardContent>
-            <CardFooter className="flex justify-between">
-              <div>
-                <Button
-                  variant="outline"
-                  onClick={() => router.back()}
-                  className="mr-2">
-                  Cancel
+                <div className="space-y-2">
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    placeholder="Detailed description of what happened"
+                    className="min-h-[100px]"
+                    {...register("description")}
+                  />
+                  {errors.description && (
+                    <p className="text-sm text-red-500">
+                      {errors.description.message}
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-between">
+                <div>
+                  <Button
+                    variant="outline"
+                    onClick={() => router.back()}
+                    className="mr-2">
+                    Cancel
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={checkFormErrors}>
+                    Debug
+                  </Button>
+                </div>
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? "Submitting..." : "Submit Report"}
                 </Button>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={checkFormErrors}>
-                  Debug
-                </Button>
-              </div>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Submitting..." : "Submit Report"}
-              </Button>
-            </CardFooter>
-          </Card>
-        </form>
+              </CardFooter>
+            </Card>
+          </form>
+        </Form>
       </div>
     </DashboardShell>
   );

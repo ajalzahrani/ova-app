@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Occurrence" ADD COLUMN     "mrn" TEXT NOT NULL DEFAULT '0000000000';
