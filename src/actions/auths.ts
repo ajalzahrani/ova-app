@@ -6,24 +6,30 @@ import { redirect } from "next/navigation";
 import bcrypt from "bcrypt";
 import { unstable_cache as cache, revalidateTag } from "next/cache";
 
-export const getCurrentUser = cache(
-  async () => {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user) {
-      redirect("/login");
-    }
-
+// Cached function to get user data by ID
+const getCachedUserById = cache(
+  async (userId: string) => {
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
+      where: { id: userId },
       include: { role: true },
     });
 
     return user;
   },
-  ["current-user"],
+  ["user-by-id"],
   { tags: ["user-session"], revalidate: 300 } // Cache for 5 minutes
 );
+
+// Get current user by first getting session outside cache, then using cached function
+export async function getCurrentUser() {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user) {
+    redirect("/login");
+  }
+
+  return getCachedUserById(session.user.id);
+}
 
 // Create a cache function factory that generates unique cache functions per user
 function createUserPermissionsCache(userId: string) {
@@ -49,6 +55,7 @@ function createUserPermissionsCache(userId: string) {
 }
 
 export const getUserPermissions = async (userId: string) => {
+  if (!userId) return [];
   const permissionsCache = createUserPermissionsCache(userId);
   return await permissionsCache();
 };

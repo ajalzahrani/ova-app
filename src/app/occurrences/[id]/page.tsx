@@ -19,9 +19,8 @@ export default async function OccurrenceDetails({
 }) {
   await checkServerPermission("view:occurrence");
 
-  const occurrence = await getOccurrenceById(params.id).then(
-    (res) => res.occurrence
-  );
+  const { id } = await params;
+  const occurrence = await getOccurrenceById(id).then((res) => res.occurrence);
 
   if (!occurrence) {
     return <div>Occurrence not found</div>;

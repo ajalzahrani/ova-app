@@ -2,9 +2,9 @@
 
 import { Button, ButtonProps } from "@/components/ui/button";
 import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
 import { hasPermission } from "@/lib/permissions";
-import { getUserPermissions } from "@/actions/auths";
+import { useEffect, useState } from "react";
+
 interface PermissionButtonProps extends ButtonProps {
   permission: string | string[];
   fallback?: React.ReactNode;
@@ -22,14 +22,11 @@ export function PermissionButton({
 
   useEffect(() => {
     if (status === "authenticated") {
-      const checkPermission = async () => {
-        const userPermissions = await getUserPermissions(session?.user?.id);
-        const allowed = hasPermission(userPermissions, permission) || false;
-        setCanAccess(allowed);
-      };
-      checkPermission();
+      const userPermissions = session?.user?.permissions || [];
+      const canAccess = hasPermission(userPermissions, permission);
+      setCanAccess(canAccess);
     }
-  }, [permission, session, status]);
+  }, [session, status, permission]);
 
   if (!canAccess) {
     // If asChild is true, we need to return something that accepts asChild

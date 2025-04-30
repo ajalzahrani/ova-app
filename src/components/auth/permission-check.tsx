@@ -1,10 +1,9 @@
 // src/components/auth/permission-check.tsx
 "use client";
 
-import { useSession } from "next-auth/react";
 import { ReactNode, useEffect, useState } from "react";
 import { hasPermission } from "@/lib/permissions";
-import { getUserPermissions } from "@/actions/auths";
+import { useSession } from "next-auth/react";
 
 interface PermissionCheckProps {
   required: string | string[];
@@ -22,14 +21,11 @@ export function PermissionCheck({
 
   useEffect(() => {
     if (status === "authenticated") {
-      const checkPermission = async () => {
-        const userPermissions = await getUserPermissions(session?.user?.id);
-        const allowed = hasPermission(userPermissions, required) || false;
-        setCanAccess(allowed);
-      };
-      checkPermission();
+      const userPermissions = session?.user?.permissions || [];
+      const canAccess = hasPermission(userPermissions, required);
+      setCanAccess(canAccess);
     }
-  }, [required, session, status]);
+  }, [session, status, required]);
 
   if (status === "loading") {
     return null;

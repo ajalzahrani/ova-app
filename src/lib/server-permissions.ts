@@ -21,12 +21,13 @@ export default async function ProtectedPage() {
 
 This is the old way to check server permissions where we query the database for the user's permissions while I implement the new way to check server permissions using the 
 CACHED getUserPermissions and getCurrentUser functions from the auths.ts file. for better performance.
+
+Now I am using the old way to check server permissions. I found out that using dataabase and cache can cause many requests per page load.
  *
  *
  */
 import { getServerSession } from "next-auth";
-import { prisma } from "@/lib/prisma";
-import { authOptions } from "@/lib/auth";
+import { authOptions, getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
 export async function checkServerPermission(required: string | string[]) {
@@ -37,27 +38,14 @@ export async function checkServerPermission(required: string | string[]) {
   }
 
   // Fetch user with role and permissions
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    include: {
-      role: {
-        include: {
-          permissions: {
-            include: {
-              permission: true,
-            },
-          },
-        },
-      },
-    },
-  });
+  const user = await getCurrentUser();
 
   if (!user) {
     redirect("/login");
   }
 
   // Check for admin permission first
-  const userPermissions = user.role.permissions.map((rp) => rp.permission.code);
+  const userPermissions = user.permissions;
 
   if (userPermissions.includes("admin:all")) {
     return true;

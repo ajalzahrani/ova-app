@@ -15,6 +15,9 @@ filters:
   - type: content
     pattern: "(?s)import.*?useForm|import.*?z\\s+from\\s+['\"]zod['\"]"
 
+- Use React Hook Form with Zod for validation
+- The same validation should be done in the server action too
+
 actions:
   - type: suggest
     message: |
@@ -97,9 +100,14 @@ actions:
          ```
 
       5. Error Handling:
+         - Define validation schemas using Zod
+         - Apply the same validation in both client and server
          - Use form.formState.errors to access validation errors
+         - Use descriptive error messages
+         - Validate form inputs before submission
          - Utilize FormMessage from shadcn/ui to display errors
          - Implement try/catch blocks for submission errors
+         - Show validation errors inline next to form fields
 
 examples:
   - input: |
