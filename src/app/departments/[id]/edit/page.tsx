@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/use-toast";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
-import { updateDepartment, getDepartmentById } from "../../actions";
+import { updateDepartment, getDepartmentById } from "@/actions/departments";
 import {
   DepartmentFormValues,
   departmentSchema,
@@ -50,7 +50,7 @@ export default function EditDepartmentPage({
   useEffect(() => {
     const fetchData = async () => {
       const departmentResponse = await getDepartmentById(departmentId);
-      console.log({ departmentResponse });
+
       if (departmentResponse.success) {
         reset({
           id: departmentResponse.department?.id,
@@ -73,10 +73,9 @@ export default function EditDepartmentPage({
       const formDataInstance = new FormData();
       formDataInstance.append("name", data.name);
 
-      const result = await updateDepartment({
+      const result = await updateDepartment(departmentId, {
         id: data.id,
         name: data.name,
-        formData: formDataInstance,
       });
 
       if (result.success) {

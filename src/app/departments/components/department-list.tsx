@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Eye, FileEdit, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { Prisma, Role } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import {
   Dialog,
   DialogContent,
@@ -75,32 +75,40 @@ export function DepartmentList({ departments }: DepartmentListProps) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {departments.map((department) => (
-            <TableRow key={department.id}>
-              <TableCell>{department.name}</TableCell>
-              <TableCell className="text-right">
-                <Button variant="ghost" size="icon">
-                  <Link href={`/departments/${department.id}`}>
-                    <Eye className="h-4 w-4" />
-                    <span className="sr-only">View</span>
-                  </Link>
-                </Button>
-                <Button variant="ghost" size="icon">
-                  <Link href={`/departments/${department.id}/edit`}>
-                    <FileEdit className="h-4 w-4" />
-                    <span className="sr-only">Edit</span>
-                  </Link>
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setDepartmentToDelete(department)}>
-                  <Trash2 className="h-4 w-4" />
-                  <span className="sr-only">Delete</span>
-                </Button>
+          {departments.length > 0 ? (
+            departments.map((department) => (
+              <TableRow key={department.id}>
+                <TableCell>{department.name}</TableCell>
+                <TableCell className="text-right">
+                  <Button variant="ghost" size="icon">
+                    <Link href={`/departments/${department.id}`}>
+                      <Eye className="h-4 w-4" />
+                      <span className="sr-only">View</span>
+                    </Link>
+                  </Button>
+                  <Button variant="ghost" size="icon">
+                    <Link href={`/departments/${department.id}/edit`}>
+                      <FileEdit className="h-4 w-4" />
+                      <span className="sr-only">Edit</span>
+                    </Link>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setDepartmentToDelete(department)}>
+                    <Trash2 className="h-4 w-4" />
+                    <span className="sr-only">Delete</span>
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={2} className="h-24 text-center">
+                No departments found
               </TableCell>
             </TableRow>
-          ))}
+          )}
         </TableBody>
       </Table>
 

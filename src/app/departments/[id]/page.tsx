@@ -27,7 +27,7 @@ export default async function DepartmentPage({
   return (
     <DashboardShell>
       <DashboardHeader
-        heading={`${department.name} Department`}
+        heading={`${department.department?.name} Department`}
         text="Manage department">
         <div className="flex gap-2">
           <Button variant="outline" asChild>
@@ -47,7 +47,7 @@ export default async function DepartmentPage({
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
-            {department.name}
+            {department.department?.name}
           </CardHeader>
         </Card>
       </div>

@@ -18,7 +18,7 @@ export default async function DepartmentsPage() {
 
   const departments = await getDepartments();
 
-  if (!departments) {
+  if (!departments.success) {
     return <div>No departments found</div>;
   }
 
@@ -35,7 +35,7 @@ export default async function DepartmentsPage() {
         </Link>
       </DashboardHeader>
 
-      <DepartmentList departments={departments} />
+      <DepartmentList departments={departments.departments || []} />
     </DashboardShell>
   );
 }

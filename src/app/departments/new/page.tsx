@@ -11,13 +11,11 @@ import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/use-toast";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
-import { createDepartment } from "../actions";
-
-const departmentSchema = z.object({
-  name: z.string().min(3, "Name must be at least 3 characters"),
-});
-
-type DepartmentFormValues = z.infer<typeof departmentSchema>;
+import { createDepartment } from "@/actions/departments";
+import {
+  departmentSchema,
+  type DepartmentFormValues,
+} from "@/actions/departments.validation";
 
 export default function NewDepartmentPage() {
   const router = useRouter();
@@ -38,12 +36,8 @@ export default function NewDepartmentPage() {
     console.log("onSubmit called", data);
     setIsSubmitting(true);
     try {
-      const formDataInstance = new FormData();
-      formDataInstance.append("name", data.name);
-
       const result = await createDepartment({
         name: data.name,
-        formData: formDataInstance,
       });
 
       if (result.success) {
