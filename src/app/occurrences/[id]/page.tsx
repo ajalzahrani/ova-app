@@ -37,9 +37,7 @@ export default async function OccurrenceDetails({
 
   return (
     <DashboardShell>
-      <DashboardHeader
-        heading={occurrence?.title || "Occurrence details"}
-        text={occurrence?.occurrenceNo || "Occurrence details"}>
+      <DashboardHeader heading={`OVA NO: ${occurrence?.occurrenceNo}`}>
         <div className="flex gap-2">
           <Button variant="outline" asChild>
             <Link href="/occurrences">

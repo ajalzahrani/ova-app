@@ -149,12 +149,24 @@ export function OccurrenceView(props: { occurrence: OccurrenceWithRelations }) {
               </span>
             </>
 
+            <>
+              <Clock className="h-4 w-4" />
+              <span>Reported on: </span>
+              <span className="font-medium text-foreground">
+                {occurrence.createdAt.toLocaleDateString()}
+              </span>
+            </>
+
             {occurrence.updatedBy && (
               <>
                 <User className="h-4 w-4" />
                 <span>Updated by: </span>
                 <span className="font-medium text-foreground">
                   {occurrence.updatedBy.name}
+                </span>
+                <span>Updated on: </span>
+                <span className="font-medium text-foreground">
+                  {occurrence.updatedAt.toLocaleDateString()}
                 </span>
               </>
             )}

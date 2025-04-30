@@ -147,6 +147,16 @@ export const columns: ColumnDef<Occurrence>[] = [
     },
   },
   {
+    accessorKey: "date",
+    header: "Occurred",
+    cell: ({ row }) => {
+      const date = row.original.date;
+      return formatDistanceToNow(new Date(date), {
+        addSuffix: true,
+      });
+    },
+  },
+  {
     accessorKey: "reported",
     header: "Reported",
     cell: ({ row }) => {
