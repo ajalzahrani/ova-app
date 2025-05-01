@@ -20,7 +20,7 @@ export function UserNav() {
 
   const handleSignOut = async () => {
     await signOut({ redirect: false });
-    router.push("/login");
+    router.push("/");
   };
 
   // Get initials for avatar fallback

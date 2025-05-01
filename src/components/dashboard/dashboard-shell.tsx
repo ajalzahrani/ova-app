@@ -1,6 +1,7 @@
 import type React from "react";
 import { MainNav } from "@/components/dashboard/main-nav";
 import { UserNav } from "@/components/dashboard/user-nav";
+import { ModeToggle } from "@/components/ui/mode-toggle";
 
 interface DashboardShellProps {
   children: React.ReactNode;
@@ -13,7 +14,10 @@ export function DashboardShell({ children, className }: DashboardShellProps) {
       <header className="sticky top-0 z-40 border-b bg-background">
         <div className="container mx-auto max-w-screen-xl flex h-16 items-center justify-between py-4 px-4">
           <MainNav />
-          <UserNav />
+          <div className="space-x-3">
+            <UserNav />
+            <ModeToggle />
+          </div>
         </div>
       </header>
       <main className="flex-1">
