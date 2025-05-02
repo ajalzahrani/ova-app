@@ -5,8 +5,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/providers/auth-provider";
-import { AuthCheck } from "@/components/auth/auth-check";
-
+import { Navbar } from "@/components/navbar/navbar";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -29,8 +28,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange>
           <AuthProvider>
-            <Toaster />
+            <Navbar />
             {children}
+            <Toaster />
           </AuthProvider>
         </ThemeProvider>
       </body>

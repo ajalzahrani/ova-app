@@ -26,17 +26,10 @@ Now I am using the old way to check server permissions. I found out that using d
  *
  *
  */
-import { getServerSession } from "next-auth";
-import { authOptions, getCurrentUser } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
 export async function checkServerPermission(required: string | string[]) {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user) {
-    redirect("/login");
-  }
-
   // Fetch user with role and permissions
   const user = await getCurrentUser();
 
