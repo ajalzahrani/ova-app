@@ -13,25 +13,8 @@ import { RecentIncidents } from "@/components/dashboard/recent-incidents";
 import Link from "next/link";
 import { PlusCircle } from "lucide-react";
 import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { redirect } from "next/navigation";
-
-interface Department {
-  id: string;
-  name: string;
-  description: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
 
 export default async function DashboardPage() {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user) {
-    redirect("/login");
-  }
-
   // Get occurrence counts
   const totalOccurrences = await prisma.occurrence.count();
   const openOccurrences = await prisma.occurrence.count({

@@ -16,7 +16,7 @@ import {
 export async function getUsers() {
   const session = await getServerSession(authOptions);
 
-  if (!session?.user || session.user.role !== "ADMIN") {
+  if (!session?.user) {
     return { success: false, error: "Not authorized" };
   }
 
@@ -59,7 +59,7 @@ export async function getUsers() {
 export async function getUserById(userId: string) {
   const session = await getServerSession(authOptions);
 
-  if (!session?.user || session.user.role !== "ADMIN") {
+  if (!session?.user) {
     return { success: false, error: "Not authorized" };
   }
 
@@ -94,7 +94,7 @@ export async function getUserById(userId: string) {
 export async function createUser(data: UserFormValuesWithRolesAndDepartments) {
   const session = await getServerSession(authOptions);
 
-  if (!session?.user || session.user.role !== "ADMIN") {
+  if (!session?.user) {
     return { success: false, error: "Not authorized" };
   }
 
@@ -164,7 +164,7 @@ export async function updateUser(
 ) {
   const session = await getServerSession(authOptions);
 
-  if (!session?.user || session.user.role !== "ADMIN") {
+  if (!session?.user) {
     return { success: false, error: "Not authorized" };
   }
 
@@ -215,6 +215,16 @@ export async function updateUser(
         data: {
           department: {
             connect: { id: validatedData.department.id },
+          },
+        },
+      });
+
+      // Update role assignments
+      await tx.user.update({
+        where: { id: userId },
+        data: {
+          role: {
+            connect: { id: validatedData.role.id },
           },
         },
       });

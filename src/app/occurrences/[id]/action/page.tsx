@@ -9,7 +9,7 @@ import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getOccurrenceById } from "../../../../actions/occurrences";
-
+import { notFound } from "next/navigation";
 export default async function OccurrenceDetails({
   params,
 }: {
@@ -20,7 +20,7 @@ export default async function OccurrenceDetails({
   );
 
   if (!occurrence) {
-    return <div>Occurrence not found</div>;
+    return notFound();
   }
 
   return (

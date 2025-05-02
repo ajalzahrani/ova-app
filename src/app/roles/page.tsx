@@ -1,105 +1,20 @@
-"use client";
-
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { PlusCircle, Eye, Edit, Trash2 } from "lucide-react";
+import { PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/components/ui/use-toast";
-import { getRoles, deleteRole } from "@/actions/roles";
+import { getRoles } from "@/actions/roles";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import Link from "next/link";
-import { RoleFormWithPermissions } from "@/actions/roles.validation";
+import { RoleList } from "./components/role-list";
+import { checkServerPermission } from "@/lib/server-permissions";
+import { notFound } from "next/navigation";
 
-export default function RolesPage() {
-  const router = useRouter();
-  const { toast } = useToast();
-  const [roles, setRoles] = useState<RoleFormWithPermissions[]>([]);
-  const [loading, setLoading] = useState(true);
+export default async function RolesPage() {
+  await checkServerPermission("manage:roles");
+  const roles = await getRoles();
 
-  const [roleToDelete, setRoleToDelete] =
-    useState<RoleFormWithPermissions | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  // Fetch roles on component mount
-  useEffect(() => {
-    const fetchRoles = async () => {
-      setLoading(true);
-      try {
-        const result = await getRoles();
-        if (result.success) {
-          setRoles(result.roles as unknown as RoleFormWithPermissions[]);
-        } else {
-          toast({
-            variant: "destructive",
-            title: "Error",
-            description: result.error || "Failed to load roles",
-          });
-        }
-      } catch (err) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "An error occurred while fetching roles",
-        });
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchRoles();
-  }, []);
-
-  // Handle role deletion
-  const handleDeleteRole = async () => {
-    if (!roleToDelete) return;
-
-    setIsDeleting(true);
-    try {
-      const result = await deleteRole(roleToDelete.id || "");
-      if (result.success) {
-        toast({
-          title: "Success",
-          description: `Role '${roleToDelete.name}' has been deleted`,
-        });
-        setRoles(roles.filter((role) => role.id !== roleToDelete.id));
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: result.error || "Failed to delete role",
-        });
-      }
-    } catch (err) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "An error occurred while deleting the role",
-      });
-      console.error(err);
-    } finally {
-      setIsDeleting(false);
-      setRoleToDelete(null);
-    }
-  };
+  if (!roles.success) {
+    return notFound();
+  }
 
   return (
     <DashboardShell>
@@ -112,83 +27,7 @@ export default function RolesPage() {
         </Link>
       </DashboardHeader>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Role Management</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="py-10 text-center">Loading roles...</div>
-          ) : roles.length === 0 ? (
-            <div className="py-10 text-center">No roles found</div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {roles.map((role) => (
-                  <TableRow key={role.id}>
-                    <TableCell className="font-medium">{role.name}</TableCell>
-                    <TableCell>{role.description || "—"}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => router.push(`/roles/${role.id}/edit`)}>
-                          <Edit className="h-4 w-4" />
-                          <span className="sr-only">Edit</span>
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setRoleToDelete(role)}>
-                          <Trash2 className="h-4 w-4" />
-                          <span className="sr-only">Delete</span>
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Delete Confirmation Dialog */}
-      <Dialog
-        open={!!roleToDelete}
-        onOpenChange={(open) => !open && setRoleToDelete(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirm Deletion</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete the role &quot;
-              {roleToDelete?.name}&quot;? This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setRoleToDelete(null)}
-              disabled={isDeleting}>
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDeleteRole}
-              disabled={isDeleting}>
-              {isDeleting ? "Deleting..." : "Delete"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <RoleList roles={roles.roles ?? []} />
     </DashboardShell>
   );
 }

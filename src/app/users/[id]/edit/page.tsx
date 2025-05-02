@@ -15,14 +15,14 @@ import { getRoles } from "@/actions/roles";
 import { getDepartments } from "@/actions/departments";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
-import {
-  UserFormValuesWithRolesAndDepartments,
-  userFormSchema,
-} from "@/actions/users.validations";
 import { RoleFormValues } from "@/actions/roles.validation";
 import { DepartmentFormValues } from "@/actions/departments.validation";
 import { ArrowLeft, Building2 } from "lucide-react";
 import Link from "next/link";
+import {
+  UserFormValuesWithRolesAndDepartments,
+  userFormSchema,
+} from "@/actions/users.validations";
 
 // Define a type for the page params
 interface PageParams {
@@ -258,11 +258,16 @@ export default function EditUserPage({
                       }
                     }}
                   />
-                  <Label
-                    htmlFor={`role-${role.id}`}
-                    className="text-sm font-medium">
-                    {role.name}
-                  </Label>
+                  <div className="flex flex-col">
+                    <Label
+                      htmlFor={`role-${role.id}`}
+                      className="text-sm font-medium">
+                      {role.name}
+                    </Label>
+                    <Label htmlFor={`role-${role.description}`}>
+                      {role.description}
+                    </Label>
+                  </div>
                 </div>
               ))}
             </div>

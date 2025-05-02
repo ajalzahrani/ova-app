@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,25 +10,18 @@ import {
 } from "@/components/ui/card";
 import Link from "next/link";
 import { PlusCircle, LogIn, ShieldAlert } from "lucide-react";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const session = await getServerSession(authOptions);
+
+  if (session) {
+    redirect("/dashboard");
+  }
+
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="border-b bg-background/95 backdrop-blur">
-        <div className="container mx-auto max-w-screen-xl flex h-14 items-center justify-between px-4">
-          <div className="flex items-center space-x-2">
-            <ShieldAlert className="h-6 w-6" />
-            <h1 className="text-xl font-bold">OVA System</h1>
-          </div>
-          <Link href="/login">
-            <Button variant="outline" size="sm">
-              <LogIn className="mr-2 h-4 w-4" />
-              Sign In
-            </Button>
-          </Link>
-        </div>
-      </header>
-
       <main className="flex-1">
         <div className="container mx-auto max-w-screen-xl py-6 md:py-8 px-4">
           <div className="space-y-8">

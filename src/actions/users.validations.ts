@@ -13,17 +13,21 @@ export const userSchema = z.object({
     .optional(),
 });
 
+const userRoleSchema = roleSchema.pick({
+  id: true,
+  name: true,
+  description: true,
+});
+const userDepartmentSchema = departmentSchema.pick({ id: true, name: true });
+
 export const userFormSchema = userSchema.extend({
-  role: roleSchema,
-  department: departmentSchema,
+  role: userRoleSchema,
+  department: userDepartmentSchema,
 });
 
 export type UserFormValues = z.infer<typeof userSchema>;
 
-const userRoleSchema = roleSchema.pick({ id: true, name: true });
-const userDepartmentSchema = departmentSchema.pick({ id: true, name: true });
-
 export type UserFormValuesWithRolesAndDepartments = UserFormValues & {
   role: z.infer<typeof userRoleSchema>;
-  department: z.infer<typeof userDepartmentSchema> | null;
+  department: z.infer<typeof userDepartmentSchema>;
 };

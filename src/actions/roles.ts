@@ -20,6 +20,31 @@ export async function getRoles() {
       orderBy: {
         name: "asc",
       },
+    });
+
+    return {
+      success: true,
+      roles: roles,
+    };
+  } catch (error) {
+    console.error("Error fetching roles:", error);
+    return { success: false, error: "Failed to fetch roles" };
+  }
+}
+
+// Get all roles with their permissions
+export async function getRolesWithPermissions() {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user) {
+    return { success: false, error: "Not authenticated" };
+  }
+
+  try {
+    const roles = await prisma.role.findMany({
+      orderBy: {
+        name: "asc",
+      },
       include: {
         permissions: true,
       },
@@ -111,7 +136,11 @@ export async function createRole(data: RoleFormValues) {
 }
 
 // Update an existing role
-export async function updateRole(roleId: string, data: RoleFormValues) {
+export async function updateRole(
+  roleId: string,
+  data: RoleFormValues,
+  permissionIds: string[]
+) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user || session.user.role !== "ADMIN") {
@@ -144,6 +173,22 @@ export async function updateRole(roleId: string, data: RoleFormValues) {
           description: validatedData.description || null,
         },
       });
+
+      // Update role permissions
+      // First, remove all existing permissions for this role
+      await tx.rolePermission.deleteMany({
+        where: { roleId },
+      });
+
+      // Then, add the new permissions
+      if (permissionIds.length > 0) {
+        await tx.rolePermission.createMany({
+          data: permissionIds.map((permissionId) => ({
+            roleId,
+            permissionId,
+          })),
+        });
+      }
 
       return updatedRole;
     });
@@ -212,49 +257,5 @@ export async function deleteRole(roleId: string) {
   } catch (error) {
     console.error("Error deleting role:", error);
     return { success: false, error: "Failed to delete role" };
-  }
-}
-
-// Update role permissions
-export async function updateRolePermissions(
-  roleId: string,
-  permissionIds: string[]
-) {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user || session.user.role !== "ADMIN") {
-    return { success: false, error: "Not authorized" };
-  }
-
-  try {
-    await prisma.$transaction(async (tx) => {
-      // First, remove all existing permissions for this role
-      await tx.rolePermission.deleteMany({
-        where: { roleId },
-      });
-
-      // Then, add the new permissions
-      if (permissionIds.length > 0) {
-        await tx.rolePermission.createMany({
-          data: permissionIds.map((permissionId) => ({
-            roleId,
-            permissionId,
-          })),
-        });
-      }
-    });
-
-    // Revalidate user & role permissions
-    revalidateTag(`user-session`);
-    revalidateTag(`user-permissions-${session.user.id}`);
-
-    // Revalidate roles pages
-    revalidatePath("/roles");
-    revalidatePath(`/roles/${roleId}`);
-
-    return { success: true };
-  } catch (error) {
-    console.error("Error updating role permissions:", error);
-    return { success: false, error: "Failed to update role permissions" };
   }
 }

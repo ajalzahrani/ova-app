@@ -131,8 +131,8 @@ export default function NewPermissionPage() {
                         <Input placeholder="e.g. view:users" {...field} />
                       </FormControl>
                       <FormDescription>
-                        Use format like "action:resource" (e.g. view:users,
-                        edit:occurrences)
+                        Use format like &quot;action:resource&quot; (e.g.
+                        view:users, edit:occurrences)
                       </FormDescription>
                       <FormMessage />
                     </FormItem>

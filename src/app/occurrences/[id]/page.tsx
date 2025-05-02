@@ -12,6 +12,7 @@ import { PermissionCheck } from "@/components/auth/permission-check";
 import { checkServerPermission } from "@/lib/server-permissions";
 import { checkBusinessPermission } from "@/lib/business-permissions";
 import { getDepartments } from "@/actions/departments";
+import { notFound } from "next/navigation";
 export default async function OccurrenceDetails({
   params,
 }: {
@@ -23,7 +24,7 @@ export default async function OccurrenceDetails({
   const occurrence = await getOccurrenceById(id).then((res) => res.occurrence);
 
   if (!occurrence) {
-    return <div>Occurrence not found</div>;
+    return notFound();
   }
 
   await checkBusinessPermission(occurrence);

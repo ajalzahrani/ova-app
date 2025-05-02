@@ -25,9 +25,7 @@ import { PermissionCheck } from "@/components/auth/permission-check";
 export default async function DepartmentDashboardPage() {
   const session = await getServerSession(authOptions);
 
-  console.log("session at department dashboard", session);
   if (!session?.user) {
-    console.log("no session at department dashboard");
     redirect("/login");
   }
 

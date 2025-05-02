@@ -10,11 +10,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/use-toast";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
-import {
-  getRoleById,
-  updateRole,
-  updateRolePermissions,
-} from "@/actions/roles";
+import { getRoleById, updateRole } from "@/actions/roles";
 import { RoleFormValues, roleSchema } from "@/actions/roles.validation";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -118,7 +114,7 @@ export default function EditRolePage({
     setIsSubmitting(true);
     try {
       // Update role basic info
-      const roleResult = await updateRole(roleId, data);
+      const roleResult = await updateRole(roleId, data, selectedPermissions);
 
       if (!roleResult.success) {
         toast({
@@ -126,24 +122,11 @@ export default function EditRolePage({
           description: roleResult.error,
         });
         return;
-      }
-
-      // Update role permissions using the new server action
-      const permissionsResult = await updateRolePermissions(
-        roleId,
-        selectedPermissions
-      );
-
-      if (permissionsResult.success) {
+      } else {
         toast({
           title: "Role updated successfully",
         });
         router.push("/roles");
-      } else {
-        toast({
-          title: "Failed to update permissions",
-          description: permissionsResult.error,
-        });
       }
     } catch (error) {
       console.error("Error updating role:", error);

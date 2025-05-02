@@ -2,24 +2,18 @@ import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import { DepartmentList } from "./components/department-list";
 import { getDepartments } from "@/actions/departments";
+import { checkServerPermission } from "@/lib/server-permissions";
+import { notFound } from "next/navigation";
 
 export default async function DepartmentsPage() {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user) {
-    redirect("/login");
-  }
+  await checkServerPermission("manage:departments");
 
   const departments = await getDepartments();
-
   if (!departments.success) {
-    return <div>No departments found</div>;
+    return notFound();
   }
 
   return (
