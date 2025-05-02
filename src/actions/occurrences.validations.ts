@@ -12,6 +12,8 @@ export const occurrenceSchema = z.object({
     required_error: "Occurrence date and time is required",
     invalid_type_error: "Invalid date and time format",
   }),
+  contactEmail: z.string().email("Invalid email").optional().or(z.literal("")),
+  contactPhone: z.string().optional().or(z.literal("")),
 });
 
 export type OccurrenceFormValues = z.infer<typeof occurrenceSchema>;

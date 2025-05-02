@@ -17,10 +17,6 @@ import { useRouter } from "next/navigation";
 export function UserNav() {
   const { data: session } = useSession();
 
-  if (!session?.user) {
-    return null;
-  }
-
   const router = useRouter();
 
   const handleSignOut = async () => {
@@ -36,6 +32,10 @@ export function UserNav() {
       .join("")
       .toUpperCase();
   };
+
+  if (!session?.user) {
+    return null;
+  }
 
   return (
     <DropdownMenu>

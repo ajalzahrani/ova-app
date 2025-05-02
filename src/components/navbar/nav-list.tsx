@@ -16,9 +16,10 @@ import { useSession } from "next-auth/react";
 export default function NavList({ items }: { items: NavItem[] }) {
   const { data: session } = useSession();
 
+  const pathname = usePathname();
+
   if (!session) return null;
 
-  const pathname = usePathname();
   return (
     <>
       {items.map((item) => (

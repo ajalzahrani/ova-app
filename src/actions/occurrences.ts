@@ -7,9 +7,9 @@ import { z } from "zod";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import {
-  OccurrenceFormValues,
-  anonymousOccurrenceSchema,
   occurrenceSchema,
+  anonymousOccurrenceSchema,
+  OccurrenceFormValues,
   AnonymousOccurrenceInput,
   referOccurrenceSchema,
   ReferOccurrenceInput,
@@ -19,22 +19,36 @@ import {
 import { Prisma } from "@prisma/client";
 
 export async function createOccurrence(formValues: OccurrenceFormValues) {
-  const user = await getCurrentUser();
+  // const user = await getCurrentUser();
 
-  if (!user) throw new Error("Unauthorized");
+  // if (!user) throw new Error("Unauthorized");
 
   try {
     // Validate data
     const validatedData = occurrenceSchema.parse(formValues);
 
-    // Use a type assertion to bypass the type checking issue
+    // Create a full description with contact info if provided
+    let fullDescription = validatedData.description;
+
+    if (validatedData.contactEmail || validatedData.contactPhone) {
+      fullDescription += "\n\nContact Information:";
+      if (validatedData.contactEmail) {
+        fullDescription += `\nEmail: ${validatedData.contactEmail}`;
+      }
+      if (validatedData.contactPhone) {
+        fullDescription += `\nPhone: ${validatedData.contactPhone}`;
+      }
+    }
+
     const createData: any = {
       mrn: validatedData.mrn,
-      description: validatedData.description,
+      description: fullDescription,
       location: { connect: { id: validatedData.locationId } },
       status: { connect: { name: "OPEN" } },
       incident: { connect: { id: validatedData.incidentId } },
-      createdBy: { connect: { id: user.id } },
+
+      // TODO: Create a user for anonymous reports
+      // createdBy: { connect: { id: "anonymous" } },
       occurrenceDate: validatedData.occurrenceDate
         ? new Date(validatedData.occurrenceDate)
         : null,
@@ -65,11 +79,6 @@ export async function createAnonymousOccurrence(
   data: AnonymousOccurrenceInput
 ) {
   try {
-    console.log(
-      "Starting anonymous occurrence creation with data:",
-      JSON.stringify(data)
-    );
-
     // const user = await getCurrentUser();
 
     // if (!user) throw new Error("Unauthorized");
