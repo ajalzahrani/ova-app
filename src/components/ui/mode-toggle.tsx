@@ -11,8 +11,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useSession } from "next-auth/react";
 
 export function ModeToggle() {
+  const { data: session } = useSession();
+
+  if (!session?.user) {
+    return null;
+  }
+
   const { setTheme } = useTheme();
 
   return (
