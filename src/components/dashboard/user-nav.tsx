@@ -20,7 +20,7 @@ export function UserNav() {
 
   const handleSignOut = async () => {
     await signOut({ redirect: false });
-    router.push("/");
+    router.push("/login");
   };
 
   // Get initials for avatar fallback
@@ -42,7 +42,7 @@ export function UserNav() {
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
             <AvatarImage
-              src={session.user.image || "/placeholder.svg?height=32&width=32"}
+              // src={session.user.image || "/placeholder.svg?height=32&width=32"}
               alt={session.user.name || "@user"}
             />
             <AvatarFallback>

@@ -12,15 +12,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { useRouter } from "next/navigation";
 import { PermissionCheck } from "../auth/permission-check";
 
 export function MainNav() {
   const pathname = usePathname();
-  const { data: session } = useSession();
-  const router = useRouter();
-  // Check if the user has admin role
-  const isAdmin = session?.user?.role === "ADMIN";
 
   return (
     <div className="flex gap-6 md:gap-10">

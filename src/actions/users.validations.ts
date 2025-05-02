@@ -20,7 +20,10 @@ export const userFormSchema = userSchema.extend({
 
 export type UserFormValues = z.infer<typeof userSchema>;
 
+const userRoleSchema = roleSchema.pick({ id: true, name: true });
+const userDepartmentSchema = departmentSchema.pick({ id: true, name: true });
+
 export type UserFormValuesWithRolesAndDepartments = UserFormValues & {
-  role: z.infer<typeof roleSchema>;
-  department: z.infer<typeof departmentSchema>;
+  role: z.infer<typeof userRoleSchema>;
+  department: z.infer<typeof userDepartmentSchema> | null;
 };

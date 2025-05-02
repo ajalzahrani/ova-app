@@ -23,8 +23,18 @@ export async function getUsers() {
   try {
     const users = await prisma.user.findMany({
       include: {
-        role: true,
-        department: true,
+        role: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        department: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
       orderBy: {
         name: "asc",

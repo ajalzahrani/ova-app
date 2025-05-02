@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import bcrypt from "bcrypt";
 import { unstable_cache as cache, revalidateTag } from "next/cache";
+import { getPermissionsByRoleId } from "./permissions";
 
 // Cached function to get user data by ID
 const getCachedUserById = cache(
@@ -85,7 +86,12 @@ export async function authenticateUser(email: string, password: string) {
       email: email,
     },
     include: {
-      role: true,
+      role: {
+        select: { id: true, name: true },
+      },
+      department: {
+        select: { id: true },
+      },
     },
   });
 
@@ -99,5 +105,21 @@ export async function authenticateUser(email: string, password: string) {
     return null;
   }
 
-  return user;
+  const permissions = await prisma.permission.findMany({
+    where: { roles: { some: { roleId: user.role.id } } },
+  });
+
+  if (!permissions) {
+    return null;
+  }
+
+  console.log("user", {
+    ...user,
+    permissions: permissions.map((p) => p.code),
+  });
+
+  return {
+    ...user,
+    permissions: permissions.map((p) => p.code),
+  };
 }
