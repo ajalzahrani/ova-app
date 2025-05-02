@@ -16,11 +16,16 @@ model User {
   departmentId       String?
   createdAt          DateTime            @default(now())
   roleId             String
+  feedbackId         String?
   occurrencesCreated Occurrence[]        @relation("CreatedOccurrences")
   occurrencesUpdated Occurrence[]        @relation("UpdatedOccurrences")
   messages           OccurrenceMessage[]
   department         Department?         @relation(fields: [departmentId], references: [id])
   role               Role                @relation(fields: [roleId], references: [id])
+
+  // Feedback token relations
+  sharedFeedbackTokens    FeedbackToken[] @relation("SharedFeedbackTokens")
+  respondedFeedbackTokens FeedbackToken[] @relation("RespondedFeedbackTokens")
 }
 
 model Role {
@@ -95,17 +100,21 @@ model OccurrenceLocation {
 }
 
 model OccurrenceAssignment {
-  id           String     @id @default(uuid())
+  id           String    @id @default(uuid())
   occurrenceId String
   departmentId String
   rootCause    String?
   actionPlan   String?
-  isCompleted  Boolean    @default(false)
+  isCompleted  Boolean   @default(false)
   completedAt  DateTime?
-  assignedAt   DateTime   @default(now())
+  assignedAt   DateTime  @default(now())
   message      String?
-  department   Department @relation(fields: [departmentId], references: [id])
-  occurrence   Occurrence @relation(fields: [occurrenceId], references: [id])
+  feedbackId   String?
+
+  department Department @relation(fields: [departmentId], references: [id])
+  occurrence Occurrence @relation(fields: [occurrenceId], references: [id])
+
+  feedbackToken FeedbackToken? @relation
 }
 
 model OccurrenceMessage {
@@ -118,6 +127,22 @@ model OccurrenceMessage {
   occurrence            Occurrence  @relation(fields: [occurrenceId], references: [id])
   recipientDepartment   Department? @relation(fields: [recipientDepartmentId], references: [id])
   sender                User        @relation(fields: [senderId], references: [id])
+}
+
+model FeedbackToken {
+  id            String    @id @default(uuid())
+  token         String    @unique
+  assignmentId  String    @unique // FK to OccurrenceAssignment
+  sharedById    String // Department head
+  respondedById String? // Employee who responded
+  respondedAt   DateTime?
+  expiresAt     DateTime
+  used          Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+
+  assignment  OccurrenceAssignment @relation(fields: [assignmentId], references: [id])
+  sharedBy    User                 @relation("SharedFeedbackTokens", fields: [sharedById], references: [id])
+  respondedBy User?                @relation("RespondedFeedbackTokens", fields: [respondedById], references: [id])
 }
 
 model OccurrenceStatus {

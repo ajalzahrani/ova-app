@@ -175,6 +175,22 @@ export async function getOccurrenceById(occurrenceId: string) {
   }
 }
 
+export async function getOccurrenceForFeedbackById(occurrenceId: string) {
+  try {
+    const occurrence = await prisma.occurrence.findUnique({
+      where: { id: occurrenceId },
+      include: {
+        assignments: true,
+      },
+    });
+
+    return { success: true, occurrence };
+  } catch (error) {
+    console.error("Error getting occurrence by id:", error);
+    return { success: false, error: "Failed to get occurrence by id" };
+  }
+}
+
 export async function assignToDepartments(
   occurrenceId: string,
   departmentIds: string[]

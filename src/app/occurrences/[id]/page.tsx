@@ -43,14 +43,14 @@ export default async function OccurrenceDetails({
             </Link>
           </Button>
 
-          {/* Action Plan - Only department managers can see this */}
-          {/* <PermissionCheck required="view:action-plan">
+          {/* Share Feedback - Only department managers can see this */}
+          <PermissionCheck required="view:feedback-share">
             <Button asChild>
-              <Link href={`/occurrences/${occurrence?.id}/action`}>
-                Action Plan
+              <Link href={`/occurrences/${occurrence?.id}/feedback`}>
+                Share Feedback
               </Link>
             </Button>
-          </PermissionCheck> */}
+          </PermissionCheck>
 
           {/* Conditional buttons based on occurrence status */}
           {occurrenceStatus === "OPEN" && (
