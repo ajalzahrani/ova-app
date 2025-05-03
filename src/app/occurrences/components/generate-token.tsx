@@ -17,7 +17,7 @@ export function GenerateToken({ assignmentId, sharedById }: Props) {
     console.log("assignmentId", assignmentId);
     console.log("sharedById", sharedById);
 
-    const res = await fetch("/api/feedback-token", {
+    const res = await fetch("/api/feedback/token-generate", {
       method: "POST",
       body: JSON.stringify({ assignmentId, sharedById }),
     });

@@ -82,7 +82,7 @@ export function OccurrenceCommunication({
   };
 
   return (
-    <Card className="mt-8">
+    <Card className="mt-3">
       <CardHeader>
         <CardTitle>Occurrence Communication & Feedback</CardTitle>
       </CardHeader>

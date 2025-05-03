@@ -1,13 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { use, useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function FeedbackForm({ token }: { token: string }) {
+type PageParams = {
+  token: string;
+};
+
+export default function FeedbackForm({
+  params,
+}: {
+  params: PageParams | Promise<PageParams>;
+}) {
+  const resolvedParams = use(params as Promise<PageParams>);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const router = useRouter();
+  const token = resolvedParams.token;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -1,3 +1,5 @@
+"use server";
+
 import { validateFeedbackToken } from "@/lib/feedback-token";
 import { prisma } from "@/lib/prisma";
 
@@ -19,6 +21,7 @@ export async function submitFeedback(token: string, message: string) {
         respondedAt: null,
         expiresAt,
         used: true,
+        responseMessage: message,
       },
     });
 
@@ -26,5 +29,17 @@ export async function submitFeedback(token: string, message: string) {
   } catch (error) {
     console.error("Error submitting feedback:", error);
     return { success: false, error: "Failed to submit feedback" };
+  }
+}
+
+export async function getFeedbackByAssignmentId(assignmentId: string) {
+  try {
+    const feedback = await prisma.feedbackToken.findMany({
+      where: { assignmentId },
+    });
+    return { success: true, feedback };
+  } catch (error) {
+    console.error("Error getting feedback by assignment ID:", error);
+    return { success: false, error: "Failed to get feedback" };
   }
 }

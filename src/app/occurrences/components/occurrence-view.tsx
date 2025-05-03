@@ -24,6 +24,8 @@ import { cn } from "@/lib/utils";
 import { OccurrenceStatus, Prisma } from "@prisma/client";
 import { OccurrenceCommunication } from "./occurrence-communication";
 import { format } from "date-fns";
+import { OccurrenceFeedback } from "./occurrence-feedback";
+import { PermissionCheck } from "@/components/auth/permission-check";
 type OccurrenceWithRelations = Prisma.OccurrenceGetPayload<{
   include: {
     assignments: {
@@ -260,6 +262,14 @@ export function OccurrenceView(props: { occurrence: OccurrenceWithRelations }) {
           </ul>
         </CardContent>
       </Card>
+
+      {/* Internal feedback from the department */}
+      <PermissionCheck required="view:feedback-share">
+        <OccurrenceFeedback
+          assignmentId={occurrence.assignments[0].id}
+          occurrenceId={occurrence.id}
+        />
+      </PermissionCheck>
 
       {/* Add the group communication and feedback thread */}
       <OccurrenceCommunication occurrenceId={occurrence.id} />

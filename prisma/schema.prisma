@@ -130,15 +130,16 @@ model OccurrenceMessage {
 }
 
 model FeedbackToken {
-  id            String    @id @default(uuid())
-  token         String    @unique
-  assignmentId  String    @unique // FK to OccurrenceAssignment
-  sharedById    String // Department head
-  respondedById String? // Employee who responded
-  respondedAt   DateTime?
-  expiresAt     DateTime
-  used          Boolean   @default(false)
-  createdAt     DateTime  @default(now())
+  id              String    @id @default(uuid())
+  token           String    @unique
+  assignmentId    String    @unique // FK to OccurrenceAssignment
+  sharedById      String // Department head
+  respondedById   String? // Employee who responded
+  respondedAt     DateTime?
+  expiresAt       DateTime
+  used            Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  responseMessage String?
 
   assignment  OccurrenceAssignment @relation(fields: [assignmentId], references: [id])
   sharedBy    User                 @relation("SharedFeedbackTokens", fields: [sharedById], references: [id])

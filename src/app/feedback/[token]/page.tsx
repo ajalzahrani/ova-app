@@ -9,8 +9,13 @@ type FeedbackPageProps = {
   };
 };
 
-export default async function FeedbackPage({ params }: FeedbackPageProps) {
-  const result = await validateFeedbackToken(params.token);
+export default async function FeedbackPage({
+  params,
+}: {
+  params: Promise<{ token: string }>;
+}) {
+  const token = (await params).token;
+  const result = await validateFeedbackToken(token);
 
   if (!result.valid) {
     return (
@@ -39,7 +44,7 @@ export default async function FeedbackPage({ params }: FeedbackPageProps) {
         <p>{assignment.occurrence.description}</p>
       </div>
 
-      <FeedbackForm token={params.token} />
+      <FeedbackForm params={params} />
     </div>
   );
 }

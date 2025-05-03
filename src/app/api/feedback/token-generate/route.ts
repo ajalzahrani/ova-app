@@ -1,7 +1,14 @@
+import { getCurrentUser } from "@/lib/auth";
 import { generateFeedbackToken } from "@/lib/feedback-token";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
+  const user = await getCurrentUser();
+
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const body = await req.json();
   const { assignmentId, sharedById } = body;
 
