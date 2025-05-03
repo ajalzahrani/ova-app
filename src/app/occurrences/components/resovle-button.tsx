@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { resolveOccurrence } from "../../../actions/occurrences";
+import { resolveOccurrence } from "@/actions/occurrences";
 import { useRouter } from "next/navigation";
 
 export function ResolveButton({ occurrenceId }: { occurrenceId: string }) {

@@ -24,8 +24,9 @@ import { cn } from "@/lib/utils";
 import { OccurrenceStatus, Prisma } from "@prisma/client";
 import { OccurrenceCommunication } from "./occurrence-communication";
 import { format } from "date-fns";
-import { OccurrenceFeedback } from "./occurrence-feedback";
+import { OccurrenceFeedback } from "./occurrence-feedback-response";
 import { PermissionCheck } from "@/components/auth/permission-check";
+import { getCurrentUser } from "@/lib/auth";
 type OccurrenceWithRelations = Prisma.OccurrenceGetPayload<{
   include: {
     assignments: {
@@ -45,8 +46,17 @@ type OccurrenceWithRelations = Prisma.OccurrenceGetPayload<{
   };
 }>;
 
-export function OccurrenceView(props: { occurrence: OccurrenceWithRelations }) {
+export async function OccurrenceView(props: {
+  occurrence: OccurrenceWithRelations;
+}) {
   const { occurrence } = props;
+
+  const user = await getCurrentUser();
+
+  const assignmentId = occurrence.assignments.find(
+    (assignment) => assignment.department.id === user?.departmentId
+  )?.id;
+
   // Function to determine severity badge color
   const getSeverityColor = (severityName: string) => {
     const name = severityName.toLowerCase();
@@ -175,7 +185,6 @@ export function OccurrenceView(props: { occurrence: OccurrenceWithRelations }) {
           </>
         </CardFooter>
       </Card>
-
       {/* Incident and severity info */}
       <div className="grid gap-6 md:grid-cols-3">
         <Card>
@@ -236,7 +245,6 @@ export function OccurrenceView(props: { occurrence: OccurrenceWithRelations }) {
           </CardContent>
         </Card>
       </div>
-
       {/* Department assignments */}
       <Card>
         <CardHeader className="pb-3">
@@ -264,11 +272,9 @@ export function OccurrenceView(props: { occurrence: OccurrenceWithRelations }) {
       </Card>
 
       {/* Internal feedback from the department */}
+
       <PermissionCheck required="view:feedback-share">
-        <OccurrenceFeedback
-          assignmentId={occurrence.assignments[0].id}
-          occurrenceId={occurrence.id}
-        />
+        <OccurrenceFeedback assignmentId={assignmentId ?? ""} />
       </PermissionCheck>
 
       {/* Add the group communication and feedback thread */}

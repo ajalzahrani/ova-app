@@ -13,6 +13,7 @@ import { checkServerPermission } from "@/lib/server-permissions";
 import { checkBusinessPermission } from "@/lib/business-permissions";
 import { getDepartments } from "@/actions/departments";
 import { notFound } from "next/navigation";
+import { OccurrenceFeedbackLinkDialog } from "../components/occurrence-feedback-link-dialog";
 export default async function OccurrenceDetails({
   params,
 }: {
@@ -43,14 +44,14 @@ export default async function OccurrenceDetails({
             </Link>
           </Button>
 
-          {/* Share Feedback - Only department managers can see this */}
-          <PermissionCheck required="view:feedback-share">
-            <Button asChild>
-              <Link href={`/occurrences/${occurrence?.id}/feedback`}>
-                Share Feedback
-              </Link>
-            </Button>
-          </PermissionCheck>
+          {occurrenceStatus == "ASSIGNED" && (
+            <>
+              {/* Share Feedback - Only department managers can see this */}
+              <PermissionCheck required="view:feedback-share">
+                <OccurrenceFeedbackLinkDialog occurrence={occurrence} />
+              </PermissionCheck>
+            </>
+          )}
 
           {/* Conditional buttons based on occurrence status */}
           {occurrenceStatus === "OPEN" && (

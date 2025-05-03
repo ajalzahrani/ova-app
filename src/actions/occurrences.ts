@@ -180,7 +180,11 @@ export async function getOccurrenceForFeedbackById(occurrenceId: string) {
     const occurrence = await prisma.occurrence.findUnique({
       where: { id: occurrenceId },
       include: {
-        assignments: true,
+        assignments: {
+          include: {
+            department: true,
+          },
+        },
       },
     });
 

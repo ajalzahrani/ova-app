@@ -1,7 +1,7 @@
 "use client";
 
 import { use, useState } from "react";
-import { useRouter } from "next/navigation";
+import { submitFeedback } from "@/actions/feedbacks";
 
 type PageParams = {
   token: string;
@@ -16,25 +16,20 @@ export default function FeedbackForm({
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const router = useRouter();
   const token = resolvedParams.token;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    const res = await fetch(`/api/feedback/submit`, {
-      method: "POST",
-      body: JSON.stringify({ token, message }),
-      headers: { "Content-Type": "application/json" },
-    });
+    const res = await submitFeedback(token, message);
 
     setLoading(false);
 
-    if (res.ok) {
+    if (res.success) {
       setSubmitted(true);
     } else {
-      alert("Failed to submit feedback. The link may have expired.");
+      alert(res.error);
     }
   };
 

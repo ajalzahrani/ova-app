@@ -1,5 +1,4 @@
-// app/feedback/[token]/page.tsx
-import { validateFeedbackToken } from "@/lib/feedback-token"; // your token validation logic
+import { validateFeedbackToken } from "@/actions/feedbacks";
 import { notFound } from "next/navigation";
 import FeedbackForm from "../components/feedback-form"; // a client component (built below)
 

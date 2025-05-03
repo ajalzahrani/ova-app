@@ -1,76 +1,26 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { formatDistanceToNow } from "date-fns";
 import { getFeedbackByAssignmentId } from "@/actions/feedbacks";
-import { useToast } from "@/components/ui/use-toast";
 import { User } from "lucide-react";
-const messageSchema = z.object({
-  message: z.string().min(1, "Message cannot be empty"),
-});
-
-type MessageFormValues = z.infer<typeof messageSchema>;
-
-interface Feedback {
-  assignmentId: string;
-  id: string;
-  token: string;
-  responseMessage: string;
-  sharedById: string;
-  respondedById: string | null;
-  respondedAt: Date | null;
-  expiresAt: Date;
-  used: boolean;
-  createdAt: Date;
-}
 
 interface OccurrenceFeedbackProps {
   assignmentId: string;
-  occurrenceId: string;
 }
 
-export function OccurrenceFeedback({
+export async function OccurrenceFeedback({
   assignmentId,
-  occurrenceId,
 }: OccurrenceFeedbackProps) {
-  const { toast } = useToast();
-  const [feedback, setFeedback] = useState<Feedback[]>([]);
-  const [loading, setLoading] = useState(true);
+  if (!assignmentId || assignmentId.length === 0) return null;
 
-  const form = useForm<MessageFormValues>({
-    resolver: zodResolver(messageSchema),
-    defaultValues: { message: "" },
-  });
+  const feedbackResponse = await getFeedbackByAssignmentId(assignmentId);
+  const feedback = feedbackResponse.feedback;
 
-  // Fetch messages
-  const fetchFeedback = async () => {
-    setLoading(true);
-    const res = await getFeedbackByAssignmentId(assignmentId);
-    if (res.success) {
-      setFeedback(res.feedback ?? []);
-    } else {
-      setFeedback([]);
-    }
-    setLoading(false);
-  };
+  if (!feedback) return null;
 
-  useEffect(() => {
-    fetchFeedback();
-    const interval = setInterval(fetchFeedback, 100000); // Poll every 100s
-    return () => clearInterval(interval);
-  }, [assignmentId]);
-
-  // TODO: Submit feedback as message to the occurrence
-
-  // TODO: If not shared link return null
   if (feedback.length === 0) return null;
 
-  if (!feedback) {
+  if (!feedback[0].used) {
     return (
       <Card className="mt-8">
         <CardHeader>
@@ -90,9 +40,7 @@ export function OccurrenceFeedback({
       </CardHeader>
       <CardContent>
         <div className="max-h-80 overflow-y-auto space-y-4 mb-4 bg-muted/50 p-4 rounded-md">
-          {loading ? (
-            <div>Loading feedback...</div>
-          ) : feedback.length === 0 ? (
+          {feedback.length === 0 ? (
             <div className="text-muted-foreground">No feedback yet.</div>
           ) : (
             feedback.map((feedback) => (
