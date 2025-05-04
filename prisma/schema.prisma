@@ -155,9 +155,11 @@ model OccurrenceStatus {
 
 model Incident {
   id          String       @id @default(uuid())
-  name        String       @unique
+  name        String       
   description String?
   severityId  String
+  oldId       String?
+  category    String?
   parentId    String?
   parent      Incident?    @relation("IncidentHierarchy", fields: [parentId], references: [id])
   children    Incident[]   @relation("IncidentHierarchy")

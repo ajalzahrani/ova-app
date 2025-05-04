@@ -1,3 +1,4 @@
+import "dotenv/config"; // ✅ This loads the .env file manually
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 
@@ -351,151 +352,151 @@ async function main() {
     },
   });
 
-  const incident1 = await prisma.incident.upsert({
-    where: { name: "Verbal Abuse" },
-    update: {
-      name: "Verbal Abuse",
-      severity: {
-        connect: {
-          id: severityLow.id,
-        },
-      },
-    },
-    create: {
-      name: "Verbal Abuse",
-      severity: {
-        connect: { id: severityLow.id },
-      },
-    },
-  });
+  // const incident1 = await prisma.incident.upsert({
+  //   where: { name: "Verbal Abuse" },
+  //   update: {
+  //     name: "Verbal Abuse",
+  //     severity: {
+  //       connect: {
+  //         id: severityLow.id,
+  //       },
+  //     },
+  //   },
+  //   create: {
+  //     name: "Verbal Abuse",
+  //     severity: {
+  //       connect: { id: severityLow.id },
+  //     },
+  //   },
+  // });
 
-  const incident2 = await prisma.incident.upsert({
-    where: { name: "Physical Assault" },
-    update: {
-      name: "Physical Assault",
-      severity: {
-        connect: {
-          id: severityMedium.id,
-        },
-      },
-    },
-    create: {
-      name: "Physical Assault",
-      severity: { connect: { id: severityMedium.id } },
-    },
-  });
+  // const incident2 = await prisma.incident.upsert({
+  //   where: { name: "Physical Assault" },
+  //   update: {
+  //     name: "Physical Assault",
+  //     severity: {
+  //       connect: {
+  //         id: severityMedium.id,
+  //       },
+  //     },
+  //   },
+  //   create: {
+  //     name: "Physical Assault",
+  //     severity: { connect: { id: severityMedium.id } },
+  //   },
+  // });
 
-  const incident3 = await prisma.incident.upsert({
-    where: { name: "Threatening Behavior" },
-    update: {
-      name: "Threatening Behavior",
-      severity: {
-        connect: {
-          id: severityHigh.id,
-        },
-      },
-    },
-    create: {
-      name: "Threatening Behavior",
-      severity: { connect: { id: severityHigh.id } },
-    },
-  });
+  // const incident3 = await prisma.incident.upsert({
+  //   where: { name: "Threatening Behavior" },
+  //   update: {
+  //     name: "Threatening Behavior",
+  //     severity: {
+  //       connect: {
+  //         id: severityHigh.id,
+  //       },
+  //     },
+  //   },
+  //   create: {
+  //     name: "Threatening Behavior",
+  //     severity: { connect: { id: severityHigh.id } },
+  //   },
+  // });
 
-  const incident4 = await prisma.incident.upsert({
-    where: { name: "Harassment" },
-    update: {
-      name: "Harassment",
-      severity: {
-        connect: {
-          id: severityCritical.id,
-        },
-      },
-    },
-    create: {
-      name: "Harassment",
-      severity: { connect: { id: severityCritical.id } },
-    },
-  });
+  // const incident4 = await prisma.incident.upsert({
+  //   where: { name: "Harassment" },
+  //   update: {
+  //     name: "Harassment",
+  //     severity: {
+  //       connect: {
+  //         id: severityCritical.id,
+  //       },
+  //     },
+  //   },
+  //   create: {
+  //     name: "Harassment",
+  //     severity: { connect: { id: severityCritical.id } },
+  //   },
+  // });
 
-  const incident5 = await prisma.incident.upsert({
-    where: { name: "Property Damage" },
-    update: {
-      name: "Property Damage",
-      severity: {
-        connect: {
-          id: severityCritical.id,
-        },
-      },
-    },
-    create: {
-      name: "Property Damage",
-      severity: { connect: { id: severityCritical.id } },
-    },
-  });
+  // const incident5 = await prisma.incident.upsert({
+  //   where: { name: "Property Damage" },
+  //   update: {
+  //     name: "Property Damage",
+  //     severity: {
+  //       connect: {
+  //         id: severityCritical.id,
+  //       },
+  //     },
+  //   },
+  //   create: {
+  //     name: "Property Damage",
+  //     severity: { connect: { id: severityCritical.id } },
+  //   },
+  // });
 
-  const incident6 = await prisma.incident.upsert({
-    where: { name: "Other" },
-    update: {
-      name: "Other",
-      severity: {
-        connect: {
-          id: severityLow.id,
-        },
-      },
-    },
-    create: {
-      name: "Other",
-      severity: { connect: { id: severityLow.id } },
-    },
-  });
+  // const incident6 = await prisma.incident.upsert({
+  //   where: { name: "Other" },
+  //   update: {
+  //     name: "Other",
+  //     severity: {
+  //       connect: {
+  //         id: severityLow.id,
+  //       },
+  //     },
+  //   },
+  //   create: {
+  //     name: "Other",
+  //     severity: { connect: { id: severityLow.id } },
+  //   },
+  // });
 
-  const incident7 = await prisma.incident.upsert({
-    where: { name: "Fighting" },
-    update: {
-      name: "Fighting",
-      severity: {
-        connect: {
-          id: severityHigh.id,
-        },
-      },
-      parent: {
-        connect: {
-          id: incident2.id,
-        },
-      },
-    },
-    create: {
-      name: "Fighting",
-      severity: { connect: { id: severityHigh.id } },
-      parent: {
-        connect: { id: incident2.id },
-      },
-    },
-  });
+  // const incident7 = await prisma.incident.upsert({
+  //   where: { name: "Fighting" },
+  //   update: {
+  //     name: "Fighting",
+  //     severity: {
+  //       connect: {
+  //         id: severityHigh.id,
+  //       },
+  //     },
+  //     parent: {
+  //       connect: {
+  //         id: incident2.id,
+  //       },
+  //     },
+  //   },
+  //   create: {
+  //     name: "Fighting",
+  //     severity: { connect: { id: severityHigh.id } },
+  //     parent: {
+  //       connect: { id: incident2.id },
+  //     },
+  //   },
+  // });
 
-  const incident8 = await prisma.incident.upsert({
-    where: { name: "Fighting with a weapon" },
-    update: {
-      name: "Fighting with a weapon",
-      severity: {
-        connect: {
-          id: severityHigh.id,
-        },
-      },
-      parent: {
-        connect: {
-          id: incident7.id,
-        },
-      },
-    },
-    create: {
-      name: "Fighting with a weapon",
-      severity: { connect: { id: severityHigh.id } },
-      parent: {
-        connect: { id: incident7.id },
-      },
-    },
-  });
+  // const incident8 = await prisma.incident.upsert({
+  //   where: { name: "Fighting with a weapon" },
+  //   update: {
+  //     name: "Fighting with a weapon",
+  //     severity: {
+  //       connect: {
+  //         id: severityHigh.id,
+  //       },
+  //     },
+  //     parent: {
+  //       connect: {
+  //         id: incident7.id,
+  //       },
+  //     },
+  //   },
+  //   create: {
+  //     name: "Fighting with a weapon",
+  //     severity: { connect: { id: severityHigh.id } },
+  //     parent: {
+  //       connect: { id: incident7.id },
+  //     },
+  //   },
+  // });
 
   const location1 = await prisma.occurrenceLocation.upsert({
     where: { name: "Office" },
@@ -788,14 +789,14 @@ async function main() {
     severityMedium,
     severityHigh,
     severityCritical,
-    incident1,
-    incident2,
-    incident3,
-    incident4,
-    incident5,
-    incident6,
-    incident7,
-    incident8,
+    // incident1,
+    // incident2,
+    // incident3,
+    // incident4,
+    // incident5,
+    // incident6,
+    // incident7,
+    // incident8,
     location1,
     location2,
     location3,
