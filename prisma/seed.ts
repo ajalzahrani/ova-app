@@ -192,19 +192,19 @@ async function main() {
   });
 
   const nursingUser = await prisma.user.upsert({
-    where: { email: "nursing@ova.com" },
+    where: { email: "ket@ova.com" },
     update: {
-      email: "nursing@ova.com",
-      name: "Nursing User",
-      username: "nursing",
+      email: "ket@ova.com",
+      name: "Miss Kitchining",
+      username: "ket",
       password: hashedPassword,
       roleId: departmentRole.id,
       departmentId: nursingDepartment.id,
     },
     create: {
-      email: "nursing@ova.com",
-      name: "Nursing User",
-      username: "nursing",
+      email: "ket@ova.com",
+      name: "Miss Kitchining",
+      username: "ket",
       password: hashedPassword,
       roleId: departmentRole.id,
       departmentId: nursingDepartment.id,
@@ -539,92 +539,139 @@ async function main() {
 
   // Create default permissions
   const permissions = [
+    // Management permissions
+    {
+      code: "manage:management",
+      name: "Manage Department",
+      description: "Ability to view department pages",
+    },
+    {
+      code: "manage:users",
+      name: "Manage users",
+      description: "Ability to view users pages",
+    },
+    {
+      code: "manage:roles",
+      name: "Manage roles",
+      description: "Ability to view roles pages",
+    },
+    {
+      code: "manage:departments",
+      name: "Manage Departments",
+      description: "Ability to view departments pages",
+    },
+    {
+      code: "manage:permissions",
+      name: "Manage Permissions",
+      description: "Ability to view permissions pages",
+    },
+    {
+      code: "manage:occurrences",
+      name: "Manage Occurrences",
+      description: "Ability to view occurrences pages",
+    },
+    {
+      code: "manage:reports",
+      name: "Manage Reports",
+      description: "Ability to view reports pages",
+    },
+    {
+      code: "manage:settings",
+      name: "Manage Settings",
+      description: "Ability to view settings pages",
+    },
+
     // Occurrence permissions
     {
-      code: "view:occurrences",
-      name: "View Occurrences",
-      description: "Ability to view occurrences",
+      code: "view:occurrence",
+      name: "View Occurrence",
+      description: "Ability to view occurrence",
     },
     {
-      code: "create:occurrences",
-      name: "Create Occurrences",
-      description: "Ability to create new occurrences",
+      code: "create:occurrence",
+      name: "Create Occurrence",
+      description: "Ability to create new occurrence",
     },
     {
-      code: "edit:occurrences",
-      name: "Edit Occurrences",
-      description: "Ability to edit existing occurrences",
+      code: "edit:occurrence",
+      name: "Edit Occurrence",
+      description: "Ability to edit existing occurrence",
     },
     {
-      code: "delete:occurrences",
-      name: "Delete Occurrences",
-      description: "Ability to delete occurrences",
+      code: "delete:occurrence",
+      name: "Delete Occurrence",
+      description: "Ability to delete occurrence",
     },
     {
-      code: "resolve:occurrences",
-      name: "Resolve Occurrences",
-      description: "Ability to resolve occurrences",
+      code: "resolve:occurrence",
+      name: "Resolve Occurrence",
+      description: "Ability to resolve occurrence",
     },
     {
-      code: "refer:occurrences",
-      name: "Refer Occurrences",
+      code: "refer:occurrence",
+      name: "Refer Occurrence",
       description: "Ability to refer occurrences to departments",
     },
     {
-      code: "action:occurrences",
-      name: "Create Action Plans",
-      description: "Ability to create action plans for occurrences",
+      code: "action:occurrence",
+      name: "Create Action Plan",
+      description: "Ability to create action plans for occurrence",
+    },
+    {
+      code: "view:feedback-share",
+      name: "View Feedback Share",
+      description: "Ability to view feedback share",
     },
 
     // User management permissions
     {
-      code: "view:users",
-      name: "View Users",
-      description: "Ability to view user profiles",
+      code: "view:user",
+      name: "View User",
+      description: "Ability to view user profile",
     },
     {
-      code: "create:users",
-      name: "Create Users",
-      description: "Ability to create new users",
+      code: "create:user",
+      name: "Create User",
+      description: "Ability to create new user",
     },
     {
-      code: "edit:users",
-      name: "Edit Users",
+      code: "edit:user",
+      name: "Edit User",
       description: "Ability to edit user details",
     },
     {
-      code: "delete:users",
-      name: "Delete Users",
-      description: "Ability to delete users",
+      code: "delete:user",
+      name: "Delete User",
+      description: "Ability to delete user",
     },
 
     // Role permissions
     {
-      code: "view:roles",
-      name: "View Roles",
-      description: "Ability to view roles",
+      code: "view:role",
+      name: "View Role",
+      description: "Ability to view role",
     },
     {
-      code: "create:roles",
-      name: "Create Roles",
-      description: "Ability to create new roles",
+      code: "create:role",
+      name: "Create Role",
+      description: "Ability to create new role",
     },
     {
-      code: "edit:roles",
-      name: "Edit Roles",
-      description: "Ability to edit roles",
+      code: "edit:role",
+      name: "Edit Role",
+      description: "Ability to edit role",
     },
     {
-      code: "delete:roles",
-      name: "Delete Roles",
-      description: "Ability to delete roles",
+      code: "delete:role",
+      name: "Delete Role",
+      description: "Ability to delete role",
     },
 
     // Permission management
     {
-      code: "view:permissions",
-      name: "View Permissions",
-      description: "Ability to view permissions",
+      code: "view:permission",
+      name: "View Permission",
+      description: "Ability to view permission",
     },
     {
       code: "manage:permissions",
@@ -656,23 +703,33 @@ async function main() {
   const rolePermissions = {
     ADMIN: ["admin:all"],
     QUALITY_MANAGER: [
-      "view:occurrences",
-      "create:occurrences",
-      "edit:occurrences",
-      "resolve:occurrences",
-      "refer:occurrences",
-      "view:users",
+      "manage:reports",
+      "manage:occurrences",
+      "view:occurrence",
+      "create:occurrence",
+      "edit:occurrence",
+      "resolve:occurrence",
+      "refer:occurrence",
+      "view:user",
     ],
     QUALITY_ASSURANCE: [
-      "view:occurrences",
-      "create:occurrences",
-      "edit:occurrences",
-      "resolve:occurrences",
-      "refer:occurrences",
+      "manage:reports",
+      "manage:occurrences",
+      "view:occurrence",
+      "create:occurrence",
+      "edit:occurrence",
+      "resolve:occurrence",
+      "refer:occurrence",
     ],
-    SAFETY_OFFICER: ["view:occurrences", "create:occurrences"],
-    EMPLOYEE: ["view:occurrences", "create:occurrences"],
-    DEPARTMENT_MANAGER: ["view:occurrences", "action:occurrences"],
+    SAFETY_OFFICER: ["view:occurrence", "create:occurrence"],
+    EMPLOYEE: ["view:occurrence", "create:occurrence"],
+    DEPARTMENT_MANAGER: [
+      "manage:reports",
+      "manage:occurrences",
+      "view:occurrence",
+      "action:occurrence",
+      "view:feedback-share",
+    ],
   };
 
   console.log("Assigning permissions to roles...");
