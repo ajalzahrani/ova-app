@@ -86,3 +86,20 @@ export async function getAllIncidentsHierarchy() {
     },
   });
 }
+
+// Get all incidents with hierarchical structure
+export async function getAllIncidentsHierarchyByIncidentId(incidentId: string) {
+  return await await prisma.incident.findUnique({
+    where: {
+      id: incidentId,
+    },
+    include: {
+      parent: {
+        include: {
+          parent: true,
+        },
+      },
+      children: true,
+    },
+  });
+}

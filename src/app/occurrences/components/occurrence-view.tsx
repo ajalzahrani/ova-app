@@ -27,6 +27,9 @@ import { format } from "date-fns";
 import { OccurrenceFeedback } from "./occurrence-feedback-response";
 import { PermissionCheck } from "@/components/auth/permission-check";
 import { getCurrentUser } from "@/lib/auth";
+import { IncidentHierarchy } from "./incdent-hierarchy";
+import { getAllIncidentsHierarchyByIncidentId } from "@/actions/incidents";
+import { checkServerPermission } from "@/lib/server-permissions";
 type OccurrenceWithRelations = Prisma.OccurrenceGetPayload<{
   include: {
     assignments: {
@@ -51,11 +54,20 @@ export async function OccurrenceView(props: {
 }) {
   const { occurrence } = props;
 
+  await checkServerPermission("view:occurrence");
   const user = await getCurrentUser();
 
   const assignmentId = occurrence.assignments.find(
     (assignment) => assignment.department.id === user?.departmentId
   )?.id;
+
+  const incident = await getAllIncidentsHierarchyByIncidentId(
+    occurrence.incident.id
+  );
+
+  if (!incident) {
+    return <div>No incident found</div>;
+  }
 
   // Function to determine severity badge color
   const getSeverityColor = (severityName: string) => {
@@ -139,7 +151,21 @@ export async function OccurrenceView(props: {
         </CardHeader>
         <CardContent className="pb-3">
           <div className="rounded-md bg-muted/50 p-4">
-            <p className="text-sm leading-relaxed">{occurrence.description}</p>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">MRN</span>
+              <span className="font-normal text-sm text-foreground">
+                {occurrence?.mrn}
+              </span>
+            </div>
+            <Separator className="my-2" />
+            <div className="flex items-start gap-2">
+              <span className="text-sm text-muted-foreground">
+                Description:
+              </span>
+              <span className="font-normal text-sm text-foreground">
+                {occurrence?.description}
+              </span>
+            </div>
           </div>
         </CardContent>
         <CardFooter className="pt-0 text-sm text-muted-foreground flex items-center gap-4">
@@ -185,94 +211,93 @@ export async function OccurrenceView(props: {
           </>
         </CardFooter>
       </Card>
+
       {/* Incident and severity info */}
       <div className="grid gap-6 md:grid-cols-3">
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
               <AlertCircle className="h-5 w-5 text-blue-500" />
-              <CardTitle>Incident Type</CardTitle>
+              <CardTitle>Incident Category</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Badge
-                variant="outline"
-                className="bg-blue-50 text-blue-700 border-blue-200">
-                {occurrence.incident.name}
-              </Badge>
+              <IncidentHierarchy incident={incident} />
             </div>
           </CardContent>
         </Card>
 
-        {/* Location information - add this block */}
-        {occurrence.location && (
+        <div className="grid gap-6 md:grid-cols-1">
           <Card>
-            <CardHeader>
+            <CardHeader className="pb-3">
               <div className="flex items-center gap-2">
-                <MapPin className="h-5 w-5 text-emerald-500" />
-                <CardTitle>Location</CardTitle>
+                <AlertTriangle className="h-5 w-5 text-orange-500" />
+                <CardTitle>Severity Level</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center gap-2">
-                {occurrence.location.name}
-              </div>
+              <Badge
+                variant={
+                  getSeverityColor(occurrence.incident.severity.name) as
+                    | "default"
+                    | "destructive"
+                    | "outline"
+                    | "secondary"
+                    | null
+                }
+                className="font-medium">
+                {occurrence.incident.severity.name}
+              </Badge>
             </CardContent>
           </Card>
-        )}
+
+          {/* Location information - add this block */}
+          {occurrence.location && (
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-5 w-5 text-emerald-500" />
+                  <CardTitle>Location</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-2">
+                  {occurrence.location.name}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
 
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-orange-500" />
-              <CardTitle>Severity Level</CardTitle>
+              <Building2 className="h-5 w-5 text-indigo-500" />
+              <CardTitle>Assigned Departments</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
-            <Badge
-              variant={
-                getSeverityColor(occurrence.incident.severity.name) as
-                  | "default"
-                  | "destructive"
-                  | "outline"
-                  | "secondary"
-                  | null
-              }
-              className="font-medium">
-              {occurrence.incident.severity.name}
-            </Badge>
+            <ul className="grid gap-2">
+              {occurrence.assignments.map(
+                (assignment: { department: { id: string; name: string } }) => (
+                  <li
+                    className="flex items-center gap-2 rounded-md border bg-card p-3 transition-colors hover:bg-accent"
+                    key={assignment.department.id}>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    <span className="font-medium">
+                      {assignment.department.name}
+                    </span>
+                  </li>
+                )
+              )}
+            </ul>
           </CardContent>
         </Card>
       </div>
       {/* Department assignments */}
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-center gap-2">
-            <Building2 className="h-5 w-5 text-indigo-500" />
-            <CardTitle>Assigned Departments</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <ul className="grid gap-2">
-            {occurrence.assignments.map(
-              (assignment: { department: { id: string; name: string } }) => (
-                <li
-                  className="flex items-center gap-2 rounded-md border bg-card p-3 transition-colors hover:bg-accent"
-                  key={assignment.department.id}>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                  <span className="font-medium">
-                    {assignment.department.name}
-                  </span>
-                </li>
-              )
-            )}
-          </ul>
-        </CardContent>
-      </Card>
 
       {/* Internal feedback from the department */}
-
       <PermissionCheck required="view:feedback-share">
         <OccurrenceFeedback assignmentId={assignmentId ?? ""} />
       </PermissionCheck>
