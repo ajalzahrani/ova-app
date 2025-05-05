@@ -1,4 +1,3 @@
-import "dotenv/config"; // ✅ This loads the .env file manually
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 

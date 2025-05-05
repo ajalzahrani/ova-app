@@ -1,101 +1,40 @@
-import "dotenv/config"; // ✅ This loads the .env file manually
-const fs = require("fs");
-const path = require("path");
-
 import { Incident, PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
-async function createIncidentCategory(
-  id: string,
-  name: string,
-  parentId: string,
-  severityId: string = "67b64031-4914-4974-adf5-c8bf2ceeee66"
-): Promise<Incident> {
-  return prisma.incident.create({
-    data: {
-      id,
-      name,
-      parentId,
-      severityId,
-    },
-  });
-}
+import IncidentMasterData from "../IncidentMasterData.json";
 
-async function readIncidentCategories(): Promise<string[]> {
-  const filePath = path.join(__dirname, "..", "IncidentCategories.csv");
-
-  return new Promise((resolve, reject) => {
-    fs.readFile(filePath, "utf8", (err: any, data: any) => {
-      if (err) {
-        console.error("Error reading IncidentCategories.csv:", err);
-        reject(err);
-        return;
-      }
-
-      const incidents = data.split("\n");
-
-      // find duplicates
-      //   const duplicates = incidents.filter(
-      //     (incident: string, index: number) =>
-      //       incidents.indexOf(incident) !== index
-      //   );
-
-      //   console.log(duplicates);
-
-      resolve(incidents);
-    });
-  });
-}
-
-function getCategory(level: string) {
-  if (level === "level 1") {
-    return "1";
-  }
-
-  if (level === "level 2") {
-    return "2";
-  }
-
-  if (level === "level 3") {
-    return "3";
-  }
-
-  return "0";
-}
-
-async function getParentUUID(id: string, category: string) {
+async function getParentUUID(oldId: string, category: string) {
+  // Find the parent incident by oldId and category
   const parent = await prisma.incident.findFirst({
     where: {
-      oldId: id,
+      oldId: oldId,
       category: category,
     },
   });
 
-  if (!parent) {
-    return null;
-  }
-
-  return parent.id;
+  return parent ? parent.id : null;
 }
 
-async function getParentId(id: string, currentLevel: string) {
-  if (id === "null") {
+async function getParentId(
+  parentId: number | null,
+  currentLevel: string
+): Promise<string | null> {
+  if (parentId === null || parentId === undefined) {
     return null;
   }
 
-  if (currentLevel === "level 2") {
-    return getParentUUID(id, "1");
+  // For level 2, parent is level 1; for level 3, parent is level 2
+  if (currentLevel === "2") {
+    return getParentUUID(parentId.toString(), "1");
   }
-
-  if (currentLevel === "level 3") {
-    return getParentUUID(id, "2");
+  if (currentLevel === "3") {
+    return getParentUUID(parentId.toString(), "2");
   }
-
   return null;
 }
 
 async function main() {
-  const incidents = await readIncidentCategories();
+  const incidents = IncidentMasterData.data;
 
   if (!incidents) {
     console.error("No incidents found");
@@ -103,21 +42,21 @@ async function main() {
   }
 
   for (const incident of incidents) {
-    const [id, name, parentId, level] = incident.split(",");
-    if (id === "id") {
-      continue;
-    }
+    const { id, name, parentId, level } = incident;
 
     await prisma.incident.create({
       data: {
         name,
-        parentId: await getParentId(parentId, level),
-        oldId: id,
-        category: getCategory(level),
-        severityId: "5634f28c-8962-4bcb-b67b-e50c2fc1254a",
+        parentId: await getParentId(parentId, level.trim()),
+        oldId: id.toString(),
+        category: level.trim(),
+        severityId: "1d4fc0a6-2656-472e-82ca-d3bb1f402afe", // Adjust as needed
       },
     });
   }
 }
 
-main();
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

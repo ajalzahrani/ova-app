@@ -1,0 +1,2224 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "Falls",
+      "parentId": null,
+      "level": "1"
+    },
+    {
+      "id": 2,
+      "name": "Medication",
+      "parentId": null,
+      "level": "1"
+    },
+    {
+      "id": 3,
+      "name": "Intravenous",
+      "parentId": null,
+      "level": "1"
+    },
+    {
+      "id": 4,
+      "name": "Burns",
+      "parentId": null,
+      "level": "1"
+    },
+    {
+      "id": 5,
+      "name": "Near miss",
+      "parentId": null,
+      "level": "1"
+    },
+    {
+      "id": 6,
+      "name": "Patient Injury",
+      "parentId": null,
+      "level": "1"
+    },
+    {
+      "id": 7,
+      "name": "Needle Stick",
+      "parentId": null,
+      "level": "1"
+    },
+    {
+      "id": 8,
+      "name": "Equipment/ Items",
+      "parentId": null,
+      "level": "1"
+    },
+    {
+      "id": 9,
+      "name": "Events",
+      "parentId": null,
+      "level": "1"
+    },
+    {
+      "id": 10,
+      "name": "Surgery",
+      "parentId": null,
+      "level": "1"
+    },
+    {
+      "id": 11,
+      "name": "Patient Care Issues",
+      "parentId": null,
+      "level": "1"
+    },
+    {
+      "id": 12,
+      "name": "Patient Identification",
+      "parentId": null,
+      "level": "1"
+    },
+    {
+      "id": 13,
+      "name": "Radiology",
+      "parentId": null,
+      "level": "1"
+    },
+    {
+      "id": 14,
+      "name": "Patient ATD or Referral",
+      "parentId": null,
+      "level": "1"
+    },
+    {
+      "id": 15,
+      "name": "Laboratory",
+      "parentId": null,
+      "level": "1"
+    },
+    {
+      "id": 16,
+      "name": "Staff Related Workplace Incident",
+      "parentId": null,
+      "level": "1"
+    },
+    {
+      "id": 17,
+      "name": "Documentation Or Records",
+      "parentId": null,
+      "level": "1"
+    },
+    {
+      "id": 18,
+      "name": "Sentinel Event",
+      "parentId": null,
+      "level": "1"
+    },
+    {
+      "id": 19,
+      "name": "Environmental and Facility",
+      "parentId": null,
+      "level": "1"
+    },
+    {
+      "id": 20,
+      "name": "Dietary Related Issues",
+      "parentId": null,
+      "level": "1"
+    },
+    {
+      "id": 21,
+      "name": "Obstetrical",
+      "parentId": null,
+      "level": "1"
+    },
+    {
+      "id": 22,
+      "name": "Infection Control",
+      "parentId": null,
+      "level": "1"
+    },
+    {
+      "id": 23,
+      "name": "Bed Sore",
+      "parentId": null,
+      "level": "1"
+    },
+    {
+      "id": 24,
+      "name": "Spillage",
+      "parentId": null,
+      "level": "1"
+    },
+    {
+      "id": 25,
+      "name": "Others",
+      "parentId": null,
+      "level": "1"
+    },
+    {
+      "id": 1,
+      "name": "With Injury",
+      "parentId": 1,
+      "level": "2"
+    },
+    {
+      "id": 2,
+      "name": "Without Injury",
+      "parentId": 1,
+      "level": "2"
+    },
+    {
+      "id": 3,
+      "name": "Ordering",
+      "parentId": 2,
+      "level": "2"
+    },
+    {
+      "id": 4,
+      "name": "Dispensing",
+      "parentId": 2,
+      "level": "2"
+    },
+    {
+      "id": 5,
+      "name": "Administration",
+      "parentId": 2,
+      "level": "2"
+    },
+    {
+      "id": 6,
+      "name": "Wrong",
+      "parentId": 3,
+      "level": "2"
+    },
+    {
+      "id": 7,
+      "name": "Disconnected",
+      "parentId": 3,
+      "level": "2"
+    },
+    {
+      "id": 8,
+      "name": "Infiltration",
+      "parentId": 3,
+      "level": "2"
+    },
+    {
+      "id": 9,
+      "name": "Transfusion Problem",
+      "parentId": 3,
+      "level": "2"
+    },
+    {
+      "id": 10,
+      "name": "Electrical",
+      "parentId": 4,
+      "level": "2"
+    },
+    {
+      "id": 11,
+      "name": "Chemical",
+      "parentId": 4,
+      "level": "2"
+    },
+    {
+      "id": 12,
+      "name": "Heating",
+      "parentId": 4,
+      "level": "2"
+    },
+    {
+      "id": 13,
+      "name": "Spills",
+      "parentId": 4,
+      "level": "2"
+    },
+    {
+      "id": 14,
+      "name": "Fire",
+      "parentId": 4,
+      "level": "2"
+    },
+    {
+      "id": 15,
+      "name": "Outside Hospital",
+      "parentId": 6,
+      "level": "2"
+    },
+    {
+      "id": 16,
+      "name": "Inside Hospital",
+      "parentId": 6,
+      "level": "2"
+    },
+    {
+      "id": 17,
+      "name": "Before Procedure",
+      "parentId": 7,
+      "level": "2"
+    },
+    {
+      "id": 18,
+      "name": "During Procedure",
+      "parentId": 7,
+      "level": "2"
+    },
+    {
+      "id": 19,
+      "name": "After Procedure",
+      "parentId": 7,
+      "level": "2"
+    },
+    {
+      "id": 20,
+      "name": "Failure",
+      "parentId": 8,
+      "level": "2"
+    },
+    {
+      "id": 21,
+      "name": "Broken",
+      "parentId": 8,
+      "level": "2"
+    },
+    {
+      "id": 22,
+      "name": "Malfunction",
+      "parentId": 8,
+      "level": "2"
+    },
+    {
+      "id": 23,
+      "name": "Procurement - Out of Stock",
+      "parentId": 8,
+      "level": "2"
+    },
+    {
+      "id": 24,
+      "name": "Procurement - Delay delivery",
+      "parentId": 8,
+      "level": "2"
+    },
+    {
+      "id": 25,
+      "name": "Inappropriate Use",
+      "parentId": 8,
+      "level": "2"
+    },
+    {
+      "id": 26,
+      "name": "CSSD- Instrument Delay Delivery",
+      "parentId": 8,
+      "level": "2"
+    },
+    {
+      "id": 27,
+      "name": "CSSD- Missing Items/Improper Sterilization",
+      "parentId": 8,
+      "level": "2"
+    },
+    {
+      "id": 28,
+      "name": "Unavailable",
+      "parentId": 8,
+      "level": "2"
+    },
+    {
+      "id": 29,
+      "name": "Foreign object found in laundry",
+      "parentId": 8,
+      "level": "2"
+    },
+    {
+      "id": 30,
+      "name": "LAMA Inpatient",
+      "parentId": 9,
+      "level": "2"
+    },
+    {
+      "id": 31,
+      "name": "LAMA ER",
+      "parentId": 9,
+      "level": "2"
+    },
+    {
+      "id": 32,
+      "name": "Dead on arrival",
+      "parentId": 9,
+      "level": "2"
+    },
+    {
+      "id": 33,
+      "name": "ETHICAL/Behavioral Issues",
+      "parentId": 9,
+      "level": "2"
+    },
+    {
+      "id": 34,
+      "name": "Patient Dissatisfied",
+      "parentId": 9,
+      "level": "2"
+    },
+    {
+      "id": 35,
+      "name": "Staff  Dissatisfied",
+      "parentId": 9,
+      "level": "2"
+    },
+    {
+      "id": 36,
+      "name": "Patient absconded",
+      "parentId": 9,
+      "level": "2"
+    },
+    {
+      "id": 37,
+      "name": "Property loss or damage",
+      "parentId": 9,
+      "level": "2"
+    },
+    {
+      "id": 38,
+      "name": "Refused treatment",
+      "parentId": 9,
+      "level": "2"
+    },
+    {
+      "id": 39,
+      "name": "Expired patient",
+      "parentId": 9,
+      "level": "2"
+    },
+    {
+      "id": 40,
+      "name": "Code blue",
+      "parentId": 9,
+      "level": "2"
+    },
+    {
+      "id": 41,
+      "name": "Code red",
+      "parentId": 9,
+      "level": "2"
+    },
+    {
+      "id": 42,
+      "name": "Code white",
+      "parentId": 9,
+      "level": "2"
+    },
+    {
+      "id": 43,
+      "name": "Code pink",
+      "parentId": 9,
+      "level": "2"
+    },
+    {
+      "id": 44,
+      "name": "Code trauma",
+      "parentId": 9,
+      "level": "2"
+    },
+    {
+      "id": 45,
+      "name": "Communication issue ",
+      "parentId": 9,
+      "level": "2"
+    },
+    {
+      "id": 46,
+      "name": "Confidentiality issue",
+      "parentId": 9,
+      "level": "2"
+    },
+    {
+      "id": 47,
+      "name": "Consent/Authorization",
+      "parentId": 10,
+      "level": "2"
+    },
+    {
+      "id": 48,
+      "name": "Patient Identification",
+      "parentId": 10,
+      "level": "2"
+    },
+    {
+      "id": 49,
+      "name": "Unplanned return to OR",
+      "parentId": 10,
+      "level": "2"
+    },
+    {
+      "id": 50,
+      "name": "Cancelled OR Delay",
+      "parentId": 10,
+      "level": "2"
+    },
+    {
+      "id": 51,
+      "name": "Incorrect instrument count (Sponge ,Neddle etc)",
+      "parentId": 10,
+      "level": "2"
+    },
+    {
+      "id": 52,
+      "name": "Surgical site not marked",
+      "parentId": 10,
+      "level": "2"
+    },
+    {
+      "id": 53,
+      "name": "Wrong Site",
+      "parentId": 10,
+      "level": "2"
+    },
+    {
+      "id": 54,
+      "name": "Foreign body left in during procedure",
+      "parentId": 10,
+      "level": "2"
+    },
+    {
+      "id": 55,
+      "name": "Postoperative acute myocardial infarction",
+      "parentId": 10,
+      "level": "2"
+    },
+    {
+      "id": 56,
+      "name": "Postoperative hemorrhage or hematoma",
+      "parentId": 10,
+      "level": "2"
+    },
+    {
+      "id": 57,
+      "name": "Postoperative iatrogenic complication - Cardiac System",
+      "parentId": 10,
+      "level": "2"
+    },
+    {
+      "id": 58,
+      "name": "Postoperative Respiratory Complication - Acute respiratory  failure",
+      "parentId": 10,
+      "level": "2"
+    },
+    {
+      "id": 59,
+      "name": "Postoperative Respiratory Complication - Aspiration Pneumonia",
+      "parentId": 10,
+      "level": "2"
+    },
+    {
+      "id": 60,
+      "name": "Postoperative Respiratory Complications - Post extubation Laryngeal spasm",
+      "parentId": 10,
+      "level": "2"
+    },
+    {
+      "id": 61,
+      "name": "Postoperative Respiratory Complication - Acute Pulmonary Edema",
+      "parentId": 10,
+      "level": "2"
+    },
+    {
+      "id": 62,
+      "name": "Postoperative pulmonary embolism or deep venous thrombosis",
+      "parentId": 10,
+      "level": "2"
+    },
+    {
+      "id": 63,
+      "name": "Iatrogenic pneumothorax",
+      "parentId": 10,
+      "level": "2"
+    },
+    {
+      "id": 64,
+      "name": "Malignant Hyperthermia",
+      "parentId": 10,
+      "level": "2"
+    },
+    {
+      "id": 65,
+      "name": "Body parts",
+      "parentId": 10,
+      "level": "2"
+    },
+    {
+      "id": 66,
+      "name": "Patient Care Delay",
+      "parentId": 11,
+      "level": "2"
+    },
+    {
+      "id": 67,
+      "name": "Procedure Delay",
+      "parentId": 11,
+      "level": "2"
+    },
+    {
+      "id": 68,
+      "name": "Line, Tube, Drain or Catheter",
+      "parentId": 11,
+      "level": "2"
+    },
+    {
+      "id": 69,
+      "name": "Aspiration pneumonia",
+      "parentId": 11,
+      "level": "2"
+    },
+    {
+      "id": 70,
+      "name": "Complication of anesthesia",
+      "parentId": 11,
+      "level": "2"
+    },
+    {
+      "id": 71,
+      "name": "Privacy of patient",
+      "parentId": 11,
+      "level": "2"
+    },
+    {
+      "id": 72,
+      "name": "Major discrepancy between pre & post diagnosis",
+      "parentId": 11,
+      "level": "2"
+    },
+    {
+      "id": 73,
+      "name": "Readmission within 24 hours",
+      "parentId": 11,
+      "level": "2"
+    },
+    {
+      "id": 74,
+      "name": "Pregnancy - contract indication",
+      "parentId": 11,
+      "level": "2"
+    },
+    {
+      "id": 75,
+      "name": "Restraint",
+      "parentId": 11,
+      "level": "2"
+    },
+    {
+      "id": 76,
+      "name": "Consent related issues",
+      "parentId": 11,
+      "level": "2"
+    },
+    {
+      "id": 77,
+      "name": "Wrong patient name",
+      "parentId": 12,
+      "level": "2"
+    },
+    {
+      "id": 78,
+      "name": "Wrong MRN",
+      "parentId": 12,
+      "level": "2"
+    },
+    {
+      "id": 79,
+      "name": "Process Delay",
+      "parentId": 13,
+      "level": "2"
+    },
+    {
+      "id": 80,
+      "name": "Preparation instruction are not followed",
+      "parentId": 13,
+      "level": "2"
+    },
+    {
+      "id": 81,
+      "name": "Consent for special procedure",
+      "parentId": 13,
+      "level": "2"
+    },
+    {
+      "id": 82,
+      "name": "Wrong side or site",
+      "parentId": 13,
+      "level": "2"
+    },
+    {
+      "id": 83,
+      "name": "Radiation or laser safety (Patient)",
+      "parentId": 13,
+      "level": "2"
+    },
+    {
+      "id": 84,
+      "name": "Radiation or laser safety (staff)",
+      "parentId": 13,
+      "level": "2"
+    },
+    {
+      "id": 85,
+      "name": "Radiation or laser safety (patient) not checked for pregnancy test",
+      "parentId": 13,
+      "level": "2"
+    },
+    {
+      "id": 86,
+      "name": "Radiation or laser safety (patient) not instructed to wear Radiation Safety Equipment",
+      "parentId": 13,
+      "level": "2"
+    },
+    {
+      "id": 87,
+      "name": "Radiation or laser safety (staff) No TLD Badge available",
+      "parentId": 13,
+      "level": "2"
+    },
+    {
+      "id": 88,
+      "name": "Radiation or laser safety",
+      "parentId": 13,
+      "level": "2"
+    },
+    {
+      "id": 89,
+      "name": "TLD badge not check monthly(staff)",
+      "parentId": 13,
+      "level": "2"
+    },
+    {
+      "id": 90,
+      "name": "Radiation or laser safety (staff) No proper radiation safety equipment",
+      "parentId": 13,
+      "level": "2"
+    },
+    {
+      "id": 91,
+      "name": "Incorrect procedure",
+      "parentId": 13,
+      "level": "2"
+    },
+    {
+      "id": 92,
+      "name": "Transfer - related issues",
+      "parentId": 14,
+      "level": "2"
+    },
+    {
+      "id": 93,
+      "name": "Discharge - related issues",
+      "parentId": 14,
+      "level": "2"
+    },
+    {
+      "id": 94,
+      "name": "Referral - related issues",
+      "parentId": 14,
+      "level": "2"
+    },
+    {
+      "id": 95,
+      "name": "Processing delay",
+      "parentId": 15,
+      "level": "2"
+    },
+    {
+      "id": 96,
+      "name": "Incorrect  test",
+      "parentId": 15,
+      "level": "2"
+    },
+    {
+      "id": 97,
+      "name": "Incorrect result entry",
+      "parentId": 15,
+      "level": "2"
+    },
+    {
+      "id": 98,
+      "name": "Incorrect  result",
+      "parentId": 15,
+      "level": "2"
+    },
+    {
+      "id": 99,
+      "name": "Wrong specimen label",
+      "parentId": 15,
+      "level": "2"
+    },
+    {
+      "id": 100,
+      "name": "Inconsistent results",
+      "parentId": 15,
+      "level": "2"
+    },
+    {
+      "id": 101,
+      "name": "Delay results",
+      "parentId": 15,
+      "level": "2"
+    },
+    {
+      "id": 102,
+      "name": "Fall",
+      "parentId": 16,
+      "level": "2"
+    },
+    {
+      "id": 103,
+      "name": "Blood or body fluid exposure",
+      "parentId": 16,
+      "level": "2"
+    },
+    {
+      "id": 104,
+      "name": "Hazardous substance exposure",
+      "parentId": 16,
+      "level": "2"
+    },
+    {
+      "id": 105,
+      "name": "Manual handling / back pain",
+      "parentId": 16,
+      "level": "2"
+    },
+    {
+      "id": 106,
+      "name": "Medical record unavailable or delayed",
+      "parentId": 17,
+      "level": "2"
+    },
+    {
+      "id": 107,
+      "name": "Illegible entry or order",
+      "parentId": 17,
+      "level": "2"
+    },
+    {
+      "id": 108,
+      "name": "Filed in wrong health record",
+      "parentId": 17,
+      "level": "2"
+    },
+    {
+      "id": 109,
+      "name": "Unapproved Abbreviations",
+      "parentId": 17,
+      "level": "2"
+    },
+    {
+      "id": 110,
+      "name": "Incomplete or inaccurate documentation",
+      "parentId": 17,
+      "level": "2"
+    },
+    {
+      "id": 111,
+      "name": "Missed MR documentation",
+      "parentId": 17,
+      "level": "2"
+    },
+    {
+      "id": 112,
+      "name": "Information Technology Related",
+      "parentId": 17,
+      "level": "2"
+    },
+    {
+      "id": 113,
+      "name": "Unanticipated death not related to the natural course of illness",
+      "parentId": 18,
+      "level": "2"
+    },
+    {
+      "id": 114,
+      "name": "Major permanent  loss of function",
+      "parentId": 18,
+      "level": "2"
+    },
+    {
+      "id": 115,
+      "name": "Wrong site surgery",
+      "parentId": 18,
+      "level": "2"
+    },
+    {
+      "id": 116,
+      "name": "Wrong procedure",
+      "parentId": 18,
+      "level": "2"
+    },
+    {
+      "id": 117,
+      "name": "Wrong patient surgery",
+      "parentId": 18,
+      "level": "2"
+    },
+    {
+      "id": 118,
+      "name": "Suicide",
+      "parentId": 18,
+      "level": "2"
+    },
+    {
+      "id": 119,
+      "name": "Infant discharge to the wrong family",
+      "parentId": 18,
+      "level": "2"
+    },
+    {
+      "id": 120,
+      "name": "Rape",
+      "parentId": 18,
+      "level": "2"
+    },
+    {
+      "id": 121,
+      "name": "Hemolytic transfusion related to blood group incompatibilities",
+      "parentId": 18,
+      "level": "2"
+    },
+    {
+      "id": 122,
+      "name": "Infant abduction",
+      "parentId": 18,
+      "level": "2"
+    },
+    {
+      "id": 123,
+      "name": "Elevators",
+      "parentId": 19,
+      "level": "2"
+    },
+    {
+      "id": 124,
+      "name": "Non-clinical equipment",
+      "parentId": 19,
+      "level": "2"
+    },
+    {
+      "id": 125,
+      "name": "Housekeeping",
+      "parentId": 19,
+      "level": "2"
+    },
+    {
+      "id": 126,
+      "name": "Infection Control",
+      "parentId": 19,
+      "level": "2"
+    },
+    {
+      "id": 127,
+      "name": "Water Leakage",
+      "parentId": 19,
+      "level": "2"
+    },
+    {
+      "id": 128,
+      "name": "Major gas, power, water or heating failure",
+      "parentId": 19,
+      "level": "2"
+    },
+    {
+      "id": 129,
+      "name": "Waste Management",
+      "parentId": 19,
+      "level": "2"
+    },
+    {
+      "id": 130,
+      "name": "Tube system",
+      "parentId": 19,
+      "level": "2"
+    },
+    {
+      "id": 131,
+      "name": "Hemolytic transfusion related to blood group incompatibilities",
+      "parentId": 19,
+      "level": "2"
+    },
+    {
+      "id": 132,
+      "name": "Pest control",
+      "parentId": 19,
+      "level": "2"
+    },
+    {
+      "id": 133,
+      "name": "Breast feeding contraindication",
+      "parentId": 20,
+      "level": "2"
+    },
+    {
+      "id": 134,
+      "name": "Physician failed to enter diagnosis of the patient",
+      "parentId": 20,
+      "level": "2"
+    },
+    {
+      "id": 135,
+      "name": "Nurse failed to refer the patient in the dietary module",
+      "parentId": 20,
+      "level": "2"
+    },
+    {
+      "id": 136,
+      "name": "Nurse entered a wrong diet",
+      "parentId": 20,
+      "level": "2"
+    },
+    {
+      "id": 137,
+      "name": "Food Services Issue",
+      "parentId": 20,
+      "level": "2"
+    },
+    {
+      "id": 138,
+      "name": "Foreign body found in the food",
+      "parentId": 20,
+      "level": "2"
+    },
+    {
+      "id": 139,
+      "name": "Birth trauma - injury to neonate",
+      "parentId": 21,
+      "level": "2"
+    },
+    {
+      "id": 140,
+      "name": "Obstetric Trauma - Cesarean Delivery",
+      "parentId": 21,
+      "level": "2"
+    },
+    {
+      "id": 141,
+      "name": "Obstetric Trauma - Vaginal instrument",
+      "parentId": 21,
+      "level": "2"
+    },
+    {
+      "id": 142,
+      "name": "Obstetric Trauma - Vaginal without instrument",
+      "parentId": 21,
+      "level": "2"
+    },
+    {
+      "id": 143,
+      "name": "Obstetric wound complications - Cesarean delivery",
+      "parentId": 21,
+      "level": "2"
+    },
+    {
+      "id": 144,
+      "name": "Obstetric wound complications - Vaginal delivery",
+      "parentId": 21,
+      "level": "2"
+    },
+    {
+      "id": 145,
+      "name": "Other obstetric complications",
+      "parentId": 21,
+      "level": "2"
+    },
+    {
+      "id": 146,
+      "name": "Bleeding after delivery (CS /SVD)",
+      "parentId": 21,
+      "level": "2"
+    },
+    {
+      "id": 147,
+      "name": "Transmission of Chronic or Fatal disease as a result of blood transfusion or organ transplant",
+      "parentId": 18,
+      "level": "2"
+    },
+    {
+      "id": 148,
+      "name": "Hospital acquired infection - Ventilators",
+      "parentId": 22,
+      "level": "2"
+    },
+    {
+      "id": 149,
+      "name": "Hospital acquired infection - Postpartum Urinary Tract Infection (UTI)",
+      "parentId": 22,
+      "level": "2"
+    },
+    {
+      "id": 150,
+      "name": "Hand hygiene",
+      "parentId": 22,
+      "level": "2"
+    },
+    {
+      "id": 151,
+      "name": "Hospital acquired infection - Postoperative sepsis",
+      "parentId": 22,
+      "level": "2"
+    },
+    {
+      "id": 152,
+      "name": "Community  acquired",
+      "parentId": 23,
+      "level": "2"
+    },
+    {
+      "id": 153,
+      "name": "Hospital acquired",
+      "parentId": 23,
+      "level": "2"
+    },
+    {
+      "id": 154,
+      "name": "Chemical spill",
+      "parentId": 24,
+      "level": "2"
+    },
+    {
+      "id": 155,
+      "name": "Blood",
+      "parentId": 24,
+      "level": "2"
+    },
+    {
+      "id": 156,
+      "name": "Body Secretion",
+      "parentId": 24,
+      "level": "2"
+    },
+    {
+      "id": 157,
+      "name": "Others",
+      "parentId": 25,
+      "level": "2"
+    },
+    {
+      "id": 158,
+      "name": "Timeout Process not followed",
+      "parentId": 13,
+      "level": "2"
+    },
+    {
+      "id": 159,
+      "name": "Incomplete MRN",
+      "parentId": 12,
+      "level": "2"
+    },
+    {
+      "id": 160,
+      "name": "Incomplete Patient Name",
+      "parentId": 12,
+      "level": "2"
+    },
+    {
+      "id": 161,
+      "name": "Using wrong ID sticker",
+      "parentId": 12,
+      "level": "2"
+    },
+    {
+      "id": 162,
+      "name": "No name or No MRN",
+      "parentId": 12,
+      "level": "2"
+    },
+    {
+      "id": 163,
+      "name": "Incorrect Patient Identification Process",
+      "parentId": 12,
+      "level": "2"
+    },
+    {
+      "id": 164,
+      "name": "Order Error",
+      "parentId": 17,
+      "level": "2"
+    },
+    {
+      "id": 165,
+      "name": "Transcription Error",
+      "parentId": 17,
+      "level": "2"
+    },
+    {
+      "id": 166,
+      "name": "Security",
+      "parentId": 19,
+      "level": "2"
+    },
+    {
+      "id": 167,
+      "name": "Safety",
+      "parentId": 19,
+      "level": "2"
+    },
+    {
+      "id": 168,
+      "name": "Medical Equipment",
+      "parentId": 19,
+      "level": "2"
+    },
+    {
+      "id": 169,
+      "name": "Hazardous Material",
+      "parentId": 19,
+      "level": "2"
+    },
+    {
+      "id": 170,
+      "name": "Fire",
+      "parentId": 19,
+      "level": "2"
+    },
+    {
+      "id": 171,
+      "name": "Sharp Injury",
+      "parentId": 22,
+      "level": "2"
+    },
+    {
+      "id": 172,
+      "name": "Isolation Precausion Compliance",
+      "parentId": 22,
+      "level": "2"
+    },
+    {
+      "id": 173,
+      "name": "Used Instrument Collection",
+      "parentId": 22,
+      "level": "2"
+    },
+    {
+      "id": 174,
+      "name": "Others",
+      "parentId": 22,
+      "level": "2"
+    },
+    {
+      "id": 175,
+      "name": "Hemolytic shock as result of blood transfusion",
+      "parentId": 18,
+      "level": "2"
+    },
+    {
+      "id": 176,
+      "name": "Unlabeled Specimen Container",
+      "parentId": 15,
+      "level": "2"
+    },
+    {
+      "id": 177,
+      "name": "No Requisition",
+      "parentId": 15,
+      "level": "2"
+    },
+    {
+      "id": 178,
+      "name": "Incomplete Orders",
+      "parentId": 15,
+      "level": "2"
+    },
+    {
+      "id": 179,
+      "name": "No Signature / No Date",
+      "parentId": 15,
+      "level": "2"
+    },
+    {
+      "id": 180,
+      "name": "Specimen transport",
+      "parentId": 15,
+      "level": "2"
+    },
+    {
+      "id": 181,
+      "name": "Missed Specimen",
+      "parentId": 15,
+      "level": "2"
+    },
+    {
+      "id": 182,
+      "name": "Sample Mix up",
+      "parentId": 15,
+      "level": "2"
+    },
+    {
+      "id": 183,
+      "name": "Technical Error",
+      "parentId": 15,
+      "level": "2"
+    },
+    {
+      "id": 184,
+      "name": "Phlebotomy Complications",
+      "parentId": 15,
+      "level": "2"
+    },
+    {
+      "id": 185,
+      "name": "Patient Injury(Hematoma etc.)",
+      "parentId": 15,
+      "level": "2"
+    },
+    {
+      "id": 186,
+      "name": "Request / Specimen mismatch",
+      "parentId": 15,
+      "level": "2"
+    },
+    {
+      "id": 187,
+      "name": "Infection",
+      "parentId": 15,
+      "level": "2"
+    },
+    {
+      "id": 188,
+      "name": "Others",
+      "parentId": 15,
+      "level": "2"
+    },
+    {
+      "id": 189,
+      "name": "Timeout Process",
+      "parentId": 10,
+      "level": "2"
+    },
+    {
+      "id": 190,
+      "name": "Break in Sterile Technique",
+      "parentId": 10,
+      "level": "2"
+    },
+    {
+      "id": 191,
+      "name": "Patient Preparation",
+      "parentId": 10,
+      "level": "2"
+    },
+    {
+      "id": 192,
+      "name": "Unanticipated Patient Injury",
+      "parentId": 10,
+      "level": "2"
+    },
+    {
+      "id": 193,
+      "name": "Not Complaining to Timeout",
+      "parentId": 10,
+      "level": "2"
+    },
+    {
+      "id": 194,
+      "name": "Others",
+      "parentId": 10,
+      "level": "2"
+    },
+    {
+      "id": 195,
+      "name": "Test Unavailable",
+      "parentId": 15,
+      "level": "2"
+    },
+    {
+      "id": 196,
+      "name": "COVID-19 Swab Issue",
+      "parentId": 22,
+      "level": "2"
+    },
+    {
+      "id": 1,
+      "name": "Found on the floor",
+      "parentId": 1,
+      "level": "3"
+    },
+    {
+      "id": 2,
+      "name": "Out of bed",
+      "parentId": 1,
+      "level": "3"
+    },
+    {
+      "id": 3,
+      "name": "While standing",
+      "parentId": 1,
+      "level": "3"
+    },
+    {
+      "id": 4,
+      "name": "While walking",
+      "parentId": 1,
+      "level": "3"
+    },
+    {
+      "id": 5,
+      "name": "While sitting",
+      "parentId": 1,
+      "level": "3"
+    },
+    {
+      "id": 6,
+      "name": "Found on the floor",
+      "parentId": 2,
+      "level": "3"
+    },
+    {
+      "id": 7,
+      "name": "Out of bed",
+      "parentId": 2,
+      "level": "3"
+    },
+    {
+      "id": 8,
+      "name": "While standing",
+      "parentId": 2,
+      "level": "3"
+    },
+    {
+      "id": 9,
+      "name": "While walking",
+      "parentId": 2,
+      "level": "3"
+    },
+    {
+      "id": 10,
+      "name": "While sitting",
+      "parentId": 2,
+      "level": "3"
+    },
+    {
+      "id": 11,
+      "name": "Demograpics",
+      "parentId": 3,
+      "level": "3"
+    },
+    {
+      "id": 12,
+      "name": "Legibility",
+      "parentId": 3,
+      "level": "3"
+    },
+    {
+      "id": 13,
+      "name": "Unapproved Abbreviations",
+      "parentId": 3,
+      "level": "3"
+    },
+    {
+      "id": 14,
+      "name": "Medication Wastage",
+      "parentId": 3,
+      "level": "3"
+    },
+    {
+      "id": 15,
+      "name": "Narcotic Wastage",
+      "parentId": 3,
+      "level": "3"
+    },
+    {
+      "id": 16,
+      "name": "Delay",
+      "parentId": 3,
+      "level": "3"
+    },
+    {
+      "id": 17,
+      "name": "Incomplete prescription (missing Generic name drug form, strength, dose, duration etc.)",
+      "parentId": 3,
+      "level": "3"
+    },
+    {
+      "id": 18,
+      "name": "Not available",
+      "parentId": 3,
+      "level": "3"
+    },
+    {
+      "id": 19,
+      "name": "Drug Incompatibilities (disease, food, lab test)",
+      "parentId": 3,
+      "level": "3"
+    },
+    {
+      "id": 20,
+      "name": "Dose adjustment is needed",
+      "parentId": 3,
+      "level": "3"
+    },
+    {
+      "id": 21,
+      "name": "Medication Wastage",
+      "parentId": 4,
+      "level": "3"
+    },
+    {
+      "id": 22,
+      "name": "Narcotic Wastage",
+      "parentId": 4,
+      "level": "3"
+    },
+    {
+      "id": 23,
+      "name": "Delay",
+      "parentId": 4,
+      "level": "3"
+    },
+    {
+      "id": 24,
+      "name": "Wrong medication",
+      "parentId": 4,
+      "level": "3"
+    },
+    {
+      "id": 25,
+      "name": "Not available",
+      "parentId": 4,
+      "level": "3"
+    },
+    {
+      "id": 26,
+      "name": "Wrong Label",
+      "parentId": 4,
+      "level": "3"
+    },
+    {
+      "id": 27,
+      "name": "--",
+      "parentId": 4,
+      "level": "3"
+    },
+    {
+      "id": 28,
+      "name": "Wrong Solution or Dilution",
+      "parentId": 4,
+      "level": "3"
+    },
+    {
+      "id": 29,
+      "name": "Medication Wastage",
+      "parentId": 5,
+      "level": "3"
+    },
+    {
+      "id": 30,
+      "name": "Narcotic Wastage",
+      "parentId": 5,
+      "level": "3"
+    },
+    {
+      "id": 31,
+      "name": "Wrong Patient",
+      "parentId": 5,
+      "level": "3"
+    },
+    {
+      "id": 32,
+      "name": "Wrong medication",
+      "parentId": 5,
+      "level": "3"
+    },
+    {
+      "id": 33,
+      "name": "Wrong Route",
+      "parentId": 5,
+      "level": "3"
+    },
+    {
+      "id": 34,
+      "name": "Wrong Time",
+      "parentId": 5,
+      "level": "3"
+    },
+    {
+      "id": 35,
+      "name": "Wrong Label",
+      "parentId": 5,
+      "level": "3"
+    },
+    {
+      "id": 36,
+      "name": "Wrong Solution or Dilution",
+      "parentId": 5,
+      "level": "3"
+    },
+    {
+      "id": 37,
+      "name": "Wrong pump setting",
+      "parentId": 5,
+      "level": "3"
+    },
+    {
+      "id": 38,
+      "name": "Wrong dose",
+      "parentId": 5,
+      "level": "3"
+    },
+    {
+      "id": 39,
+      "name": "Medical Interaction or Reaction",
+      "parentId": 5,
+      "level": "3"
+    },
+    {
+      "id": 40,
+      "name": "Medication Allergy",
+      "parentId": 5,
+      "level": "3"
+    },
+    {
+      "id": 41,
+      "name": "Patient",
+      "parentId": 6,
+      "level": "3"
+    },
+    {
+      "id": 42,
+      "name": "Solution",
+      "parentId": 6,
+      "level": "3"
+    },
+    {
+      "id": 43,
+      "name": "Rate",
+      "parentId": 6,
+      "level": "3"
+    },
+    {
+      "id": 44,
+      "name": "Order",
+      "parentId": 6,
+      "level": "3"
+    },
+    {
+      "id": 45,
+      "name": "Compounding",
+      "parentId": 6,
+      "level": "3"
+    },
+    {
+      "id": 46,
+      "name": "Site",
+      "parentId": 8,
+      "level": "3"
+    },
+    {
+      "id": 47,
+      "name": "Red",
+      "parentId": 8,
+      "level": "3"
+    },
+    {
+      "id": 48,
+      "name": "Sore",
+      "parentId": 8,
+      "level": "3"
+    },
+    {
+      "id": 49,
+      "name": "Blood or blood product",
+      "parentId": 9,
+      "level": "3"
+    },
+    {
+      "id": 50,
+      "name": "Sepsis",
+      "parentId": 9,
+      "level": "3"
+    },
+    {
+      "id": 51,
+      "name": "Reaction",
+      "parentId": 9,
+      "level": "3"
+    },
+    {
+      "id": 52,
+      "name": "Extravasation",
+      "parentId": 9,
+      "level": "3"
+    },
+    {
+      "id": 53,
+      "name": "Blister",
+      "parentId": 15,
+      "level": "3"
+    },
+    {
+      "id": 54,
+      "name": "Ulceration",
+      "parentId": 15,
+      "level": "3"
+    },
+    {
+      "id": 55,
+      "name": "Fracture",
+      "parentId": 15,
+      "level": "3"
+    },
+    {
+      "id": 56,
+      "name": "Dislocation",
+      "parentId": 15,
+      "level": "3"
+    },
+    {
+      "id": 57,
+      "name": "Hematoma",
+      "parentId": 15,
+      "level": "3"
+    },
+    {
+      "id": 58,
+      "name": "Damage teeth",
+      "parentId": 15,
+      "level": "3"
+    },
+    {
+      "id": 59,
+      "name": "Abrasion",
+      "parentId": 15,
+      "level": "3"
+    },
+    {
+      "id": 60,
+      "name": "Necrosis",
+      "parentId": 15,
+      "level": "3"
+    },
+    {
+      "id": 61,
+      "name": "Laceration",
+      "parentId": 15,
+      "level": "3"
+    },
+    {
+      "id": 62,
+      "name": "Ecchymosis",
+      "parentId": 15,
+      "level": "3"
+    },
+    {
+      "id": 63,
+      "name": "Redness",
+      "parentId": 15,
+      "level": "3"
+    },
+    {
+      "id": 64,
+      "name": "Cut wound",
+      "parentId": 15,
+      "level": "3"
+    },
+    {
+      "id": 65,
+      "name": "Discoloration",
+      "parentId": 15,
+      "level": "3"
+    },
+    {
+      "id": 66,
+      "name": "Blister",
+      "parentId": 16,
+      "level": "3"
+    },
+    {
+      "id": 67,
+      "name": "Ulceration",
+      "parentId": 16,
+      "level": "3"
+    },
+    {
+      "id": 68,
+      "name": "Fracture",
+      "parentId": 16,
+      "level": "3"
+    },
+    {
+      "id": 69,
+      "name": "Dislocation",
+      "parentId": 16,
+      "level": "3"
+    },
+    {
+      "id": 70,
+      "name": "Hematoma",
+      "parentId": 16,
+      "level": "3"
+    },
+    {
+      "id": 71,
+      "name": "Damage teeth",
+      "parentId": 16,
+      "level": "3"
+    },
+    {
+      "id": 72,
+      "name": "Abrasion",
+      "parentId": 16,
+      "level": "3"
+    },
+    {
+      "id": 73,
+      "name": "Necrosis",
+      "parentId": 16,
+      "level": "3"
+    },
+    {
+      "id": 74,
+      "name": "Laceration",
+      "parentId": 16,
+      "level": "3"
+    },
+    {
+      "id": 75,
+      "name": "Ecchymosis",
+      "parentId": 16,
+      "level": "3"
+    },
+    {
+      "id": 76,
+      "name": "Redness",
+      "parentId": 16,
+      "level": "3"
+    },
+    {
+      "id": 77,
+      "name": "Cut wound",
+      "parentId": 16,
+      "level": "3"
+    },
+    {
+      "id": 78,
+      "name": "Discoloration",
+      "parentId": 16,
+      "level": "3"
+    },
+    {
+      "id": 79,
+      "name": "Personal reason",
+      "parentId": 30,
+      "level": "3"
+    },
+    {
+      "id": 80,
+      "name": "Social reason",
+      "parentId": 30,
+      "level": "3"
+    },
+    {
+      "id": 81,
+      "name": "Transfer to another facility/hospital",
+      "parentId": 30,
+      "level": "3"
+    },
+    {
+      "id": 82,
+      "name": "Not satisfied with the staff",
+      "parentId": 30,
+      "level": "3"
+    },
+    {
+      "id": 83,
+      "name": "Not satisfied with services",
+      "parentId": 30,
+      "level": "3"
+    },
+    {
+      "id": 84,
+      "name": "For 2nd opinion",
+      "parentId": 30,
+      "level": "3"
+    },
+    {
+      "id": 85,
+      "name": "Patient refused operation/procedure",
+      "parentId": 30,
+      "level": "3"
+    },
+    {
+      "id": 86,
+      "name": "Patient Felt Better",
+      "parentId": 30,
+      "level": "3"
+    },
+    {
+      "id": 87,
+      "name": "Refused investigation",
+      "parentId": 30,
+      "level": "3"
+    },
+    {
+      "id": 88,
+      "name": "Refused to be seen by male staff",
+      "parentId": 30,
+      "level": "3"
+    },
+    {
+      "id": 89,
+      "name": "Refused  treatment",
+      "parentId": 30,
+      "level": "3"
+    },
+    {
+      "id": 90,
+      "name": "Personal reason",
+      "parentId": 31,
+      "level": "3"
+    },
+    {
+      "id": 91,
+      "name": "Social reason",
+      "parentId": 31,
+      "level": "3"
+    },
+    {
+      "id": 92,
+      "name": "Transfer to another facility/hospital",
+      "parentId": 31,
+      "level": "3"
+    },
+    {
+      "id": 93,
+      "name": "Not satisfied with the staff",
+      "parentId": 31,
+      "level": "3"
+    },
+    {
+      "id": 94,
+      "name": "Not satisfied with services",
+      "parentId": 31,
+      "level": "3"
+    },
+    {
+      "id": 95,
+      "name": "For 2nd opinion",
+      "parentId": 31,
+      "level": "3"
+    },
+    {
+      "id": 96,
+      "name": "Patient refused operation/procedure",
+      "parentId": 31,
+      "level": "3"
+    },
+    {
+      "id": 97,
+      "name": "Patient Felt Better",
+      "parentId": 31,
+      "level": "3"
+    },
+    {
+      "id": 98,
+      "name": "Refused investigation",
+      "parentId": 31,
+      "level": "3"
+    },
+    {
+      "id": 99,
+      "name": "Refused to be seen by male staff",
+      "parentId": 31,
+      "level": "3"
+    },
+    {
+      "id": 100,
+      "name": "Refused  treatment",
+      "parentId": 31,
+      "level": "3"
+    },
+    {
+      "id": 101,
+      "name": "ER- refused to wait lab result",
+      "parentId": 31,
+      "level": "3"
+    },
+    {
+      "id": 102,
+      "name": "ER- refused admission",
+      "parentId": 31,
+      "level": "3"
+    },
+    {
+      "id": 103,
+      "name": "OPD follow up",
+      "parentId": 31,
+      "level": "3"
+    },
+    {
+      "id": 104,
+      "name": "Patient",
+      "parentId": 33,
+      "level": "3"
+    },
+    {
+      "id": 105,
+      "name": "Staff",
+      "parentId": 33,
+      "level": "3"
+    },
+    {
+      "id": 106,
+      "name": "Others",
+      "parentId": 33,
+      "level": "3"
+    },
+    {
+      "id": 107,
+      "name": "Hospital",
+      "parentId": 37,
+      "level": "3"
+    },
+    {
+      "id": 108,
+      "name": "Patient",
+      "parentId": 37,
+      "level": "3"
+    },
+    {
+      "id": 109,
+      "name": "Staff",
+      "parentId": 37,
+      "level": "3"
+    },
+    {
+      "id": 110,
+      "name": "Visitor",
+      "parentId": 37,
+      "level": "3"
+    },
+    {
+      "id": 111,
+      "name": "Communication devices - Operator or pager",
+      "parentId": 45,
+      "level": "3"
+    },
+    {
+      "id": 112,
+      "name": "Panic value",
+      "parentId": 45,
+      "level": "3"
+    },
+    {
+      "id": 113,
+      "name": "Hand over",
+      "parentId": 45,
+      "level": "3"
+    },
+    {
+      "id": 114,
+      "name": "Verbal/Telephone order",
+      "parentId": 45,
+      "level": "3"
+    },
+    {
+      "id": 115,
+      "name": "Diabitic Foot",
+      "parentId": 15,
+      "level": "3"
+    },
+    {
+      "id": 116,
+      "name": "Brusis",
+      "parentId": 15,
+      "level": "3"
+    },
+    {
+      "id": 117,
+      "name": "Skin Pealing",
+      "parentId": 15,
+      "level": "3"
+    },
+    {
+      "id": 118,
+      "name": "Catury Marks",
+      "parentId": 15,
+      "level": "3"
+    },
+    {
+      "id": 119,
+      "name": "Old Injury",
+      "parentId": 15,
+      "level": "3"
+    },
+    {
+      "id": 120,
+      "name": "Diabitic Foot",
+      "parentId": 16,
+      "level": "3"
+    },
+    {
+      "id": 122,
+      "name": "Brusis",
+      "parentId": 16,
+      "level": "3"
+    },
+    {
+      "id": 123,
+      "name": "Skin Pealing",
+      "parentId": 16,
+      "level": "3"
+    },
+    {
+      "id": 124,
+      "name": "Catury Marks",
+      "parentId": 16,
+      "level": "3"
+    },
+    {
+      "id": 125,
+      "name": "Old Injury",
+      "parentId": 16,
+      "level": "3"
+    },
+    {
+      "id": 126,
+      "name": "Paging / Phoning",
+      "parentId": 45,
+      "level": "3"
+    },
+    {
+      "id": 127,
+      "name": "Delay in Responding",
+      "parentId": 45,
+      "level": "3"
+    },
+    {
+      "id": 128,
+      "name": "Co-Ordination",
+      "parentId": 45,
+      "level": "3"
+    },
+    {
+      "id": 129,
+      "name": "Off Bedside commode",
+      "parentId": 1,
+      "level": "3"
+    },
+    {
+      "id": 130,
+      "name": "Off Scales or Equipment",
+      "parentId": 1,
+      "level": "3"
+    },
+    {
+      "id": 131,
+      "name": "Off Table or Strecher",
+      "parentId": 1,
+      "level": "3"
+    },
+    {
+      "id": 132,
+      "name": "Unknown",
+      "parentId": 1,
+      "level": "3"
+    },
+    {
+      "id": 133,
+      "name": "Off Bedside commode",
+      "parentId": 2,
+      "level": "3"
+    },
+    {
+      "id": 134,
+      "name": "Off Scales or Equipment",
+      "parentId": 2,
+      "level": "3"
+    },
+    {
+      "id": 135,
+      "name": "Off Table or Strecher",
+      "parentId": 2,
+      "level": "3"
+    },
+    {
+      "id": 136,
+      "name": "Unknown",
+      "parentId": 2,
+      "level": "3"
+    },
+    {
+      "id": 137,
+      "name": "Incorrect Gropuing",
+      "parentId": 9,
+      "level": "3"
+    },
+    {
+      "id": 138,
+      "name": "Mislabeled",
+      "parentId": 9,
+      "level": "3"
+    },
+    {
+      "id": 139,
+      "name": "Not Documented",
+      "parentId": 9,
+      "level": "3"
+    },
+    {
+      "id": 140,
+      "name": "Omitted",
+      "parentId": 9,
+      "level": "3"
+    },
+    {
+      "id": 141,
+      "name": "Refuse Transfusion",
+      "parentId": 9,
+      "level": "3"
+    },
+    {
+      "id": 142,
+      "name": "Rate of Flow",
+      "parentId": 9,
+      "level": "3"
+    },
+    {
+      "id": 143,
+      "name": "Site Problem",
+      "parentId": 9,
+      "level": "3"
+    },
+    {
+      "id": 144,
+      "name": "Tubing Pulled out / Broken",
+      "parentId": 9,
+      "level": "3"
+    },
+    {
+      "id": 145,
+      "name": "Tubing Not Changed",
+      "parentId": 9,
+      "level": "3"
+    },
+    {
+      "id": 146,
+      "name": "Refusal of Cannulation",
+      "parentId": 9,
+      "level": "3"
+    },
+    {
+      "id": 147,
+      "name": "Others",
+      "parentId": 9,
+      "level": "3"
+    },
+    {
+      "id": 148,
+      "name": "No COVID-19 Swab Test Done",
+      "parentId": 196,
+      "level": "3"
+    },
+    {
+      "id": 149,
+      "name": "Patient Refused to take COVID-19 Swab",
+      "parentId": 196,
+      "level": "3"
+    },
+    {
+      "id": 150,
+      "name": "COVID-19 Swab Missing",
+      "parentId": 196,
+      "level": "3"
+    }
+  ]
+}
