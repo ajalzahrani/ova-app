@@ -156,7 +156,7 @@ export function IncidentSelector({
         <SelectTrigger id="incidentType">
           <SelectValue placeholder="Select incident type" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="max-h-[300px] overflow-y-auto">
           {incidents.map((incident) => (
             <SelectItem key={incident.id} value={incident.id}>
               {incident.name}
@@ -175,7 +175,7 @@ export function IncidentSelector({
             <SelectTrigger id="subIncidentType">
               <SelectValue placeholder="Select sub-category" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="max-h-[300px] overflow-y-auto">
               {subIncidents.map((subIncident) => (
                 <SelectItem key={subIncident.id} value={subIncident.id}>
                   {subIncident.name}
@@ -196,7 +196,7 @@ export function IncidentSelector({
             <SelectTrigger id="subSubIncidentType">
               <SelectValue placeholder="Select sub-sub-category" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="max-h-[300px] overflow-y-auto">
               {subSubIncidents.map((subSubIncident) => (
                 <SelectItem key={subSubIncident.id} value={subSubIncident.id}>
                   {subSubIncident.name}

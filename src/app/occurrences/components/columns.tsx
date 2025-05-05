@@ -117,6 +117,9 @@ export const columns: ColumnDef<Occurrence>[] = [
   {
     accessorKey: "incident",
     header: "Incident",
+    cell: ({ row }) => {
+      return row.original.incident.substring(0, 10) + "...";
+    },
   },
   {
     accessorKey: "status",
@@ -148,6 +151,9 @@ export const columns: ColumnDef<Occurrence>[] = [
   {
     accessorKey: "location",
     header: "Location",
+    cell: ({ row }) => {
+      return row.original.location.substring(0, 10) + "...";
+    },
     enableHiding: true,
     meta: {
       columnVisibility: false,
