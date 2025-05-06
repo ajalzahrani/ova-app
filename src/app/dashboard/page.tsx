@@ -12,48 +12,38 @@ import { Overview } from "@/components/dashboard/overview";
 import { RecentIncidents } from "@/components/dashboard/recent-incidents";
 import Link from "next/link";
 import { PlusCircle } from "lucide-react";
-import { prisma } from "@/lib/prisma";
+import { getDashboardData } from "@/actions/dashboards";
 
 export default async function DashboardPage() {
-  // Get occurrence counts
-  const totalOccurrences = await prisma.occurrence.count();
-  const openOccurrences = await prisma.occurrence.count({
-    where: {
-      status: {
-        name: "OPEN",
-      },
-    },
-  });
-  const highRiskOccurrences = await prisma.occurrence.count({
-    where: {
-      Severity: {
-        name: {
-          in: ["HIGH", "CRITICAL"],
-        },
-      },
-    },
-  });
+  const dashboardData = await getDashboardData();
 
-  // Calculate resolution rate
-  const resolvedOccurrences = await prisma.occurrence.count({
-    where: {
-      status: {
-        name: {
-          in: ["RESOLVED", "CLOSED"],
-        },
-      },
-    },
-  });
-  const resolutionRate =
-    totalOccurrences > 0
-      ? Math.round((resolvedOccurrences / totalOccurrences) * 100)
-      : 0;
+  if (!dashboardData.success || !dashboardData.data) {
+    return <div>{dashboardData.error}</div>;
+  }
+
+  const {
+    totalOccurrences,
+    openOccurrences,
+    completedOccurrences,
+    highRiskOccurrences,
+    resolutionRate,
+    isDepartment,
+    departmentName,
+  } = dashboardData.data;
 
   return (
     <DashboardShell>
       <DashboardHeader
-        heading="Dashboard"
-        text="Overview of OVA incidents and reports">
+        heading={
+          isDepartment && departmentName
+            ? `${departmentName} Department Dashboard`
+            : "Dashboard"
+        }
+        text={
+          isDepartment && departmentName
+            ? `Overview of ${departmentName} department's incidents and reports`
+            : "Overview of OVA incidents and reports"
+        }>
         <Link href="/occurrences/new">
           <Button>
             <PlusCircle className="mr-2 h-4 w-4" />
@@ -65,50 +55,64 @@ export default async function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Total Incidents
+              {isDepartment ? "Total Occurrences" : "Total Incidents"}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalOccurrences}</div>
             <p className="text-xs text-muted-foreground">
-              All reported incidents
+              {isDepartment
+                ? "All department occurrences"
+                : "All reported incidents"}
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Open Incidents
+              {isDepartment ? "Open Occurrences" : "Open Incidents"}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{openOccurrences}</div>
             <p className="text-xs text-muted-foreground">
-              Active incidents requiring attention
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">High Risk</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{highRiskOccurrences}</div>
-            <p className="text-xs text-muted-foreground">
-              High & critical severity incidents
+              {isDepartment
+                ? "Occurrences requiring attention"
+                : "Active incidents requiring attention"}
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Resolution Rate
+              {isDepartment ? "Completed" : "High Risk"}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{resolutionRate}%</div>
+            <div className="text-2xl font-bold">
+              {isDepartment ? completedOccurrences : highRiskOccurrences}
+            </div>
             <p className="text-xs text-muted-foreground">
-              Resolved & closed incidents
+              {isDepartment
+                ? "Resolved occurrences"
+                : "High & critical severity incidents"}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              {isDepartment ? "High Risk" : "Resolution Rate"}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {isDepartment ? highRiskOccurrences : `${resolutionRate}%`}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {isDepartment
+                ? "High severity occurrences"
+                : "Resolved & closed incidents"}
             </p>
           </CardContent>
         </Card>

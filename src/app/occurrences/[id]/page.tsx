@@ -56,14 +56,6 @@ export default async function OccurrenceDetails({
           {/* Conditional buttons based on occurrence status */}
           {occurrenceStatus === "OPEN" && (
             <>
-              {/* Refer Occurrence - Need refer:occurrences permission */}
-              <PermissionCheck required="refer:occurrence">
-                <ReferOccurrenceDialog
-                  occurrenceId={occurrence.id}
-                  departments={departments.departments ?? []}
-                />
-              </PermissionCheck>
-
               {/* Edit Occurrence - Need edit:occurrences permission */}
               <PermissionButton permission="edit:occurrence" asChild>
                 <Link href={`/occurrences/${occurrence?.id}/edit`}>
@@ -79,6 +71,14 @@ export default async function OccurrenceDetails({
               <ResolveButton occurrenceId={occurrence.id} />
             </PermissionCheck>
           )}
+
+          {/* Refer Occurrence - Need refer:occurrences permission */}
+          <PermissionCheck required="refer:occurrence">
+            <ReferOccurrenceDialog
+              occurrenceId={occurrence.id}
+              departments={departments.departments ?? []}
+            />
+          </PermissionCheck>
         </div>
       </DashboardHeader>
 
