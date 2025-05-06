@@ -70,8 +70,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center  py-12 px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md">
+    <div className="flex h-[calc(100vh-4rem)] items-center justify-center bg-gray-50 dark:bg-gray-900">
+      <Card className="w-full max-w-md mx-4">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">OVA System</CardTitle>
           <CardDescription>
