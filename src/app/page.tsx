@@ -21,8 +21,8 @@ export default async function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <main className="flex-1">
+    <>
+      <main>
         <div className="container mx-auto max-w-screen-xl py-6 md:py-8 px-4">
           <div className="space-y-8">
             <div className="text-center space-y-3">
@@ -125,6 +125,6 @@ export default async function LandingPage() {
           </p>
         </div>
       </footer>
-    </div>
+    </>
   );
 }

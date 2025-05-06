@@ -21,7 +21,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body
+        className={`${inter.className} flex flex-col min-h-screen overflow-x-hidden`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -29,7 +30,7 @@ export default function RootLayout({
           disableTransitionOnChange>
           <AuthProvider>
             <Navbar />
-            {children}
+            <div className="flex-1 flex flex-col pt-16">{children}</div>
             <Toaster />
           </AuthProvider>
         </ThemeProvider>
