@@ -10,14 +10,25 @@ import { OccurrencesTable } from "./components/occurrences-table";
 import { PermissionButton } from "@/components/auth/permission-button";
 import { checkServerPermission } from "@/lib/server-permissions";
 import { getCurrentUserFromDB } from "@/actions/auths";
+import { OccurrencesSearch } from "./components/occurrence-search";
 
 export default async function OccurrencesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; pageSize?: string }>;
+  searchParams: Promise<{
+    page?: string;
+    pageSize?: string;
+    search?: string;
+    status?: string;
+    severity?: string;
+    location?: string;
+    dateFrom?: string;
+    dateTo?: string;
+    mrn?: string;
+  }>;
 }) {
-  const session = await getServerSession(authOptions);
   const resolvedSearchParams = await searchParams;
+  const session = await getServerSession(authOptions);
 
   if (!session?.user) {
     redirect("/login");
@@ -36,9 +47,51 @@ export default async function OccurrencesPage({
   const isAllowedToViewAllOccurrences =
     user?.role.name === "ADMIN" || user?.role.name === "QUALITY_ASSURANCE";
 
-  // Base filter condition
-  const whereCondition =
-    isAllowedToViewAllOccurrences || !user?.departmentId
+  // Build search conditions
+  const searchConditions = {
+    ...(resolvedSearchParams.search && {
+      OR: [
+        {
+          mrn: {
+            contains: resolvedSearchParams.search,
+            mode: "insensitive" as const,
+          },
+        },
+        {
+          occurrenceNo: {
+            contains: resolvedSearchParams.search,
+            mode: "insensitive" as const,
+          },
+        },
+      ],
+    }),
+    ...(resolvedSearchParams.status &&
+      resolvedSearchParams.status !== "all" && {
+        status: { id: resolvedSearchParams.status },
+      }),
+    ...(resolvedSearchParams.severity &&
+      resolvedSearchParams.severity !== "all" && {
+        incident: { severity: { id: resolvedSearchParams.severity } },
+      }),
+    ...(resolvedSearchParams.location && {
+      location: { name: resolvedSearchParams.location },
+    }),
+    ...(resolvedSearchParams.mrn && {
+      mrn: { contains: resolvedSearchParams.mrn, mode: "insensitive" as const },
+    }),
+    ...(resolvedSearchParams.dateFrom &&
+      resolvedSearchParams.dateTo && {
+        occurrenceDate: {
+          gte: new Date(resolvedSearchParams.dateFrom),
+          lte: new Date(resolvedSearchParams.dateTo),
+        },
+      }),
+  };
+
+  // Combine with existing department filter
+  const whereCondition = {
+    ...searchConditions,
+    ...(isAllowedToViewAllOccurrences || !user?.departmentId
       ? {}
       : {
           assignments: {
@@ -46,14 +99,15 @@ export default async function OccurrencesPage({
               departmentId: user.departmentId,
             },
           },
-        };
+        }),
+  };
 
   // Get total count for pagination
   const totalOccurrences = await prisma.occurrence.count({
     where: whereCondition,
   });
 
-  // Get paginated data
+  // Get paginated data with search
   const occurrences = await prisma.occurrence.findMany({
     where: whereCondition,
     include: {

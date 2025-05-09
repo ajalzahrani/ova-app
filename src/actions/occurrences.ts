@@ -643,3 +643,13 @@ export async function getOccurrenceByNo(occurrenceNo: string) {
   });
   return occurrence;
 }
+
+export async function getOccurrenceStatuses() {
+  const statuses = await prisma.occurrenceStatus.findMany();
+  return statuses;
+}
+
+export async function getOccurrenceSeverities() {
+  const severities = await prisma.severity.findMany();
+  return severities;
+}
