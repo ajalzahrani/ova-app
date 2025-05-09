@@ -102,7 +102,7 @@ async function generateOccurrences(count: number): Promise<void> {
     // Make sure we have departments
     await ensureDepartments();
     // Make sure we have incidents
-    await ensureIncidents();
+    // await ensureIncidents();
     // Make sure we have at least one user
     await ensureUsers();
 
@@ -176,7 +176,7 @@ async function generateOccurrences(count: number): Promise<void> {
       const occurrence = await prisma.occurrence.create({
         data: {
           occurrenceNo,
-          title: faker.lorem.sentence(4),
+          mrn: faker.string.numeric({ length: 10 }),
           description: faker.lorem.paragraph(),
           occurrenceDate,
           createdAt: faker.date.between({
@@ -274,23 +274,23 @@ async function ensureDepartments(): Promise<void> {
   }
 }
 
-async function ensureIncidents(): Promise<void> {
-  const severities = await prisma.severity.findMany();
+// async function ensureIncidents(): Promise<void> {
+//   const severities = await prisma.severity.findMany();
 
-  for (const name of incidentTypes) {
-    const severity = severities[Math.floor(Math.random() * severities.length)];
+//   for (const name of incidentTypes) {
+//     const severity = severities[Math.floor(Math.random() * severities.length)];
 
-    await prisma.incident.upsert({
-      where: { name },
-      update: {},
-      create: {
-        name,
-        description: faker.lorem.sentence(),
-        severity: { connect: { id: severity.id } },
-      },
-    });
-  }
-}
+//     await prisma.incident.upsert({
+//       where: { name: name },
+//       update: {},
+//       create: {
+//         name,
+//         description: faker.lorem.sentence(),
+//         severity: { connect: { id: severity.id } },
+//       },
+//     });
+//   }
+// }
 
 async function ensureUsers(): Promise<void> {
   const roleCount = await prisma.role.count();

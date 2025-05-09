@@ -16,11 +16,6 @@ export const NAV_ITEMS: NavItem[] = [
     requiredPermissions: ["manage:dashboard"],
   },
   {
-    label: "Department Dashboard",
-    href: "/department-dashboard",
-    requiredRoles: ["DEPARTMENT_MANAGER"],
-  },
-  {
     label: "Occurrences",
     href: "/occurrences",
     requiredPermissions: ["manage:occurrences"],
