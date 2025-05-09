@@ -44,7 +44,8 @@ export default async function OccurrenceDetails({
             </Link>
           </Button>
 
-          {occurrenceStatus == "ASSIGNED" && (
+          {(occurrenceStatus == "ASSIGNED" ||
+            occurrenceStatus == "ANSWERED_PARTIALLY") && (
             <>
               {/* Share Feedback - Only department managers can see this */}
               <PermissionCheck required="view:feedback-share">

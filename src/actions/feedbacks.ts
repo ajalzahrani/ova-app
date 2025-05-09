@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { randomBytes } from "crypto";
 import { addHours } from "date-fns";
+import { getOccurrenceForFeedbackById } from "./occurrences";
 
 export async function submitFeedback(token: string, message: string) {
   const tokenRecord = await validateFeedbackToken(token);
@@ -84,7 +85,6 @@ export async function validateFeedbackToken(token: string) {
       include: {
         assignment: {
           include: {
-            occurrence: true,
             department: true,
           },
         },

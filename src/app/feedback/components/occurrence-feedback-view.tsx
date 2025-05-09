@@ -10,28 +10,21 @@ import { Separator } from "@/components/ui/separator";
 import {
   AlertCircle,
   ChevronRight,
-  ClipboardList,
   FileText,
-  Search,
   User,
   Building2,
   AlertTriangle,
   MapPin,
   Clock,
-  CheckCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { OccurrenceStatus, Prisma } from "@prisma/client";
-import { OccurrenceCommunication } from "./occurrence-communication";
+import { Prisma } from "@prisma/client";
 import { format } from "date-fns";
-import { OccurrenceFeedback } from "./occurrence-feedback-response";
-import { PermissionCheck } from "@/components/auth/permission-check";
-import { getCurrentUser } from "@/lib/auth";
-import { IncidentHierarchy } from "./incdent-hierarchy";
+import { IncidentHierarchy } from "@/app/occurrences/components/incdent-hierarchy";
 import { getAllIncidentsHierarchyByIncidentId } from "@/actions/incidents";
-import { checkServerPermission } from "@/lib/server-permissions";
-import { getSeverityColor } from "@/lib/severity-color";
 import { getStatusBadge } from "@/lib/status-badge";
+import { getSeverityColor } from "@/lib/severity-color";
+import { OccurrenceFeedbackForm } from "./occurrence-feedback-form";
 
 type OccurrenceWithRelations = Prisma.OccurrenceGetPayload<{
   include: {
@@ -52,25 +45,15 @@ type OccurrenceWithRelations = Prisma.OccurrenceGetPayload<{
   };
 }>;
 
-export async function OccurrenceView(props: {
+export async function OccurrenceFeedbackView(props: {
   occurrence: OccurrenceWithRelations;
+  token: string;
 }) {
-  const { occurrence } = props;
-
-  await checkServerPermission("view:occurrence");
-  const user = await getCurrentUser();
-
-  const assignmentId = occurrence.assignments.find(
-    (assignment) => assignment.department.id === user?.departmentId
-  )?.id;
+  const { occurrence, token } = props;
 
   const incident = await getAllIncidentsHierarchyByIncidentId(
     occurrence.incident.id
   );
-
-  if (!incident) {
-    return <div>No incident found</div>;
-  }
 
   const statusBadge = getStatusBadge(occurrence.status?.name);
 
@@ -241,15 +224,9 @@ export async function OccurrenceView(props: {
           </CardContent>
         </Card>
       </div>
-      {/* Department assignments */}
-
-      {/* Internal feedback from the department */}
-      <PermissionCheck required="view:feedback-share">
-        <OccurrenceFeedback assignmentId={assignmentId ?? ""} />
-      </PermissionCheck>
 
       {/* Add the group communication and feedback thread */}
-      <OccurrenceCommunication occurrenceId={occurrence.id} />
+      <OccurrenceFeedbackForm occurrenceId={occurrence.id} token={token} />
     </div>
   );
 }

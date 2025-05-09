@@ -1,7 +1,11 @@
 import { validateFeedbackToken } from "@/actions/feedbacks";
 import { notFound } from "next/navigation";
 import FeedbackForm from "../components/feedback-form"; // a client component (built below)
-
+import { OccurrenceFeedbackView } from "@/app/feedback/components/occurrence-feedback-view";
+import { DashboardShell } from "@/components/dashboard/dashboard-shell";
+import { DashboardHeader } from "@/components/dashboard/dashboard-header";
+import { getOccurrenceById } from "@/actions/occurrences";
+import { format } from "date-fns";
 type FeedbackPageProps = {
   params: {
     token: string;
@@ -26,24 +30,29 @@ export default async function FeedbackPage({
   }
 
   const { assignment, sharedBy, expiresAt } = result.data;
+  const occurrenceResult = await getOccurrenceById(assignment.occurrenceId);
+
+  if (!occurrenceResult.success) {
+    return notFound();
+  }
+
+  const { occurrence } = occurrenceResult;
+
+  if (!occurrence) {
+    return notFound();
+  }
 
   return (
-    <div className="max-w-2xl mx-auto py-10">
-      <h1 className="text-xl font-semibold mb-4">
-        Feedback on Occurrence #{assignment.occurrence.occurrenceNo}
-      </h1>
+    <DashboardShell>
+      <DashboardHeader
+        heading={`Feedback on Occurrence #${occurrence.occurrenceNo}`}
+        text={`Shared by ${sharedBy.name} on ${format(
+          new Date(assignment.assignedAt),
+          "MMM d, yyyy"
+        )}`}
+      />
 
-      <div className="mb-6 text-sm text-muted-foreground">
-        Shared by: {sharedBy.name} · Expires:{" "}
-        {new Date(expiresAt).toLocaleString()}
-      </div>
-
-      <div className="mb-8 border p-4 rounded bg-muted">
-        <p className="font-medium mb-1">Occurrence Description:</p>
-        <p>{assignment.occurrence.description}</p>
-      </div>
-
-      <FeedbackForm params={params} />
-    </div>
+      <OccurrenceFeedbackView occurrence={occurrence} token={token} />
+    </DashboardShell>
   );
 }
