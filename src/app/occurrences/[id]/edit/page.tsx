@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/select";
 import { Select } from "@/components/ui/select";
 import { checkBusinessPermission } from "@/lib/business-permissions";
+import { BackToOccurrencesButton } from "@/app/occurrences/components/back-to-occurrences-button";
 
 // Form schema for occurrence edit
 const occurrenceSchema = z.object({
@@ -133,7 +134,8 @@ export default function EditOccurrencePage({
           title: "Success",
           description: "Occurrence updated successfully",
         });
-        router.push("/occurrences");
+        // Use router.back() instead of push to preserve state
+        router.back();
       } else {
         toast({
           variant: "destructive",
@@ -173,12 +175,7 @@ export default function EditOccurrencePage({
         heading="Edit Occurrence"
         text="Edit the occurrence details">
         <div className="flex gap-2">
-          <Button variant="outline" asChild>
-            <Link href="/occurrences">
-              <ArrowLeft className="h-4 w-4" />
-              Back to Occurrences
-            </Link>
-          </Button>
+          <BackToOccurrencesButton />
         </div>
       </DashboardHeader>
       <div className="grid gap-6">

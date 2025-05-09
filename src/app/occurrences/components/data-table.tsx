@@ -44,6 +44,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { OccurrencesSearch } from "./occurrence-search";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -172,7 +173,7 @@ export function DataTable<TData, TValue>({
           className="max-w-sm"
         />
         <div className="flex items-center gap-2">
-          <Popover>
+          {/* <Popover>
             <PopoverTrigger asChild>
               <Button
                 variant={"outline"}
@@ -219,8 +220,9 @@ export function DataTable<TData, TValue>({
               }}>
               Reset
             </Button>
-          )}
+          )} */}
         </div>
+        <OccurrencesSearch />
         <DataTableViewOptions table={table} />
       </div>
       <div className="rounded-md border">

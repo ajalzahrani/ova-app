@@ -36,30 +36,67 @@ import {
   getOccurrenceSeverities,
   getOccurrenceStatuses,
 } from "@/actions/occurrences";
+import { useOccurrenceSearchStore } from "@/stores/occurrenceStore";
 
 export function OccurrencesSearch() {
+  const {
+    searchParams: storedParams,
+    setSearchParams,
+    resetSearchParams,
+  } = useOccurrenceSearchStore();
+
   const [dateRange, setDateRange] = React.useState<{
     from: Date | undefined;
     to: Date | undefined;
   }>({
-    from: undefined,
-    to: undefined,
+    from: storedParams.dateFrom ? new Date(storedParams.dateFrom) : undefined,
+    to: storedParams.dateTo ? new Date(storedParams.dateTo) : undefined,
   });
 
   const [statuses, setStatuses] = useState<any[]>([]);
   const [severities, setSeverities] = useState<any[]>([]);
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const urlSearchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
 
-  const createQueryString = useCallback(
-    (name: string, value: string) => {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set(name, value);
-      return params.toString();
-    },
-    [searchParams]
-  );
+  // Create query string from params
+  const createQueryString = useCallback((params: Record<string, string>) => {
+    const urlParams = new URLSearchParams();
+
+    // Add all params that have values
+    Object.entries(params).forEach(([key, value]) => {
+      if (value) urlParams.set(key, value);
+    });
+
+    return urlParams.toString();
+  }, []);
+
+  // Initialize from URL on first load
+  useEffect(() => {
+    const initialParams: Record<string, string> = {};
+
+    // If URL has params and store is empty, initialize from URL
+    if (urlSearchParams.toString() && Object.keys(storedParams).length === 0) {
+      urlSearchParams.forEach((value, key) => {
+        initialParams[key] = value;
+      });
+
+      if (Object.keys(initialParams).length > 0) {
+        setSearchParams(initialParams);
+      }
+    }
+    // If store has params but URL doesn't, update URL from store
+    else if (
+      Object.keys(storedParams).length > 0 &&
+      !urlSearchParams.toString()
+    ) {
+      router.push(
+        `/occurrences?${createQueryString(
+          storedParams as Record<string, string>
+        )}`
+      );
+    }
+  }, []);
 
   useEffect(() => {
     const fetchStatuses = async () => {
@@ -77,18 +114,39 @@ export function OccurrencesSearch() {
   // Update date filter when date range changes
   useEffect(() => {
     if (dateRange.from || dateRange.to) {
+      const newParams = {
+        ...storedParams,
+        dateFrom: dateRange.from?.toISOString() ?? "",
+        dateTo: dateRange.to?.toISOString() ?? "",
+      };
+
+      setSearchParams(newParams);
       router.push(
-        `/occurrences?${createQueryString(
-          "dateFrom",
-          dateRange.from?.toISOString() ?? ""
-        )}&${createQueryString("dateTo", dateRange.to?.toISOString() ?? "")}`
+        `/occurrences?${createQueryString(newParams as Record<string, string>)}`
       );
-    } else {
-      router.push("/occurrences");
     }
   }, [dateRange]);
 
+  const updateFilter = (key: string, value: string) => {
+    let newParams;
+
+    if (value === "all" || value === "") {
+      // Create a new object without the specified key
+      const { [key]: _, ...rest } = storedParams;
+      newParams = rest;
+    } else {
+      newParams = { ...storedParams, [key]: value };
+    }
+
+    setSearchParams(newParams);
+    router.push(
+      `/occurrences?${createQueryString(newParams as Record<string, string>)}`
+    );
+  };
+
   const clearFilters = () => {
+    resetSearchParams();
+    setDateRange({ from: undefined, to: undefined });
     router.push("/occurrences");
   };
 
@@ -108,18 +166,8 @@ export function OccurrencesSearch() {
             <div className="space-y-2">
               <label>Status</label>
               <Select
-                defaultValue={searchParams.get("status") ?? "all"}
-                onValueChange={(value) => {
-                  if (value === "all") {
-                    const params = new URLSearchParams(searchParams.toString());
-                    params.delete("status");
-                    router.push(`/occurrences?${params.toString()}`);
-                  } else {
-                    router.push(
-                      `/occurrences?${createQueryString("status", value)}`
-                    );
-                  }
-                }}>
+                defaultValue={storedParams.status ?? "all"}
+                onValueChange={(value) => updateFilter("status", value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
@@ -137,18 +185,8 @@ export function OccurrencesSearch() {
             <div className="space-y-2">
               <label>Severity</label>
               <Select
-                defaultValue={searchParams.get("severity") ?? "all"}
-                onValueChange={(value) => {
-                  if (value === "all") {
-                    const params = new URLSearchParams(searchParams.toString());
-                    params.delete("severity");
-                    router.push(`/occurrences?${params.toString()}`);
-                  } else {
-                    router.push(
-                      `/occurrences?${createQueryString("severity", value)}`
-                    );
-                  }
-                }}>
+                defaultValue={storedParams.severity ?? "all"}
+                onValueChange={(value) => updateFilter("severity", value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select severity" />
                 </SelectTrigger>
@@ -203,16 +241,6 @@ export function OccurrencesSearch() {
                     />
                   </PopoverContent>
                 </Popover>
-                {/* {(dateRange.from || dateRange.to) && (
-                  <Button
-                    variant="ghost"
-                    onClick={() => {
-                      setDateRange({ from: undefined, to: undefined });
-                      table.getColumn("reported")?.setFilterValue(undefined);
-                    }}>
-                    Reset
-                  </Button>
-                )} */}
               </div>
             </div>
 
@@ -220,12 +248,8 @@ export function OccurrencesSearch() {
               <label>MRN</label>
               <Input
                 placeholder="Enter MRN..."
-                defaultValue={searchParams.get("mrn") ?? ""}
-                onChange={(e) => {
-                  router.push(
-                    `/occurrences?${createQueryString("mrn", e.target.value)}`
-                  );
-                }}
+                defaultValue={storedParams.mrn ?? ""}
+                onChange={(e) => updateFilter("mrn", e.target.value)}
               />
             </div>
           </div>

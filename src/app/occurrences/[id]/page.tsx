@@ -14,6 +14,8 @@ import { checkBusinessPermission } from "@/lib/business-permissions";
 import { getDepartments } from "@/actions/departments";
 import { notFound } from "next/navigation";
 import { OccurrenceFeedbackLinkDialog } from "../components/occurrence-feedback-link-dialog";
+import { BackToOccurrencesButton } from "@/app/occurrences/components/back-to-occurrences-button";
+
 export default async function OccurrenceDetails({
   params,
 }: {
@@ -37,12 +39,7 @@ export default async function OccurrenceDetails({
     <DashboardShell>
       <DashboardHeader heading={`OVA NO: ${occurrence?.occurrenceNo}`}>
         <div className="flex gap-2">
-          <Button variant="outline" asChild>
-            <Link href="/occurrences">
-              <ChevronLeft className="mr-2 h-4 w-4" />
-              Back to Occurrences
-            </Link>
-          </Button>
+          <BackToOccurrencesButton />
 
           {(occurrenceStatus == "ASSIGNED" ||
             occurrenceStatus == "ANSWERED_PARTIALLY") && (

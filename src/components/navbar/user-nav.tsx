@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@radix-ui/react-label";
 import { getOccurrenceByNo } from "@/actions/occurrences";
 import { useToast } from "@/components/ui/use-toast";
-
+import { useOccurrenceSearchStore } from "@/stores/occurrenceStore";
 export function UserNav() {
   const { data: session } = useSession();
 
@@ -25,6 +25,8 @@ export function UserNav() {
   const { toast } = useToast();
 
   const handleSignOut = async () => {
+    // clear the occurrence search store
+    useOccurrenceSearchStore.getState().resetSearchParams();
     await signOut({ redirect: false });
     router.push("/login");
   };
