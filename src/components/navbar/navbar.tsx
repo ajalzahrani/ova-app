@@ -25,7 +25,7 @@ export async function Navbar() {
     <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background">
       <div className="container mx-auto max-w-screen-xl flex h-16 items-center justify-between py-4 px-4">
         <MainNav />
-        <div className="space-x-3">
+        <div className="flex items-center space-x-3">
           <UserNav />
           <ModeToggle />
         </div>

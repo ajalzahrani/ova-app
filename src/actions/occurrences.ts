@@ -636,3 +636,10 @@ export async function getOccurrenceMessages(occurrenceId: string) {
     return { success: false, error: "Failed to get occurrence messages" };
   }
 }
+
+export async function getOccurrenceByNo(occurrenceNo: string) {
+  const occurrence = await prisma.occurrence.findUnique({
+    where: { occurrenceNo },
+  });
+  return occurrence;
+}
