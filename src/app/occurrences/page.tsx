@@ -10,7 +10,6 @@ import { OccurrencesTable } from "./components/occurrences-table";
 import { PermissionButton } from "@/components/auth/permission-button";
 import { checkServerPermission } from "@/lib/server-permissions";
 import { getCurrentUserFromDB } from "@/actions/auths";
-import { OccurrencesSearch } from "./components/occurrence-search";
 
 export default async function OccurrencesPage({
   searchParams,

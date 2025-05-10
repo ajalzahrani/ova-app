@@ -151,7 +151,7 @@ export function OccurrencesSearch() {
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="gap-2">
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetTrigger asChild>
           <Button variant="outline" size="icon">
@@ -202,13 +202,14 @@ export function OccurrencesSearch() {
             </div>
 
             <div className="space-y-2">
+              <label>Date Range</label>
               <div className="flex items-center gap-2">
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
                       variant={"outline"}
                       className={cn(
-                        "w-[240px] justify-start text-left font-normal",
+                        "w-full justify-start text-left font-normal",
                         !dateRange.from && "text-muted-foreground"
                       )}>
                       <CalendarIcon className="mr-2 h-4 w-4" />

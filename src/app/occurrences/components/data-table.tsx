@@ -3,7 +3,6 @@
 "use client";
 
 import * as React from "react";
-import { Input } from "@/components/ui/input";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -32,18 +31,6 @@ import { DataTablePagination } from "@/components/table-components/table-paginat
 import { DataTableViewOptions } from "@/components/table-components/column-toggle";
 import { PaginationInfo } from "../components/occurrences-table";
 import { useEffect } from "react";
-import { format } from "date-fns";
-
-// Add date picker imports
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
-import { CalendarIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { OccurrencesSearch } from "./occurrence-search";
 
 interface DataTableProps<TData, TValue> {
@@ -153,81 +140,13 @@ export function DataTable<TData, TValue>({
 
   return (
     <div>
-      <div className="flex items-center gap-4 py-4">
-        <Input
-          placeholder="Filter by occurrence no..."
-          value={
-            (table.getColumn("occurrenceNo")?.getFilterValue() as string) ?? ""
-          }
-          onChange={(event) =>
-            table.getColumn("occurrenceNo")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        />
-        <Input
-          placeholder="Filter by status name..."
-          value={(table.getColumn("status")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("status")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        />
-        <div className="flex items-center gap-2">
-          {/* <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant={"outline"}
-                className={cn(
-                  "w-[240px] justify-start text-left font-normal",
-                  !dateRange.from && "text-muted-foreground"
-                )}>
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {dateRange.from ? (
-                  dateRange.to ? (
-                    <>
-                      {format(dateRange.from, "LLL dd, y")} -{" "}
-                      {format(dateRange.to, "LLL dd, y")}
-                    </>
-                  ) : (
-                    format(dateRange.from, "LLL dd, y")
-                  )
-                ) : (
-                  <span>Pick a date range</span>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                initialFocus
-                mode="range"
-                selected={{ from: dateRange.from, to: dateRange.to }}
-                onSelect={(range) =>
-                  setDateRange({
-                    from: range?.from,
-                    to: range?.to || range?.from,
-                  })
-                }
-                numberOfMonths={2}
-              />
-            </PopoverContent>
-          </Popover>
-          {(dateRange.from || dateRange.to) && (
-            <Button
-              variant="ghost"
-              onClick={() => {
-                setDateRange({ from: undefined, to: undefined });
-                table.getColumn("reported")?.setFilterValue(undefined);
-              }}>
-              Reset
-            </Button>
-          )} */}
-        </div>
-        <OccurrencesSearch />
+      <div className="flex gap-4 py-4 justify-end items-center">
         <DataTableViewOptions table={table} />
+        <OccurrencesSearch />
       </div>
       <div className="rounded-md border">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-muted">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
