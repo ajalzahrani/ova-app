@@ -5,8 +5,9 @@ import { Prisma } from "@prisma/client";
 import { columns, Occurrence } from "@/app/occurrences/components/columns";
 import { DataTable } from "@/app/occurrences/components/data-table";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useOccurrenceSearchStore } from "@/stores/occurrenceStore";
+import { getDepartments } from "@/actions/departments";
 
 type OccurrenceWithRelations = Prisma.OccurrenceGetPayload<{
   include: {
@@ -46,6 +47,22 @@ export function OccurrencesTable({
   const searchParams = useSearchParams();
   const { searchParams: storedParams, setSearchParams } =
     useOccurrenceSearchStore();
+
+  const [departments, setDepartments] = useState<
+    Array<{ id: string; name: string }>
+  >([]);
+
+  // Fetch departments
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      const result = await getDepartments();
+      if (result.success && result.departments) {
+        setDepartments(result.departments);
+      }
+    };
+
+    fetchDepartments();
+  }, []);
 
   // Create query string from all params
   const createQueryString = useCallback((params: Record<string, string>) => {
@@ -110,6 +127,7 @@ export function OccurrencesTable({
       data={tableData}
       paginationInfo={paginationInfo}
       onPaginationChange={onPaginationChange}
+      departments={departments}
     />
   );
 }
