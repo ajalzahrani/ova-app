@@ -136,6 +136,7 @@ function convertOccurrencesToDataTable(
         name: occurrence.incident?.severity?.name || "",
         variant: occurrence.incident?.severity?.variant || "default",
       },
+      description: (occurrence as any).description || "",
     };
 
     return result;

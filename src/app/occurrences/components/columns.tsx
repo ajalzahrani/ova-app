@@ -27,6 +27,17 @@ import { DataTableColumnHeader } from "@/components/table-components/column-head
 import { formatDistanceToNow } from "date-fns";
 import { useRouter } from "next/navigation";
 import { PermissionCheck } from "@/components/auth/permission-check";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -46,6 +57,7 @@ export type Occurrence = {
     name: string;
     variant: string;
   };
+  description?: string;
 };
 
 const renderSeverityIcon = (severity: string) => {
@@ -92,12 +104,33 @@ export const columns: ColumnDef<Occurrence>[] = [
     cell: ({ row }) => {
       const occurrenceNo = row.original.occurrenceNo;
       const rowId = row.original.id;
+      const description =
+        row.original.description || "No description available";
+      const router = useRouter();
+
       return (
-        <PermissionCheck required="view:occurrence">
-          <Link href={`/occurrences/${rowId}`}>
-            <Badge>{occurrenceNo}</Badge>
-          </Link>
-        </PermissionCheck>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Badge className="cursor-pointer hover:bg-primary/90">
+              {occurrenceNo}
+            </Badge>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Occurrence {occurrenceNo}</AlertDialogTitle>
+              <AlertDialogDescription className="max-h-[200px] overflow-y-auto whitespace-pre-wrap">
+                {description}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => {}}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => router.push(`/occurrences/${rowId}`)}>
+                View Details
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       );
     },
     enableHiding: false,
@@ -114,13 +147,13 @@ export const columns: ColumnDef<Occurrence>[] = [
       return row.original.mrn;
     },
   },
-  {
-    accessorKey: "incident",
-    header: "Incident",
-    cell: ({ row }) => {
-      return row.original.incident.substring(0, 10) + "...";
-    },
-  },
+  // {
+  //   accessorKey: "incident",
+  //   header: "Incident",
+  //   cell: ({ row }) => {
+  //     return row.original.incident.substring(0, 10) + "...";
+  //   },
+  // },
   {
     accessorKey: "status",
     header: ({ column }) => (
@@ -148,17 +181,17 @@ export const columns: ColumnDef<Occurrence>[] = [
         .includes(value.toLowerCase());
     },
   },
-  {
-    accessorKey: "location",
-    header: "Location",
-    cell: ({ row }) => {
-      return row.original.location.substring(0, 10) + "...";
-    },
-    enableHiding: true,
-    meta: {
-      columnVisibility: false,
-    },
-  },
+  // {
+  //   accessorKey: "location",
+  //   header: "Location",
+  //   cell: ({ row }) => {
+  //     return row.original.location.substring(0, 10) + "...";
+  //   },
+  //   enableHiding: true,
+  //   meta: {
+  //     columnVisibility: false,
+  //   },
+  // },
   {
     accessorKey: "date",
     header: "Occurred",
