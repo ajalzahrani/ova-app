@@ -37,6 +37,8 @@ import {
   getOccurrenceStatuses,
 } from "@/actions/occurrences";
 import { useOccurrenceSearchStore } from "@/stores/occurrenceStore";
+import { getDepartments } from "@/actions/departments";
+import { PermissionCheck } from "@/components/auth/permission-check";
 
 export function OccurrencesSearch() {
   const {
@@ -55,6 +57,7 @@ export function OccurrencesSearch() {
 
   const [statuses, setStatuses] = useState<any[]>([]);
   const [severities, setSeverities] = useState<any[]>([]);
+  const [departments, setDepartments] = useState<any[]>([]);
   const router = useRouter();
   const urlSearchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
@@ -107,8 +110,15 @@ export function OccurrencesSearch() {
       const severities = await getOccurrenceSeverities();
       setSeverities(severities);
     };
+    const fetchDepartments = async () => {
+      const departments = await getDepartments();
+      if (departments.success && departments.departments) {
+        setDepartments(departments.departments);
+      }
+    };
     fetchStatuses();
     fetchSeverities();
+    fetchDepartments();
   }, []);
 
   // Update date filter when date range changes
@@ -244,6 +254,29 @@ export function OccurrencesSearch() {
                 </Popover>
               </div>
             </div>
+
+            <PermissionCheck required="search:by-department">
+              <div className="space-y-2">
+                <label>Assigned to Department</label>
+                <Select
+                  defaultValue={storedParams.assignedToDepartment ?? "all"}
+                  onValueChange={(value) =>
+                    updateFilter("assignedToDepartment", value)
+                  }>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select department" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Departments</SelectItem>
+                    {departments.map((department) => (
+                      <SelectItem key={department.id} value={department.id}>
+                        {department.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </PermissionCheck>
 
             <div className="space-y-2">
               <label>MRN</label>

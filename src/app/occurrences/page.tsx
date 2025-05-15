@@ -24,6 +24,7 @@ export default async function OccurrencesPage({
     dateFrom?: string;
     dateTo?: string;
     mrn?: string;
+    assignedToDepartment?: string;
   }>;
 }) {
   const resolvedSearchParams = await searchParams;
@@ -83,6 +84,12 @@ export default async function OccurrencesPage({
         occurrenceDate: {
           gte: new Date(resolvedSearchParams.dateFrom),
           lte: new Date(resolvedSearchParams.dateTo),
+        },
+      }),
+    ...(resolvedSearchParams.assignedToDepartment &&
+      resolvedSearchParams.assignedToDepartment !== "all" && {
+        assignments: {
+          some: { departmentId: resolvedSearchParams.assignedToDepartment },
         },
       }),
   };

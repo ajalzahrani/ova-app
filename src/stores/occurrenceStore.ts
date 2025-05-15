@@ -13,6 +13,7 @@ interface OccurrenceSearchState {
     mrn?: string;
     page?: string;
     pageSize?: string;
+    assignedToDepartment?: string;
   };
 
   // Actions
