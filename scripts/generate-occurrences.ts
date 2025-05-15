@@ -122,52 +122,52 @@ async function generateOccurrences(count: number): Promise<void> {
       const occurrenceNo = await generateNextOccurrenceNo();
 
       // Randomly decide if this occurrence will have assignments
-      const willHaveAssignments = Math.random() > 0.3; // ~70% will have assignments
+      // const willHaveAssignments = Math.random() > 0.3; // ~70% will have assignments
 
       // Default status
       let statusName = "OPEN";
       let assignmentsData: any[] = [];
 
-      if (willHaveAssignments) {
-        // Assign to 1-3 random departments
-        const assignmentCount = Math.floor(Math.random() * 3) + 1;
-        const selectedDeptIndices = new Set<number>();
-        while (selectedDeptIndices.size < assignmentCount) {
-          selectedDeptIndices.add(
-            Math.floor(Math.random() * departments.length)
-          );
-        }
+      // if (willHaveAssignments) {
+      //   // Assign to 1-3 random departments
+      //   const assignmentCount = Math.floor(Math.random() * 3) + 1;
+      //   const selectedDeptIndices = new Set<number>();
+      //   while (selectedDeptIndices.size < assignmentCount) {
+      //     selectedDeptIndices.add(
+      //       Math.floor(Math.random() * departments.length)
+      //     );
+      //   }
 
-        // Generate assignments
-        for (const deptIndex of selectedDeptIndices) {
-          // Randomly decide rootCause and actionPlan
-          const rootCause = Math.random() > 0.5 ? faker.lorem.sentence() : null;
-          const actionPlan =
-            Math.random() > 0.5 ? faker.lorem.paragraph() : null;
-          assignmentsData.push({
-            rootCause,
-            actionPlan,
-            departmentId: departments[deptIndex].id,
-          });
-        }
+      //   // Generate assignments
+      //   for (const deptIndex of selectedDeptIndices) {
+      //     // Randomly decide rootCause and actionPlan
+      //     const rootCause = Math.random() > 0.5 ? faker.lorem.sentence() : null;
+      //     const actionPlan =
+      //       Math.random() > 0.5 ? faker.lorem.paragraph() : null;
+      //     assignmentsData.push({
+      //       rootCause,
+      //       actionPlan,
+      //       departmentId: departments[deptIndex].id,
+      //     });
+      //   }
 
-        // Determine status based on assignments
-        const allAnswered = assignmentsData.every(
-          (a) => a.rootCause && a.actionPlan
-        );
-        const allUnanswered = assignmentsData.every(
-          (a) => !a.rootCause && !a.actionPlan
-        );
-        const somePartial = assignmentsData.some(
-          (a) =>
-            (a.rootCause && !a.actionPlan) || (!a.rootCause && a.actionPlan)
-        );
+      //   // Determine status based on assignments
+      //   const allAnswered = assignmentsData.every(
+      //     (a) => a.rootCause && a.actionPlan
+      //   );
+      //   const allUnanswered = assignmentsData.every(
+      //     (a) => !a.rootCause && !a.actionPlan
+      //   );
+      //   const somePartial = assignmentsData.some(
+      //     (a) =>
+      //       (a.rootCause && !a.actionPlan) || (!a.rootCause && a.actionPlan)
+      //   );
 
-        if (allAnswered) statusName = "ANSWERED";
-        else if (allUnanswered) statusName = "ASSIGNED";
-        else if (somePartial) statusName = "ANSWERED_PARTIALLY";
-        else statusName = "ASSIGNED"; // fallback
-      }
+      //   if (allAnswered) statusName = "ANSWERED";
+      //   else if (allUnanswered) statusName = "ASSIGNED";
+      //   else if (somePartial) statusName = "ANSWERED_PARTIALLY";
+      //   else statusName = "ASSIGNED"; // fallback
+      // }
 
       // Find status id
       const status = statuses.find((s) => s.name === statusName);
@@ -183,7 +183,7 @@ async function generateOccurrences(count: number): Promise<void> {
             from: occurrenceDate,
             to: new Date(),
           }),
-          status: { connect: { id: status?.id } },
+          status: { connect: { name: "OPEN" } },
           location: { connect: { id: location.id } },
           incident: { connect: { id: incident.id } },
           createdBy: { connect: { id: createdBy.id } },
@@ -191,20 +191,20 @@ async function generateOccurrences(count: number): Promise<void> {
       });
 
       // Create assignments if any
-      for (const assignment of assignmentsData) {
-        await prisma.occurrenceAssignment.create({
-          data: {
-            occurrence: { connect: { id: occurrence.id } },
-            department: { connect: { id: assignment.departmentId } },
-            rootCause: assignment.rootCause,
-            actionPlan: assignment.actionPlan,
-            isCompleted: Math.random() > 0.7,
-            completedAt:
-              Math.random() > 0.7 ? faker.date.recent({ days: 7 }) : null,
-            message: Math.random() > 0.5 ? faker.lorem.sentence() : null,
-          },
-        });
-      }
+      // for (const assignment of assignmentsData) {
+      //   await prisma.occurrenceAssignment.create({
+      //     data: {
+      //       occurrence: { connect: { id: occurrence.id } },
+      //       department: { connect: { id: assignment.departmentId } },
+      //       rootCause: assignment.rootCause,
+      //       actionPlan: assignment.actionPlan,
+      //       isCompleted: Math.random() > 0.7,
+      //       completedAt:
+      //         Math.random() > 0.7 ? faker.date.recent({ days: 7 }) : null,
+      //       message: Math.random() > 0.5 ? faker.lorem.sentence() : null,
+      //     },
+      //   });
+      // }
 
       console.log(
         `Created occurrence #${i + 1} with ID: ${
