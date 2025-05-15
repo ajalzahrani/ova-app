@@ -4,7 +4,7 @@ import Link from "next/link";
 import { PlusCircle } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { authOptions, getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { OccurrencesTable } from "./components/occurrences-table";
 import { PermissionButton } from "@/components/auth/permission-button";
@@ -28,24 +28,25 @@ export default async function OccurrencesPage({
   }>;
 }) {
   const resolvedSearchParams = await searchParams;
-  const session = await getServerSession(authOptions);
+  const user = await getCurrentUser();
 
-  if (!session?.user) {
+  if (!user) {
     redirect("/login");
   }
 
   await checkServerPermission("manage:occurrences");
+
+  if (!user.departmentId) {
+    redirect("/unauthorized");
+  }
 
   // Parse pagination params with defaults
   const page = Number(resolvedSearchParams.page) || 1;
   const pageSize = Number(resolvedSearchParams.pageSize) || 10;
   const skip = (page - 1) * pageSize;
 
-  // TODO: Include user department in user session
-  const user = await getCurrentUserFromDB(session?.user.id);
-
   const isAllowedToViewAllOccurrences =
-    user?.role.name === "ADMIN" || user?.role.name === "QUALITY_ASSURANCE";
+    user?.role === "ADMIN" || user?.role === "QUALITY_ASSURANCE";
 
   // Build search conditions
   const searchConditions = {
