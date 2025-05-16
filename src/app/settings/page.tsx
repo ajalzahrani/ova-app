@@ -1,19 +1,27 @@
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
-import Link from "next/link";
-import { PlusCircle } from "lucide-react";
-import { PermissionButton } from "@/components/auth/permission-button";
+import { NotificationPreferences } from "./components/notification-preferences";
+import { getUserNotificationPreferences } from "@/actions/notification-preferences";
+// import { getIncidents } from "@/actions/incidents";
+
 export default async function SettingsPage() {
+  const userNotificationPreferences = await getUserNotificationPreferences();
+  // const incidents = await getIncidents();
+
+  if (!userNotificationPreferences.success) {
+    return <div>Error: {userNotificationPreferences.error}</div>;
+  }
+
   return (
     <DashboardShell>
-      <DashboardHeader heading="Settings" text="Manage application settings">
-        <Link href="/occurrences/new">
-          <PermissionButton permission="create:occurrence" asChild>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Report Occurrence
-          </PermissionButton>
-        </Link>
-      </DashboardHeader>
+      <DashboardHeader
+        heading="Settings"
+        text="Manage application settings"></DashboardHeader>
+      <NotificationPreferences
+        userPreferences={userNotificationPreferences.userPreferences}
+        severities={[]}
+        incidentTypes={[]}
+      />
     </DashboardShell>
   );
 }
