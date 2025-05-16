@@ -21,10 +21,15 @@ export const NAV_ITEMS: NavItem[] = [
     requiredPermissions: ["manage:occurrences"],
   },
   {
-    label: "Reports",
-    href: "/reports",
-    requiredPermissions: ["manage:reports"],
+    label: "Incidents",
+    href: "/incidents",
+    requiredPermissions: ["manage:incidents"],
   },
+  // {
+  //   label: "Reports",
+  //   href: "/reports",
+  //   requiredPermissions: ["manage:reports"],
+  // },
   {
     label: "Management",
     requiredPermissions: ["manage:management"],
@@ -51,11 +56,11 @@ export const NAV_ITEMS: NavItem[] = [
       },
     ],
   },
-  {
-    label: "Payments",
-    href: "/payments",
-    requiredPermissions: ["manage:payments"],
-  },
+  // {
+  //   label: "Payments",
+  //   href: "/payments",
+  //   requiredPermissions: ["manage:payments"],
+  // },
 
   // Add more items here...
 ];
