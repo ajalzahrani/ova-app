@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { Incident } from "@prisma/client";
 import { IncidentFormValues, incidentSchema } from "./incidents.validation";
 import { revalidatePath } from "next/cache";
+
 // Get all incidents
 export async function getAllIncidents() {
   try {
@@ -78,22 +79,6 @@ export async function getAllSeverities() {
   }
 }
 
-// Get all top-level incidents (no parent)
-export async function getTopLevelIncidents() {
-  return prisma.incident.findMany({
-    where: {
-      parentId: null,
-    },
-    include: {
-      children: true, // Include first level of sub-incidents
-      severity: true, // Include severity details
-    },
-    orderBy: {
-      name: "asc",
-    },
-  });
-}
-
 export async function editIncident(incident: Incident) {
   try {
     const updatedIncident = await prisma.incident.update({
@@ -107,44 +92,6 @@ export async function editIncident(incident: Incident) {
   }
 }
 
-// Get sub-incidents for a specific parent
-export async function getSubIncidents(parentId: string) {
-  try {
-    const incidents = await prisma.incident.findMany({
-      where: {
-        parentId: parentId,
-      },
-      include: {
-        children: true, // Include next level if needed
-        severity: true, // Include severity details
-      },
-      orderBy: {
-        name: "asc",
-      },
-    });
-    return { success: true, incidents: incidents };
-  } catch (error) {
-    console.error(error);
-    return { success: false, error: "Failed to get sub-incidents" };
-  }
-}
-
-// Get sub-sub-incidents for a specific sub-incident
-export async function getSubSubIncidents(subIncidentId: string) {
-  return prisma.incident.findMany({
-    where: {
-      parentId: subIncidentId,
-    },
-    include: {
-      children: true, // Include next level if needed
-      severity: true, // Include severity details
-    },
-    orderBy: {
-      name: "asc",
-    },
-  });
-}
-
 // Get a single incident with all details
 export async function getIncidentById(id: string) {
   return prisma.incident.findUnique({
@@ -155,6 +102,21 @@ export async function getIncidentById(id: string) {
       children: true,
     },
   });
+}
+
+export async function deleteIncident(incidentId: string) {
+  try {
+    await prisma.incident.delete({
+      where: { id: incidentId },
+    });
+
+    revalidatePath("/incidents");
+
+    return { success: true };
+  } catch (error) {
+    console.error(error);
+    return { success: false, error: "Failed to delete incident" };
+  }
 }
 
 // Get all incidents with hierarchical structure
@@ -199,17 +161,53 @@ export async function getAllIncidentsHierarchyByIncidentId(incidentId: string) {
   });
 }
 
-export async function deleteIncident(incidentId: string) {
-  try {
-    await prisma.incident.delete({
-      where: { id: incidentId },
-    });
+/* 
+Action for incident hierarchy selector
+*/
+// Get all top-level incidents (no parent)
+export async function getTopLevelIncidents() {
+  return prisma.incident.findMany({
+    where: {
+      parentId: null,
+    },
+    include: {
+      children: true, // Include first level of sub-incidents
+      severity: true, // Include severity details
+    },
+    orderBy: {
+      name: "asc",
+    },
+  });
+}
 
-    revalidatePath("/incidents");
+// Get sub-incidents for a specific parent
+export async function getSubIncidents(parentId: string) {
+  return prisma.incident.findMany({
+    where: {
+      parentId: parentId,
+    },
+    include: {
+      children: true, // Include next level if needed
+      severity: true, // Include severity details
+    },
+    orderBy: {
+      name: "asc",
+    },
+  });
+}
 
-    return { success: true };
-  } catch (error) {
-    console.error(error);
-    return { success: false, error: "Failed to delete incident" };
-  }
+// Get sub-sub-incidents for a specific sub-incident
+export async function getSubSubIncidents(subIncidentId: string) {
+  return prisma.incident.findMany({
+    where: {
+      parentId: subIncidentId,
+    },
+    include: {
+      children: true, // Include next level if needed
+      severity: true, // Include severity details
+    },
+    orderBy: {
+      name: "asc",
+    },
+  });
 }
