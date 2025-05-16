@@ -1,57 +1,7 @@
 import { Incident, PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
-const fs = require("fs");
-const csv = require("csv-parser");
-
 import IncidentMasterData from "../IncidentMasterData.json";
-import { readFile } from "fs/promises";
-
-async function loadcsvAdvanced() {
-  const results: any[] = [];
-
-  // Create a readable stream from the CSV file
-  const stream = fs
-    .createReadStream("incidents-v3.csv")
-    .pipe(
-      csv({
-        // Optional: specify column headers if they are not in the first row
-        // headers: ['id', 'name', 'parentId', 'level'],
-        // mapValues: ({ header, index, value }) => value.trim() // Optional: auto-trim values
-      })
-    )
-    .on("data", (data: any) => {
-      // 'data' is an object where keys are the column headers
-      // and values are the cell contents, correctly handled.
-
-      // Assuming your CSV has 'id', 'name', 'parentId', 'level' headers:
-      const { id, name, parentId, level } = data;
-      const levelTrim = level.trim();
-
-      console.log(id, " ", name, " ", parentId, " ", levelTrim);
-
-      results.push({ id, name, parentId, levelTrim });
-    })
-    .on("end", () => {
-      console.log("CSV file successfully processed.");
-    });
-
-  // Wait for the stream to finish processing
-  await new Promise((resolve) => stream.on("end", resolve));
-
-  return results;
-}
-
-async function loadcsv() {
-  const csv = await readFile("incidents-v2.csv", "utf8");
-  const rows = csv.split("\n");
-  return rows.map((row) => {
-    const [id, name, parentId, level] = row.split(",");
-    const levelTrim = level.trim();
-    console.log(id, " ", name, " ", parentId, " ", levelTrim);
-    return { id, name, parentId, levelTrim };
-  });
-}
 
 async function getParentUUID(oldId: string, category: string) {
   // Find the parent incident by oldId and category
@@ -83,38 +33,24 @@ async function getParentId(
   return null;
 }
 
-export async function deleteIncidents() {
-  const incidents = await prisma.incident.count();
-
-  if (incidents > 0) {
-    await prisma.incident.deleteMany({});
-  }
-
-  return {
-    incidents,
-  };
-}
-
 async function main() {
-  const incidents = await loadcsvAdvanced();
+  const incidents = IncidentMasterData.data;
 
   if (!incidents) {
     console.error("No incidents found");
     return;
   }
 
-  await deleteIncidents();
-
   for (const incident of incidents) {
-    const { id, name, parentId, levelTrim } = incident;
+    const { id, name, parentId, level } = incident;
 
     await prisma.incident.create({
       data: {
         name,
-        parentId: await getParentId(parseInt(parentId), levelTrim),
+        parentId: await getParentId(parentId, level.trim()),
         oldId: id.toString(),
-        category: levelTrim,
-        severityId: "1d4fc0a6-2656-472e-82ca-d3bb1f402afe", // Adjust as needed
+        category: level.trim(),
+        severityId: "13d4c93b-c6d2-4640-9d4e-d070ac8c9a9f", // Adjust as needed
       },
     });
   }
