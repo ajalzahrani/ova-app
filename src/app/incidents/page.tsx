@@ -7,7 +7,7 @@ import { IncidentList } from "./components/incident-list";
 import { getAllIncidents } from "@/actions/incidents";
 import { checkServerPermission } from "@/lib/server-permissions";
 import { notFound } from "next/navigation";
-import { AddIncidentDialog } from "./components/add-incident-dialog";
+import { IncidentFormDialog } from "./components/incident-form-dialog";
 export default async function IncidentsPage() {
   await checkServerPermission("manage:incidents");
 
@@ -19,7 +19,7 @@ export default async function IncidentsPage() {
   return (
     <DashboardShell>
       <DashboardHeader heading="Incidents" text="Manage and track incidents">
-        <AddIncidentDialog />
+        <IncidentFormDialog incidents={result.incidents || []} />
       </DashboardHeader>
 
       <IncidentList incidents={result.incidents || []} />

@@ -1,7 +1,4 @@
 "use client";
-
-import { SelectTrigger } from "@/components/ui/select";
-import { File } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -11,9 +8,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Eye, FileEdit, Trash2 } from "lucide-react";
-import Link from "next/link";
-import { Incident, Prisma, Severity } from "@prisma/client";
+import { FileEdit, Trash2 } from "lucide-react";
+import { Prisma } from "@prisma/client";
 import {
   Dialog,
   DialogContent,
@@ -23,31 +19,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { toast } from "@/components/ui/use-toast";
-import {
-  addIncident,
-  deleteIncident,
-  editIncident,
-  getAllIncidents,
-  getAllSeverities,
-} from "@/actions/incidents";
-import { Form } from "@/components/ui/form";
-import { IncidentFormValues } from "@/actions/incidents.validation";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { incidentSchema } from "@/actions/incidents.validation";
-import { useForm } from "react-hook-form";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import SearchInput, { SearchInputRef } from "@/components/ui/search-input";
-import {
-  Select,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
+import { deleteIncident } from "@/actions/incidents";
+import { IncidentFormDialog } from "./incident-form-dialog";
 
-type IncidentWithRelations = Prisma.IncidentGetPayload<{
+export type IncidentWithRelations = Prisma.IncidentGetPayload<{
   include: {
     children: true;
     severity: true;
@@ -63,59 +40,10 @@ export function IncidentList({ incidents }: IncidentListProps) {
   const [incidentToEdit, setIncidentToEdit] =
     useState<IncidentWithRelations | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [incidentToDelete, setIncidentToDelete] =
     useState<IncidentWithRelations | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-
-  const [selectedParentIncident, setSelectedParentIncident] =
-    useState<Incident | null>(null);
-  const [severities, setSeverities] = useState<Severity[]>([]);
-  const [parentIncidents, setParentIncidents] = useState<Incident[]>([]);
-
-  const parentIncidentSearchInputRef = useRef<SearchInputRef>(null);
-
-  useEffect(() => {
-    const fetchParentIncidents = async () => {
-      const result = await getAllIncidents();
-      if (result.success) {
-        setParentIncidents(result.incidents || []);
-      }
-    };
-    const fetchSeverity = async () => {
-      const result = await getAllSeverities();
-      if (result.success) {
-        setSeverities(result.severities || []);
-      }
-    };
-    fetchParentIncidents();
-    fetchSeverity();
-  }, []);
-
-  const form = useForm<IncidentFormValues>({
-    resolver: zodResolver(incidentSchema),
-    defaultValues: {
-      name: "",
-      severityId: "",
-      parentId: undefined,
-    },
-  });
-
-  const handleEditIncident = async () => {
-    if (!incidentToEdit) return;
-
-    setIsEditing(true);
-    try {
-      const result = await editIncident(incidentToEdit);
-    } catch (err) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "An error occurred while editing the incident",
-      });
-    }
-  };
 
   const handleDeleteIncident = async () => {
     if (!incidentToDelete) return;
@@ -148,10 +76,6 @@ export function IncidentList({ incidents }: IncidentListProps) {
     }
   };
 
-  const handleParentIncidentChange = (incident: Incident) => {
-    setSelectedParentIncident(incident);
-  };
-
   return (
     <div className="rounded-md border">
       <Card>
@@ -179,7 +103,10 @@ export function IncidentList({ incidents }: IncidentListProps) {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => setIncidentToEdit(incident)}>
+                        onClick={() => {
+                          setIncidentToEdit(incident);
+                          setIsEditing(true);
+                        }}>
                         <FileEdit className="h-4 w-4" />
                         <span className="sr-only">Edit</span>
                       </Button>
@@ -195,8 +122,8 @@ export function IncidentList({ incidents }: IncidentListProps) {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={2} className="h-24 text-center">
-                    No departments found
+                  <TableCell colSpan={4} className="h-24 text-center">
+                    No incidents found
                   </TableCell>
                 </TableRow>
               )}
@@ -205,83 +132,18 @@ export function IncidentList({ incidents }: IncidentListProps) {
         </CardContent>
       </Card>
 
-      {/* Edit incident Dialog */}
-      <Dialog
-        open={!!isEditing}
-        onOpenChange={(open) => !open && setIncidentToEdit(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Incident</DialogTitle>
-            <DialogDescription>Edit the incident</DialogDescription>
-          </DialogHeader>
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(handleEditIncident)}
-              className="space-y-4">
-              <CardContent>
-                <div className="grid gap-4 py-4">
-                  {/* Add incident name */}
-                  <div className="grid gap-2">
-                    <Label>Incident Name</Label>
-                    <Input {...form.register("name")} />
-                  </div>
-
-                  {/* Add parent incident */}
-                  <div className="space-y-2">
-                    <Label htmlFor="parentIncident">Parent Incident</Label>
-                    <SearchInput
-                      {...form.register("parentId")}
-                      ref={parentIncidentSearchInputRef}
-                      options={parentIncidents}
-                      onSelect={handleParentIncidentChange}
-                      renderOption={(incident) => <span>{incident.name}</span>}
-                      filterOption={(incident, searchTerm) =>
-                        incident.name
-                          .toLowerCase()
-                          .includes(searchTerm.toLowerCase())
-                      }
-                      getOptionLabel={(incident) => incident.name}
-                      icon={<File className="w-4 h-4" />}
-                    />
-                  </div>
-
-                  {/* Add severity */}
-                  <div className="grid gap-2">
-                    <Label>Severity</Label>
-                    <Select
-                      onValueChange={(value) =>
-                        form.setValue("severityId", value)
-                      }>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select Severity" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {severities.map((severity) => (
-                          <SelectItem key={severity.id} value={severity.id}>
-                            {severity.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </CardContent>
-              <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsEditing(false)}
-                  disabled={isSubmitting}>
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Editing..." : "Edit"}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
+      {/* Edit Dialog - conditionally render with proper open state management */}
+      {isEditing && (
+        <IncidentFormDialog
+          incidentId={incidentToEdit?.id}
+          incidents={incidents}
+          open={isEditing}
+          onOpenChange={(open) => {
+            setIsEditing(open);
+            if (!open) setIncidentToEdit(null);
+          }}
+        />
+      )}
 
       {/* Delete Confirmation Dialog */}
       <Dialog

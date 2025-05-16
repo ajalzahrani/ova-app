@@ -79,7 +79,7 @@ export async function getAllSeverities() {
   }
 }
 
-export async function editIncident(incident: Incident) {
+export async function editIncident(incident: IncidentFormValues) {
   try {
     const updatedIncident = await prisma.incident.update({
       where: { id: incident.id },
@@ -94,14 +94,20 @@ export async function editIncident(incident: Incident) {
 
 // Get a single incident with all details
 export async function getIncidentById(id: string) {
-  return prisma.incident.findUnique({
-    where: { id },
-    include: {
-      severity: true,
-      parent: true,
-      children: true,
-    },
-  });
+  try {
+    const incident = await prisma.incident.findUnique({
+      where: { id },
+      include: {
+        severity: true,
+        parent: true,
+        children: true,
+      },
+    });
+    return { success: true, incident: incident };
+  } catch (error) {
+    console.error(error);
+    return { success: false, error: "Failed to get incident by id" };
+  }
 }
 
 export async function deleteIncident(incidentId: string) {

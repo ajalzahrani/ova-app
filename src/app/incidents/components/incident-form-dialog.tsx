@@ -25,17 +25,14 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "@/components/ui/use-toast";
 import {
   addIncident,
-  deleteIncident,
   editIncident,
   getAllIncidents,
   getAllSeverities,
+  getIncidentById,
 } from "@/actions/incidents";
-import { useRouter } from "next/navigation";
-import { FormControl, FormItem, FormLabel } from "@/components/ui/form";
 import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectValue,
@@ -51,19 +48,43 @@ import {
   type IncidentFormValues,
 } from "@/actions/incidents.validation";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { IncidentWithRelations } from "./incident-list";
 
-export function AddIncidentDialog() {
-  const router = useRouter();
+interface IncidentFormDialogProps {
+  incidentId?: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  incidents: IncidentWithRelations[];
+}
+
+export function IncidentFormDialog({
+  incidentId,
+  open: controlledOpen,
+  onOpenChange,
+  incidents,
+}: IncidentFormDialogProps) {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [severities, setSeverities] = useState<Severity[]>([]);
-  const [parentIncidents, setParentIncidents] = useState<Incident[]>([]);
   const [selectedParentIncident, setSelectedParentIncident] =
-    useState<Incident | null>(null);
+    useState<IncidentWithRelations | null>(null);
+  const [selectedSeverityId, setSelectedSeverityId] = useState<string>("");
 
   const parentIncidentSearchInputRef = useRef<SearchInputRef>(null);
 
-  const handleParentIncidentChange = (incident: Incident | null) => {
+  // Handle controlled vs uncontrolled state
+  const isOpen = controlledOpen !== undefined ? controlledOpen : open;
+  const handleOpenChange = (newOpen: boolean) => {
+    if (onOpenChange) {
+      onOpenChange(newOpen);
+    } else {
+      setOpen(newOpen);
+    }
+  };
+
+  const handleParentIncidentChange = (
+    incident: IncidentWithRelations | null
+  ) => {
     setSelectedParentIncident(incident);
     if (incident) {
       form.setValue("parentId", incident.id);
@@ -72,31 +93,75 @@ export function AddIncidentDialog() {
     }
   };
 
+  // Form setup should be before any useEffect that uses it
+  const form = useForm<IncidentFormValues>({
+    resolver: zodResolver(incidentSchema),
+    defaultValues: {
+      id: "",
+      name: "",
+      severityId: "",
+      parentId: undefined,
+    },
+  });
+
   useEffect(() => {
-    const fetchParentIncidents = async () => {
-      const result = await getAllIncidents();
-      if (result.success) {
-        setParentIncidents(result.incidents || []);
+    if (incidentId) {
+      const fetchIncident = async () => {
+        const result = await getIncidentById(incidentId);
+        if (result.success && result.incident) {
+          form.setValue("name", result.incident.name || "");
+          form.setValue("severityId", result.incident.severityId || "");
+          setSelectedSeverityId(result.incident.severityId || "");
+          form.setValue("parentId", result.incident.parentId || undefined);
+
+          // If there's a parent, find it in the incidents and set it as selected
+          if (result.incident.parentId && incidents.length > 0) {
+            const parent = incidents.find(
+              (p) => p.id === result.incident?.parentId
+            );
+            if (parent) {
+              setSelectedParentIncident(parent);
+              // Also update the search input display text
+              if (parentIncidentSearchInputRef.current) {
+                parentIncidentSearchInputRef.current.setSearchTerm(parent.name);
+              }
+            }
+          }
+        }
+      };
+      fetchIncident();
+    } else {
+      // Reset form for new incident
+      form.reset({
+        id: "",
+        name: "",
+        severityId: "",
+        parentId: undefined,
+      });
+      setSelectedSeverityId("");
+      setSelectedParentIncident(null);
+      if (parentIncidentSearchInputRef.current) {
+        parentIncidentSearchInputRef.current.reset();
       }
-    };
+    }
+  }, [incidentId, form, incidents]);
+
+  useEffect(() => {
     const fetchSeverity = async () => {
       const result = await getAllSeverities();
       if (result.success) {
         setSeverities(result.severities || []);
       }
     };
-    fetchParentIncidents();
     fetchSeverity();
   }, []);
 
-  const form = useForm<IncidentFormValues>({
-    resolver: zodResolver(incidentSchema),
-    defaultValues: {
-      name: "",
-      severityId: "",
-      parentId: undefined,
-    },
-  });
+  // Set the incidentId in the form
+  useEffect(() => {
+    if (incidentId) {
+      form.setValue("id", incidentId);
+    }
+  }, [incidentId, form]);
 
   const handleAddIncident = async (data: IncidentFormValues) => {
     setIsSubmitting(true);
@@ -111,8 +176,9 @@ export function AddIncidentDialog() {
           title: "Success",
           description: "Incident added successfully",
         });
-        setOpen(false);
+        handleOpenChange(false);
         form.reset();
+        setSelectedSeverityId("");
         parentIncidentSearchInputRef.current?.reset();
         setSelectedParentIncident(null);
       } else {
@@ -132,25 +198,71 @@ export function AddIncidentDialog() {
     }
   };
 
+  const handleEditIncident = async (data: IncidentFormValues) => {
+    setIsSubmitting(true);
+    try {
+      const result = await editIncident({
+        id: incidentId || "",
+        name: data.name,
+        severityId: data.severityId || "",
+        parentId: data.parentId || undefined,
+      });
+      if (result.success) {
+        toast({
+          title: "Success",
+          description: "Incident updated successfully",
+        });
+        handleOpenChange(false);
+        form.reset();
+        setSelectedSeverityId("");
+        parentIncidentSearchInputRef.current?.reset();
+        setSelectedParentIncident(null);
+      } else {
+        toast({
+          title: "Error",
+          description: result.error,
+        });
+      }
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "An error occurred while updating the incident",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          <Button>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Add Incident
-          </Button>
-        </DialogTrigger>
+      <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+        {!controlledOpen && (
+          <DialogTrigger asChild>
+            <Button>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Add Incident
+            </Button>
+          </DialogTrigger>
+        )}
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add New Incident</DialogTitle>
+            <DialogTitle>
+              {incidentId ? "Edit Incident" : "Add New Incident"}
+            </DialogTitle>
             <DialogDescription>
-              Add a new incident to the system
+              {incidentId
+                ? "Modify the incident details"
+                : "Add a new incident to the system"}
             </DialogDescription>
           </DialogHeader>
           <Form {...form}>
             <form
-              onSubmit={form.handleSubmit(handleAddIncident)}
+              onSubmit={
+                incidentId
+                  ? form.handleSubmit(handleEditIncident)
+                  : form.handleSubmit(handleAddIncident)
+              }
               className="space-y-4">
               <CardContent>
                 <div className="grid gap-4 py-4">
@@ -174,7 +286,7 @@ export function AddIncidentDialog() {
                         form.setValue("parentId", e.target.value)
                       }
                       ref={parentIncidentSearchInputRef}
-                      options={parentIncidents}
+                      options={incidents}
                       onSelect={handleParentIncidentChange}
                       renderOption={(incident) => <span>{incident.name}</span>}
                       filterOption={(incident, searchTerm) =>
@@ -196,9 +308,11 @@ export function AddIncidentDialog() {
                   <div className="grid gap-2">
                     <Label>Severity</Label>
                     <Select
-                      onValueChange={(value) =>
-                        form.setValue("severityId", value)
-                      }>
+                      value={selectedSeverityId}
+                      onValueChange={(value) => {
+                        setSelectedSeverityId(value);
+                        form.setValue("severityId", value);
+                      }}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select Severity" />
                       </SelectTrigger>
@@ -222,13 +336,19 @@ export function AddIncidentDialog() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => setOpen(false)}
+                  onClick={() => handleOpenChange(false)}
                   disabled={isSubmitting}>
                   Cancel
                 </Button>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Adding..." : "Add"}
-                </Button>
+                {incidentId ? (
+                  <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? "Editing..." : "Edit"}
+                  </Button>
+                ) : (
+                  <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? "Adding..." : "Add"}
+                  </Button>
+                )}
               </DialogFooter>
             </form>
           </Form>
