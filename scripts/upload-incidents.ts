@@ -50,7 +50,7 @@ async function main() {
         parentId: await getParentId(parentId, level.trim()),
         oldId: id.toString(),
         category: level.trim(),
-        severityId: "1d4fc0a6-2656-472e-82ca-d3bb1f402afe", // Adjust as needed
+        severityId: "13d4c93b-c6d2-4640-9d4e-d070ac8c9a9f", // Adjust as needed
       },
     });
   }

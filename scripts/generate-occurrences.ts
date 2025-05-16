@@ -13,18 +13,6 @@ const statusNames = [
   "ANSWERED_PARTIALLY",
   "CLOSED",
 ];
-const incidentTypes = [
-  "Equipment Failure",
-  "Safety Violation",
-  "Procedural Error",
-  "Near Miss",
-  "Environmental Spill",
-  "Security Breach",
-  "Quality Issue",
-  "Operational Disruption",
-  "System Outage",
-  "Injury Report",
-];
 const locationNames = [
   "Building A - Floor 1",
   "Building A - Floor 2",
@@ -39,14 +27,9 @@ const locationNames = [
 ];
 const departmentNames = [
   "Safety",
-  "Operations",
   "Maintenance",
   "Quality Assurance",
-  "IT",
   "Human Resources",
-  "Production",
-  "Logistics",
-  "Facilities",
   "Security",
 ];
 
