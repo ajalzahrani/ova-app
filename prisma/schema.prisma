@@ -26,6 +26,10 @@ model User {
   // Feedback token relations
   sharedFeedbackTokens    FeedbackToken[] @relation("SharedFeedbackTokens")
   respondedFeedbackTokens FeedbackToken[] @relation("RespondedFeedbackTokens")
+
+  // Notification relations
+  notificationPreferences NotificationPreference[]
+  notifications           Notification[]
 }
 
 model Role {
@@ -174,4 +178,50 @@ model Severity {
   variant     String?
   Incident    Incident[]
   occurrences Occurrence[]
+}
+
+// Notification settings per user
+model NotificationPreference {
+  id             String   @id @default(uuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  channel        NotificationChannel
+  enabled        Boolean  @default(true)
+  severityLevels String[] // Array of severity IDs the user wants to be notified about
+  incidentTypes  String[] // Array of incident IDs the user wants to be notified about
+  departmentOnly Boolean  @default(false) // Only notify for user's department
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([userId, channel])
+}
+
+enum NotificationChannel {
+  EMAIL
+  MOBILE
+  BOTH
+}
+
+// Sent notifications log
+model Notification {
+  id           String               @id @default(uuid())
+  userId       String
+  user         User                 @relation(fields: [userId], references: [id])
+  title        String
+  message      String
+  type         NotificationType
+  channel      NotificationChannel
+  read         Boolean              @default(false)
+  referenceIds String[]             // Store IDs of related entities (occurrences, referrals)
+  createdAt    DateTime             @default(now())
+  metadata     Json?                // Additional context data
+}
+
+enum NotificationType {
+  OCCURRENCE_CREATED
+  OCCURRENCE_UPDATED
+  HIGH_SEVERITY
+  REFERRAL
+  ASSIGNMENT
+  FEEDBACK
 }
