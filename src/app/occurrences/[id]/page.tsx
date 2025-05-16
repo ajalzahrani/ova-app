@@ -15,6 +15,7 @@ import { getDepartments } from "@/actions/departments";
 import { notFound } from "next/navigation";
 import { OccurrenceFeedbackLinkDialog } from "../components/occurrence-feedback-link-dialog";
 import { BackToOccurrencesButton } from "@/app/occurrences/components/back-to-occurrences-button";
+import { DeleteOccurrenceDialog } from "../components/occurrence-delete-dialog";
 
 export default async function OccurrenceDetails({
   params,
@@ -50,6 +51,11 @@ export default async function OccurrenceDetails({
               </PermissionCheck>
             </>
           )}
+
+          {/* Delete Occurrence - Need delete:occurrence permission */}
+          <PermissionCheck required="delete:occurrence">
+            <DeleteOccurrenceDialog occurrenceId={occurrence.id} />
+          </PermissionCheck>
 
           {/* Conditional buttons based on occurrence status */}
           {occurrenceStatus === "OPEN" && (

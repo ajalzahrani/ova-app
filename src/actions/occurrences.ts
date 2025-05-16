@@ -653,3 +653,30 @@ export async function getOccurrenceSeverities() {
   const severities = await prisma.severity.findMany();
   return severities;
 }
+
+export async function deleteOccurrence(occurrenceId: string) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    return { success: false, error: "Not authenticated" };
+  }
+
+  try {
+    await prisma.$transaction([
+      prisma.occurrenceAssignment.deleteMany({
+        where: { occurrenceId },
+      }),
+      prisma.occurrenceMessage.deleteMany({
+        where: { occurrenceId },
+      }),
+      prisma.occurrence.delete({
+        where: { id: occurrenceId },
+      }),
+    ]);
+
+    revalidatePath("/occurrences");
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting occurrence:", error);
+    return { success: false, error: "Failed to delete occurrence" };
+  }
+}
