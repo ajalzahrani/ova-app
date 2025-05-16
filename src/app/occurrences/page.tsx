@@ -133,13 +133,6 @@ export default async function OccurrencesPage({
     },
     orderBy: [
       {
-        incident: {
-          severity: {
-            level: "desc",
-          },
-        },
-      },
-      {
         createdAt: "desc",
       },
     ],
