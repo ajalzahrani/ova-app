@@ -63,8 +63,13 @@ export function AddIncidentDialog() {
 
   const parentIncidentSearchInputRef = useRef<SearchInputRef>(null);
 
-  const handleParentIncidentChange = (incident: Incident) => {
+  const handleParentIncidentChange = (incident: Incident | null) => {
     setSelectedParentIncident(incident);
+    if (incident) {
+      form.setValue("parentId", incident.id);
+    } else {
+      form.setValue("parentId", undefined);
+    }
   };
 
   useEffect(() => {
@@ -94,7 +99,6 @@ export function AddIncidentDialog() {
   });
 
   const handleAddIncident = async (data: IncidentFormValues) => {
-    console.log(data);
     setIsSubmitting(true);
     try {
       const result = await addIncident({
@@ -109,6 +113,8 @@ export function AddIncidentDialog() {
         });
         setOpen(false);
         form.reset();
+        parentIncidentSearchInputRef.current?.reset();
+        setSelectedParentIncident(null);
       } else {
         toast({
           title: "Error",
@@ -152,13 +158,21 @@ export function AddIncidentDialog() {
                   <div className="grid gap-2">
                     <Label>Incident Name</Label>
                     <Input {...form.register("name")} />
+                    {form.formState.errors.name && (
+                      <p className="text-sm text-red-500">
+                        {form.formState.errors.name.message}
+                      </p>
+                    )}
                   </div>
 
                   {/* Add parent incident */}
                   <div className="space-y-2">
                     <Label htmlFor="parentIncident">Parent Incident</Label>
                     <SearchInput
-                      {...form.register("parentId")}
+                      name="parentId"
+                      onChange={(e) =>
+                        form.setValue("parentId", e.target.value)
+                      }
                       ref={parentIncidentSearchInputRef}
                       options={parentIncidents}
                       onSelect={handleParentIncidentChange}
@@ -171,6 +185,11 @@ export function AddIncidentDialog() {
                       getOptionLabel={(incident) => incident.name}
                       icon={<File className="w-4 h-4" />}
                     />
+                    {form.formState.errors.parentId && (
+                      <p className="text-sm text-red-500">
+                        {form.formState.errors.parentId.message}
+                      </p>
+                    )}
                   </div>
 
                   {/* Add severity */}
@@ -191,6 +210,11 @@ export function AddIncidentDialog() {
                         ))}
                       </SelectContent>
                     </Select>
+                    {form.formState.errors.severityId && (
+                      <p className="text-sm text-red-500">
+                        {form.formState.errors.severityId.message}
+                      </p>
+                    )}
                   </div>
                 </div>
               </CardContent>

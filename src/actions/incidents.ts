@@ -31,6 +31,12 @@ export async function addIncident(incident: IncidentFormValues) {
       const parentIncident = await prisma.incident.findUnique({
         where: { id: validatedIncident.parentId },
       });
+      if (!parentIncident) {
+        return {
+          success: false,
+          error: "Parent incident not found",
+        };
+      }
     }
 
     // Check if incident with same name exists

@@ -21,6 +21,9 @@ interface SearchInputProps<T> {
   icon?: ReactNode;
   clear?: boolean;
   initialValue?: T;
+  name?: string;
+  onChange?: (e: { target: { name?: string; value: string } }) => void;
+  value?: string;
 }
 
 // Define the ref type with a reset method
@@ -41,6 +44,9 @@ const SearchInput = forwardRef<SearchInputRef, SearchInputProps<any>>(
       icon,
       clear,
       initialValue,
+      name,
+      onChange,
+      value: externalValue,
     }: SearchInputProps<T>,
     ref: React.Ref<SearchInputRef>
   ) {
@@ -50,6 +56,7 @@ const SearchInput = forwardRef<SearchInputRef, SearchInputProps<any>>(
     const [selectedOption, setSelectedOption] = useState<T | null>(
       initialValue || null
     );
+    const [hiddenInputValue, setHiddenInputValue] = useState("");
 
     // Expose the reset method to parent components
     useImperativeHandle(ref, () => ({
@@ -57,8 +64,14 @@ const SearchInput = forwardRef<SearchInputRef, SearchInputProps<any>>(
         setSearchTerm("");
         setFilteredOptions([]);
         setSelectedOption(null);
+        setHiddenInputValue("");
         // Inform parent component that selection has been cleared
         onSelect(null as any);
+
+        // Trigger onChange for React Hook Form
+        if (onChange && name) {
+          onChange({ target: { name, value: "" } });
+        }
       },
       setSearchTerm: (value: string) => {
         setSearchTerm(value);
@@ -79,20 +92,35 @@ const SearchInput = forwardRef<SearchInputRef, SearchInputProps<any>>(
 
     const handleOptionClick = useCallback(
       (option: T) => {
+        const optionId = (option as any).id || "";
+
         setSearchTerm(getOptionLabel(option));
         setFilteredOptions([]);
         setSelectedOption(option);
+        setHiddenInputValue(optionId);
         onSelect(option);
+
+        // Trigger onChange for React Hook Form
+        if (onChange && name) {
+          onChange({ target: { name, value: optionId } });
+        }
       },
-      [getOptionLabel, onSelect]
+      [getOptionLabel, onSelect, onChange, name]
     );
 
     const clearInput = () => {
       setSearchTerm("");
       setFilteredOptions([]);
       setSelectedOption(null);
+      setHiddenInputValue("");
+
       // Notify parent that selection was cleared
       onSelect(null);
+
+      // Trigger onChange for React Hook Form
+      if (onChange && name) {
+        onChange({ target: { name, value: "" } });
+      }
     };
 
     useEffect(() => {
@@ -164,6 +192,13 @@ const SearchInput = forwardRef<SearchInputRef, SearchInputProps<any>>(
             onChange={handleInputChange}
             onFocus={handleFocus}
             className="w-full pl-10 pr-10"
+          />
+          {/* Hidden input to store the actual value for form submission */}
+          <input
+            type="hidden"
+            name={name}
+            value={hiddenInputValue}
+            onChange={() => {}}
           />
           {searchTerm && (
             <button
