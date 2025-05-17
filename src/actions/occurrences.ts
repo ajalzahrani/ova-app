@@ -7,6 +7,13 @@ import { z } from "zod";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import {
+  notifyOccurrenceCreated,
+  notifyOccurrenceReferral,
+  notifyOccurrenceActionCompleted,
+  notifyOccurrenceMessage,
+  notifyOccurrenceResolved,
+} from "@/lib/notifications/occurrence-notifications";
+import {
   occurrenceSchema,
   anonymousOccurrenceSchema,
   OccurrenceFormValues,
@@ -15,13 +22,14 @@ import {
   ReferOccurrenceInput,
   updateOccurrenceActionSchema,
   UpdateOccurrenceActionInput,
+  SendMessageInput,
+  sendMessageSchema,
 } from "@/actions/occurrences.validations";
-import { Prisma } from "@prisma/client";
 
 export async function createOccurrence(formValues: OccurrenceFormValues) {
-  // const user = await getCurrentUser();
+  const user = await getCurrentUser();
 
-  // if (!user) throw new Error("Unauthorized");
+  if (!user) throw new Error("Unauthorized");
 
   try {
     // Validate data
@@ -46,9 +54,7 @@ export async function createOccurrence(formValues: OccurrenceFormValues) {
       location: { connect: { id: validatedData.locationId } },
       status: { connect: { name: "OPEN" } },
       incident: { connect: { id: validatedData.incidentId } },
-
-      // TODO: Create a user for anonymous reports
-      // createdBy: { connect: { id: "anonymous" } },
+      createdBy: { connect: { id: user.id } },
       occurrenceDate: validatedData.occurrenceDate
         ? new Date(validatedData.occurrenceDate)
         : null,
@@ -57,6 +63,9 @@ export async function createOccurrence(formValues: OccurrenceFormValues) {
     const occurrence = await prisma.occurrence.create({
       data: createData,
     });
+
+    // Send notifications for the new occurrence
+    await notifyOccurrenceCreated(occurrence.id);
 
     // Revalidate the occurrences page
     revalidatePath("/occurrences");
@@ -119,6 +128,9 @@ export async function createAnonymousOccurrence(
     const occurrence = await prisma.occurrence.create({
       data: createData,
     });
+
+    // Send notifications for the new occurrence
+    await notifyOccurrenceCreated(occurrence.id);
 
     // Revalidate the occurrences page
     revalidatePath("/occurrences");
@@ -195,6 +207,68 @@ export async function getOccurrenceForFeedbackById(occurrenceId: string) {
   }
 }
 
+export async function getOccurrenceByNo(occurrenceNo: string) {
+  const occurrence = await prisma.occurrence.findUnique({
+    where: { occurrenceNo },
+  });
+  return occurrence;
+}
+
+export async function getOccurrenceStatuses() {
+  const statuses = await prisma.occurrenceStatus.findMany();
+  return statuses;
+}
+
+export async function getOccurrenceSeverities() {
+  const severities = await prisma.severity.findMany();
+  return severities;
+}
+
+export async function getOccurrenceSeveritiesAscendants(severityId: string) {
+  const baseSeverity = await prisma.severity.findUnique({
+    where: { id: severityId },
+  });
+
+  if (!baseSeverity) return [];
+
+  const severity = await prisma.severity.findMany({
+    where: {
+      level: {
+        gte: baseSeverity.level,
+      },
+    },
+  });
+
+  return severity;
+}
+
+export async function deleteOccurrence(occurrenceId: string) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    return { success: false, error: "Not authenticated" };
+  }
+
+  try {
+    await prisma.$transaction([
+      prisma.occurrenceAssignment.deleteMany({
+        where: { occurrenceId },
+      }),
+      prisma.occurrenceMessage.deleteMany({
+        where: { occurrenceId },
+      }),
+      prisma.occurrence.delete({
+        where: { id: occurrenceId },
+      }),
+    ]);
+
+    revalidatePath("/occurrences");
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting occurrence:", error);
+    return { success: false, error: "Failed to delete occurrence" };
+  }
+}
+
 export async function assignToDepartments(
   occurrenceId: string,
   departmentIds: string[]
@@ -220,13 +294,35 @@ export async function assignToDepartments(
 }
 
 export async function resolveOccurrence(occurrenceId: string) {
-  await prisma.occurrence.update({
-    where: { id: occurrenceId },
-    data: {
-      closedByQualityAt: new Date(),
-      status: { connect: { name: "CLOSED" } },
-    },
-  });
+  const user = await getCurrentUser();
+
+  if (!user) throw new Error("Unauthorized");
+
+  try {
+    // Update occurrence status
+    await prisma.occurrence.update({
+      where: { id: occurrenceId },
+      data: {
+        closedByQualityAt: new Date(),
+        status: { connect: { name: "CLOSED" } },
+      },
+    });
+
+    // Send notifications for resolution
+    await notifyOccurrenceResolved(occurrenceId, user.id);
+
+    revalidatePath(`/occurrences/${occurrenceId}`);
+    revalidatePath("/occurrences");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error resolving occurrence:", error);
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : "Failed to resolve occurrence",
+    };
+  }
 }
 
 export async function referOccurrenceToDepartments(data: ReferOccurrenceInput) {
@@ -284,8 +380,12 @@ export async function referOccurrenceToDepartments(data: ReferOccurrenceInput) {
       })
     );
 
-    // Create notifications for each department
-    // This is a simplified example - you'd need user-department associations to target specific users
+    // Send notifications to departments
+    await notifyOccurrenceReferral(
+      validatedData.occurrenceId,
+      validatedData.departmentIds,
+      validatedData.message
+    );
 
     // Revalidate related pages
     revalidatePath(`/occurrences/${validatedData.occurrenceId}`);
@@ -356,6 +456,13 @@ export async function updateOccurrenceAction(
         completedAt: new Date(),
       },
     });
+
+    // Send notifications
+    await notifyOccurrenceActionCompleted(
+      validatedData.occurrenceId,
+      user.departmentId,
+      validatedData.rootCause
+    );
 
     // Update the occurrence status to ANSWERED if referred to one department
     const departmentsInvolvedCount = await prisma.occurrenceAssignment.count({
@@ -473,16 +580,6 @@ export async function updateOccurrence(
 
 // --- Occurrence Communication & Feedback ---
 
-const sendMessageSchema = z.object({
-  occurrenceId: z.string().uuid("Invalid occurrence ID"),
-  message: z.string().min(1, "Message cannot be empty"),
-});
-
-type SendMessageInput = z.infer<typeof sendMessageSchema>;
-
-/**
- * Send a message in an occurrence conversation (group thread)
- */
 export async function sendOccurrenceMessage(data: SendMessageInput) {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
@@ -494,13 +591,17 @@ export async function sendOccurrenceMessage(data: SendMessageInput) {
     // check if occurrence status is not closed
     const occurrence = await prisma.occurrence.findUnique({
       where: { id: validatedData.occurrenceId },
-      select: { status: true },
+      select: {
+        status: true,
+        occurrenceNo: true,
+      },
     });
 
     if (occurrence?.status.name === "CLOSED") {
       return { success: false, error: "Occurrence is closed" };
     }
 
+    // Create the message
     const message = await prisma.occurrenceMessage.create({
       data: {
         occurrenceId: validatedData.occurrenceId,
@@ -522,8 +623,17 @@ export async function sendOccurrenceMessage(data: SendMessageInput) {
     // Get current user department
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { departmentId: true },
+      select: {
+        departmentId: true,
+      },
     });
+
+    // Send notifications for the new message
+    await notifyOccurrenceMessage(
+      validatedData.occurrenceId,
+      session.user.id,
+      validatedData.message
+    );
 
     if (!user?.departmentId) {
       return { success: false, error: "User not assigned to a department" };
@@ -589,9 +699,6 @@ export async function sendOccurrenceMessage(data: SendMessageInput) {
   }
 }
 
-/**
- * Get all messages for an occurrence (group thread)
- */
 export async function getOccurrenceMessages(occurrenceId: string) {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
@@ -634,49 +741,5 @@ export async function getOccurrenceMessages(occurrenceId: string) {
   } catch (error) {
     console.error("Error getting occurrence messages:", error);
     return { success: false, error: "Failed to get occurrence messages" };
-  }
-}
-
-export async function getOccurrenceByNo(occurrenceNo: string) {
-  const occurrence = await prisma.occurrence.findUnique({
-    where: { occurrenceNo },
-  });
-  return occurrence;
-}
-
-export async function getOccurrenceStatuses() {
-  const statuses = await prisma.occurrenceStatus.findMany();
-  return statuses;
-}
-
-export async function getOccurrenceSeverities() {
-  const severities = await prisma.severity.findMany();
-  return severities;
-}
-
-export async function deleteOccurrence(occurrenceId: string) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
-    return { success: false, error: "Not authenticated" };
-  }
-
-  try {
-    await prisma.$transaction([
-      prisma.occurrenceAssignment.deleteMany({
-        where: { occurrenceId },
-      }),
-      prisma.occurrenceMessage.deleteMany({
-        where: { occurrenceId },
-      }),
-      prisma.occurrence.delete({
-        where: { id: occurrenceId },
-      }),
-    ]);
-
-    revalidatePath("/occurrences");
-    return { success: true };
-  } catch (error) {
-    console.error("Error deleting occurrence:", error);
-    return { success: false, error: "Failed to delete occurrence" };
   }
 }

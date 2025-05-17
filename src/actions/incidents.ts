@@ -200,6 +200,19 @@ export async function getTopLevelIncidents() {
   });
 }
 
+// Get the top level incident for a specific incident
+export async function getTopLevelIncidentForIncident(incidentId: string) {
+  const incident = await prisma.incident.findUnique({
+    where: { id: incidentId },
+  });
+
+  if (incident?.parentId) {
+    return await getTopLevelIncidentForIncident(incident.parentId);
+  }
+
+  return incident;
+}
+
 // Get sub-incidents for a specific parent
 export async function getSubIncidents(parentId: string) {
   return prisma.incident.findMany({

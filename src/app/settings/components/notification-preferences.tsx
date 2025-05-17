@@ -36,13 +36,7 @@ type UserNotificationPreferencesWithRelations = Prisma.UserGetPayload<{
     notificationPreferences: true;
   };
 }>;
-type IncidentWithRelations = Prisma.IncidentGetPayload<{
-  include: {
-    children: true;
-    severity: true;
-    parent: true;
-  };
-}>;
+type IncidentWithRelations = Prisma.IncidentGetPayload<{}>;
 type SeverityWithRelations = Prisma.SeverityGetPayload<{}>;
 
 export function NotificationPreferences({
@@ -60,7 +54,7 @@ export function NotificationPreferences({
       id: "",
       email: "",
       mobile: "",
-      enabled: true,
+      enabled: false,
       channels: "EMAIL",
       severityLevels: [],
       incidents: [],

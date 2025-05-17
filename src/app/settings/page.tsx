@@ -2,12 +2,15 @@ import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { NotificationPreferences } from "./components/notification-preferences";
 import { getUserNotificationPreferences } from "@/actions/notification-preferences";
-import { getAllIncidents, getAllSeverities } from "@/actions/incidents";
+import {
+  getMainCategoryIncidents,
+  getAllSeverities,
+} from "@/actions/incidents";
 import { Prisma } from "@prisma/client";
 
 export default async function SettingsPage() {
   const userNotificationPreferences = await getUserNotificationPreferences();
-  const incidents = await getAllIncidents();
+  const incidents = await getMainCategoryIncidents();
   const severityLevels = await getAllSeverities();
 
   if (!userNotificationPreferences.success) {

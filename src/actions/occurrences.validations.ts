@@ -59,3 +59,10 @@ export const updateOccurrenceActionSchema = z.object({
 export type UpdateOccurrenceActionInput = z.infer<
   typeof updateOccurrenceActionSchema
 >;
+
+export const sendMessageSchema = z.object({
+  occurrenceId: z.string().uuid("Invalid occurrence ID"),
+  message: z.string().min(1, "Message cannot be empty"),
+});
+
+export type SendMessageInput = z.infer<typeof sendMessageSchema>;
