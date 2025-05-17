@@ -167,6 +167,20 @@ export async function getAllIncidentsHierarchyByIncidentId(incidentId: string) {
   });
 }
 
+export async function getMainCategoryIncidents() {
+  try {
+    const incidents = await prisma.incident.findMany({
+      where: {
+        parentId: null,
+      },
+    });
+    return { success: true, incidents: incidents };
+  } catch (error) {
+    console.error(error);
+    return { success: false, error: "Failed to get main category incidents" };
+  }
+}
+
 /* 
 Action for incident hierarchy selector
 */

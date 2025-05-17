@@ -2,15 +2,39 @@ import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { NotificationPreferences } from "./components/notification-preferences";
 import { getUserNotificationPreferences } from "@/actions/notification-preferences";
-// import { getIncidents } from "@/actions/incidents";
+import { getAllIncidents, getAllSeverities } from "@/actions/incidents";
+import { Prisma } from "@prisma/client";
 
 export default async function SettingsPage() {
   const userNotificationPreferences = await getUserNotificationPreferences();
-  // const incidents = await getIncidents();
+  const incidents = await getAllIncidents();
+  const severityLevels = await getAllSeverities();
 
   if (!userNotificationPreferences.success) {
     return <div>Error: {userNotificationPreferences.error}</div>;
   }
+
+  if (!incidents.success) {
+    return <div>Error: {incidents.error}</div>;
+  }
+
+  if (!severityLevels.success) {
+    return <div>Error: {severityLevels.error}</div>;
+  }
+
+  const userPrefs = userNotificationPreferences.userPreferences || [];
+
+  type UserNotificationPreferencesWithRelations = Prisma.UserGetPayload<{
+    include: {
+      notificationPreferences: true;
+    };
+  }>;
+
+  const formattedUserPrefs: UserNotificationPreferencesWithRelations[] = [
+    {
+      notificationPreferences: userPrefs,
+    } as unknown as UserNotificationPreferencesWithRelations,
+  ];
 
   return (
     <DashboardShell>
@@ -18,9 +42,9 @@ export default async function SettingsPage() {
         heading="Settings"
         text="Manage application settings"></DashboardHeader>
       <NotificationPreferences
-        userPreferences={userNotificationPreferences.userPreferences}
-        severities={[]}
-        incidentTypes={[]}
+        userPreferences={formattedUserPrefs}
+        severityLevels={severityLevels.severities || []}
+        incidents={incidents.incidents || []}
       />
     </DashboardShell>
   );

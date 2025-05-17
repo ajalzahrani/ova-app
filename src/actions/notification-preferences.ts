@@ -3,33 +3,46 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { NotificationPreferencesFormValues } from "./notification-preferences.validation";
+import { NotificationChannel } from "@prisma/client";
 
 export async function getUserNotificationPreferences() {
   const currentUser = await getCurrentUser();
 
-  if (!currentUser) throw new Error("Unauthorized");
+  if (!currentUser) redirect("/login");
 
   try {
-    const user = await prisma.user.findUnique({
-      where: { id: currentUser.id },
-      include: {
-        notificationPreferences: true,
-      },
-    });
+    // Directly fetch notification preferences for the user, but exclude fields that don't exist
+    const notificationPreferences =
+      await prisma.notificationPreference.findMany({
+        where: {
+          userId: currentUser.id,
+        },
+        select: {
+          id: true,
+          userId: true,
+          enabled: true,
+          channel: true,
+          email: true,
+          mobile: true,
+          severityLevels: true,
+          incidents: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
 
     return {
       success: true,
-      userPreferences: user?.notificationPreferences || [],
+      userPreferences: notificationPreferences || [],
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching user notification preferences", error);
+
     return {
       success: false,
-      error: "Failed to fetch user notification preferences",
+      error: error.message || "Failed to fetch user notification preferences",
     };
   }
 }
@@ -39,11 +52,11 @@ export async function updateNotificationPreferences(
 ) {
   const currentUser = await getCurrentUser();
 
-  if (!currentUser) throw new Error("Unauthorized");
+  if (!currentUser) redirect("/login");
 
   // Update notification preferences
   await prisma.user.update({
-    where: { id: session.user.id },
+    where: { id: currentUser.id },
     data: {
       notificationPreferences: {
         connect: preferences.map((pref) => ({ id: pref.id })),
@@ -57,30 +70,65 @@ export async function saveNotificationPreferences(
 ) {
   const currentUser = await getCurrentUser();
 
-  if (!currentUser) throw new Error("Unauthorized");
+  if (!currentUser) redirect("/login");
 
   try {
-    // Update notification preferences
-    await prisma.user.update({
-      where: { id: currentUser.id },
-      data: {
-        notificationPreferences: {
-          connect: preferences.map((pref) => ({ id: pref.id })),
+    if (!preferences || preferences.length === 0) {
+      throw new Error("No preferences provided");
+    }
+
+    // Use upsert to either create or update preferences
+    await prisma.notificationPreference.upsert({
+      where: {
+        userId_channel: {
+          userId: currentUser.id,
+          channel:
+            (preferences[0].channels as NotificationChannel) ||
+            NotificationChannel.EMAIL,
         },
       },
+      update: {
+        channel:
+          (preferences[0].channels as NotificationChannel) ||
+          NotificationChannel.EMAIL,
+        email: preferences[0].email,
+        mobile: preferences[0].mobile,
+        severityLevels: preferences[0].severityLevels || [],
+        incidents: preferences[0].incidents || [],
+        enabled: preferences[0].enabled,
+      },
+      create: {
+        userId: currentUser.id,
+        channel:
+          (preferences[0].channels as NotificationChannel) ||
+          NotificationChannel.EMAIL,
+        email: preferences[0].email,
+        mobile: preferences[0].mobile,
+        severityLevels: preferences[0].severityLevels || [],
+        incidents: preferences[0].incidents || [],
+        enabled: preferences[0].enabled,
+      },
     });
+
     revalidatePath("/settings");
-    redirect("/settings");
 
     return {
       success: true,
       message: "Notification preferences saved successfully",
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error saving notification preferences", error);
+    // Log more specific error details
+    if (error.code) {
+      console.error(`Prisma Error Code: ${error.code}`);
+    }
+    if (error.meta) {
+      console.error(`Error Meta: ${JSON.stringify(error.meta)}`);
+    }
+
     return {
       success: false,
-      message: "Failed to save notification preferences",
+      message: error.message || "Failed to save notification preferences",
     };
   }
 }

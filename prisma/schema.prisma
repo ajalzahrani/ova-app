@@ -190,7 +190,6 @@ model NotificationPreference {
   mobile         String?
   severityLevels String[] // Array of severity IDs the user wants to be notified about
   incidents  String[] // Array of incident IDs the user wants to be notified about
-  departmentOnly Boolean  @default(false) // Only notify for user's department
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
