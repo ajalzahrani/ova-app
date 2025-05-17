@@ -1,6 +1,6 @@
 ---
 description: Prisma ORM with PostgreSQL Best Practices
-globs: *.ts,*.tsx,*.js,*.jsx,*.prisma
+globs: *.ts,*.prisma
 alwaysApply: false
 ---
 

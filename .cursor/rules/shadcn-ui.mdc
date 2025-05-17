@@ -1,6 +1,6 @@
 ---
 description: ShadCN UI Components and Patterns
-globs: *.ts,*.tsx
+globs: *.tsx
 alwaysApply: false
 ---
 

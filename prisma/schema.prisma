@@ -184,15 +184,17 @@ model Severity {
 model NotificationPreference {
   id             String   @id @default(uuid())
   userId         String
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  channel        NotificationChannel
   enabled        Boolean  @default(true)
+  channel        NotificationChannel
+  email          String?
+  mobile         String?
   severityLevels String[] // Array of severity IDs the user wants to be notified about
-  incidentTypes  String[] // Array of incident IDs the user wants to be notified about
+  incidents  String[] // Array of incident IDs the user wants to be notified about
   departmentOnly Boolean  @default(false) // Only notify for user's department
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   @@unique([userId, channel])
 }
 
