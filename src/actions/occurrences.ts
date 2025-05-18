@@ -571,8 +571,8 @@ export async function updateOccurrence(
 // --- Occurrence Communication & Feedback ---
 
 export async function sendOccurrenceMessage(data: SendMessageInput) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
+  const user = await getCurrentUser();
+  if (!user) {
     return { success: false, error: "Not authenticated" };
   }
   try {
@@ -595,7 +595,7 @@ export async function sendOccurrenceMessage(data: SendMessageInput) {
     const message = await prisma.occurrenceMessage.create({
       data: {
         occurrenceId: validatedData.occurrenceId,
-        senderId: session.user.id,
+        senderId: user.id,
         recipientDepartmentId: null, // group message
         message: validatedData.message,
       },
@@ -610,24 +610,16 @@ export async function sendOccurrenceMessage(data: SendMessageInput) {
       },
     });
 
-    // Get current user department
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: {
-        departmentId: true,
-      },
-    });
+    if (!user?.departmentId) {
+      return { success: false, error: "User not assigned to a department" };
+    }
 
     // Send notifications for the new message
     await notifyOccurrenceMessage(
       validatedData.occurrenceId,
-      session.user.id,
+      user.id,
       validatedData.message
     );
-
-    if (!user?.departmentId) {
-      return { success: false, error: "User not assigned to a department" };
-    }
 
     // Get all assigned departments for this occurrence
     const assignedDepartments = await prisma.occurrenceAssignment.findMany({

@@ -241,7 +241,7 @@ export async function notifyOccurrenceReferralBulk(
     await sendNotification({
       userId: notification.userId,
       title: `Occurrences Referral`,
-      message: `${occurrenceIds.length} occurrences have been referred to your department`,
+      message: `You have received ${occurrenceIds.length} new occurrences for review`,
       type: NotificationType.REFERRAL,
       referenceIds: occurrenceIds,
       channel: notification.channel,
@@ -273,6 +273,7 @@ export async function notifyOccurrenceMessage(
           department: true,
         },
       },
+      status: true,
     },
   });
 
@@ -311,39 +312,41 @@ export async function notifyOccurrenceMessage(
     });
   }
 
-  // 2. Notify QA users
-  const qaUsers = await prisma.user.findMany({
-    where: {
-      role: {
-        name: "QUALITY_ASSURANCE",
-      },
-      id: { not: senderId }, // Exclude the sender
-      notificationPreferences: {
-        some: {
-          enabled: true,
+  // 2. Notify QA users if the occurrence is answered status
+  if (occurrence.status.name === "ANSWERED") {
+    const qaUsers = await prisma.user.findMany({
+      where: {
+        role: {
+          name: "QUALITY_ASSURANCE",
+        },
+        id: { not: senderId }, // Exclude the sender
+        notificationPreferences: {
+          some: {
+            enabled: true,
+          },
         },
       },
-    },
-  });
-
-  for (const qaUser of qaUsers) {
-    await sendNotification({
-      userId: qaUser.id,
-      title: `New message on ${occurrence.occurrenceNo}`,
-      message: `${sender.name || "A user"} has sent a message on occurrence ${
-        occurrence.occurrenceNo
-      }`,
-      type: NotificationType.OCCURRENCE_UPDATED,
-      referenceIds: [occurrenceId],
-      channel: NotificationChannel.EMAIL,
-      metadata: {
-        occurrenceNo: occurrence.occurrenceNo,
-        messageSnippet:
-          message.substring(0, 100) + (message.length > 100 ? "..." : ""),
-        senderName: sender.name,
-        senderDepartment: sender.department?.name,
-      },
     });
+
+    for (const qaUser of qaUsers) {
+      await sendNotification({
+        userId: qaUser.id,
+        title: `New message on ${occurrence.occurrenceNo}`,
+        message: `${sender.name || "A user"} has sent a message on occurrence ${
+          occurrence.occurrenceNo
+        }`,
+        type: NotificationType.OCCURRENCE_UPDATED,
+        referenceIds: [occurrenceId],
+        channel: NotificationChannel.EMAIL,
+        metadata: {
+          occurrenceNo: occurrence.occurrenceNo,
+          messageSnippet:
+            message.substring(0, 100) + (message.length > 100 ? "..." : ""),
+          senderName: sender.name,
+          senderDepartment: sender.department?.name,
+        },
+      });
+    }
   }
 
   // 3. Notify users from other assigned departments
@@ -457,53 +460,6 @@ export async function notifyOccurrenceResolved(
           occurrenceNo: occurrence.occurrenceNo,
           resolvedBy: resolver?.name || "A user",
           departmentName: assignment.department.name,
-        },
-      });
-    }
-  }
-}
-
-// For handling bulk referrals
-export async function sendBulkReferralNotification({
-  departmentId,
-  occurrenceIds,
-  message,
-}: {
-  departmentId: string;
-  occurrenceIds: string[];
-  message?: string;
-}) {
-  // Get department users
-  const users = await prisma.user.findMany({
-    where: { departmentId },
-    include: { notificationPreferences: true },
-  });
-
-  // Get the occurrences for the title
-  const occurrences = await prisma.occurrence.findMany({
-    where: { id: { in: occurrenceIds } },
-    select: { occurrenceNo: true },
-  });
-
-  // Create a nice title and message
-  const title = `${occurrenceIds.length} occurrences referred to your department`;
-  const notificationMessage =
-    message ||
-    `You have received ${occurrenceIds.length} new occurrences for review`;
-
-  // Send one notification per eligible user
-  for (const user of users) {
-    if (shouldNotifyUserForReferral(user)) {
-      await sendNotification({
-        userId: user.id,
-        title,
-        message: notificationMessage,
-        type: NotificationType.REFERRAL,
-        referenceIds: occurrenceIds,
-        channel: NotificationChannel.EMAIL,
-        metadata: {
-          occurrenceNumbers: occurrences.map((o) => o.occurrenceNo),
-          departmentId,
         },
       });
     }
