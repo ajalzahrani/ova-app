@@ -3,17 +3,6 @@ import { prisma } from "@/lib/prisma";
 import { sendNotification } from "@/lib/notification-service";
 import { getTopLevelIncidentForIncident } from "@/actions/incidents";
 
-function shouldNotifyUserForReferral(user: any) {
-  // Check if user has enabled referral notifications
-  return user.notificationPreferences.some(
-    (pref: any) =>
-      pref.enabled &&
-      (pref.channel === NotificationChannel.EMAIL ||
-        pref.channel === NotificationChannel.MOBILE ||
-        pref.channel === NotificationChannel.BOTH)
-  );
-}
-
 function shouldNotifyUserForIncident(user: any, incidentId: string) {
   // if incident is null, return false to not notify user for all incidents
   if (user.notificationPreferences[0].incidents.length === 0) return false;
@@ -25,12 +14,22 @@ function shouldNotifyUserForIncident(user: any, incidentId: string) {
 }
 
 function shouldNotifyUserForSeverity(user: any, severityId: string) {
+  if (!user.notificationPreferences) return false;
+
   // if severity is null, return false to not notify user for all severity levels
   if (user.notificationPreferences[0].severityLevels.length === 0) return false;
 
   // Check if user has enabled severity notifications
   return user.notificationPreferences.some(
     (pref: any) => pref.enabled && pref.severityLevels.includes(severityId)
+  );
+}
+
+// Helper function to determine if a user should be notified for referrals
+function shouldNotifyUserForReferral(user: any) {
+  return (
+    user.notificationPreferences &&
+    user.notificationPreferences.some((pref: any) => pref.enabled)
   );
 }
 
@@ -69,7 +68,9 @@ export async function notifyOccurrenceCreated(occurrenceId: string) {
   for (const user of users) {
     // Check if user has preferences for new occurrences
     const shouldNotify =
-      shouldNotifyUserForIncident(user, topLevelIncident?.id) ||
+      (topLevelIncident
+        ? shouldNotifyUserForIncident(user, topLevelIncident.id)
+        : false) ||
       shouldNotifyUserForSeverity(user, occurrence.incident.severity.id);
 
     console.log("Should notify", shouldNotify);
@@ -97,83 +98,159 @@ export async function notifyOccurrenceReferral(
   departmentIds: string[],
   message?: string
 ) {
-  // Send notifications for each department
-  for (const departmentId of departmentIds) {
-    await sendBulkReferralNotification({
-      departmentId,
-      occurrenceIds: [occurrenceId],
-      message,
-    });
-  }
-}
-
-// Send notifications when an occurrence action is completed
-export async function notifyOccurrenceActionCompleted(
-  occurrenceId: string,
-  departmentId: string,
-  rootCause: string
-) {
-  // Get occurrence details for notifications
   const occurrence = await prisma.occurrence.findUnique({
     where: { id: occurrenceId },
     include: {
-      createdBy: true,
+      incident: { include: { severity: true } },
     },
   });
 
   if (!occurrence) return;
 
-  // Get the department that responded
-  const department = await prisma.department.findUnique({
-    where: { id: departmentId },
-  });
+  const topLevelIncident =
+    occurrence.incident.id &&
+    (await getTopLevelIncidentForIncident(occurrence.incident.id));
 
-  // If the original reporter exists, notify them about the response
-  if (occurrence.createdBy) {
-    await sendNotification({
-      userId: occurrence.createdBy.id,
-      title: `Response from ${department?.name || "a department"}`,
-      message: `Department ${
-        department?.name || "Unknown"
-      } has responded to occurrence ${occurrence.occurrenceNo}`,
-      type: NotificationType.ASSIGNMENT,
-      referenceIds: [occurrence.id],
-      metadata: {
-        occurrenceNo: occurrence.occurrenceNo,
-        rootCause,
-        departmentId,
-        departmentName: department?.name,
-      },
-    });
-  }
-
-  // Notify quality assurance users
-  const qaUsers = await prisma.user.findMany({
+  // Get users with enabled notification preferences for the departments that are being referred to
+  const users = await prisma.user.findMany({
     where: {
       role: {
-        name: "QUALITY_ASSURANCE",
+        name: {
+          in: ["DEPARTMENT_MANAGER"],
+        },
       },
-      notificationPreferences: {
-        some: {
-          enabled: true,
+      department: {
+        id: {
+          in: departmentIds,
         },
       },
     },
+    include: {
+      notificationPreferences: true,
+    },
   });
 
-  for (const qaUser of qaUsers) {
+  for (const user of users) {
+    // Check if user has preferences for new occurrences
+    const shouldNotify =
+      (topLevelIncident
+        ? shouldNotifyUserForIncident(user, topLevelIncident.id)
+        : false) ||
+      shouldNotifyUserForSeverity(user, occurrence.incident.severity.id);
+
+    console.log(`Should notify ${user.name}`, shouldNotify);
+    if (shouldNotify) {
+      console.log("Sending notification to user", user.id);
+      await sendNotification({
+        userId: user.id,
+        title: `Occurrence Referral: ${occurrence.occurrenceNo}`,
+        message: `An occurrence has been referred to your department: ${occurrence.occurrenceNo}`,
+        type: NotificationType.REFERRAL,
+        referenceIds: [occurrence.id],
+        channel: user.notificationPreferences[0].channel,
+        metadata: {
+          occurrenceNo: occurrence.occurrenceNo,
+          severityLevel: occurrence.incident.severity?.level || null,
+          departmentId: departmentIds[0],
+          departmentName: departmentIds[0],
+          message,
+        },
+      });
+    }
+  }
+}
+
+// Send notifications for referring an occurrence to departments
+export async function notifyOccurrenceReferralBulk(
+  occurrenceIds: string[],
+  departmentIds: string[],
+  message?: string
+) {
+  // Get users with enabled notification preferences for the departments that are being referred to
+  const users = await prisma.user.findMany({
+    where: {
+      role: {
+        name: {
+          in: ["DEPARTMENT_MANAGER"],
+        },
+      },
+      department: {
+        id: {
+          in: departmentIds,
+        },
+      },
+    },
+    include: {
+      notificationPreferences: true,
+    },
+  });
+
+  // Create a map to aggregate notifications by user
+  const userNotifications = new Map();
+  const occurrenceNos: string[] = [];
+
+  // First collect all occurrence numbers
+  for (const occurrenceId of occurrenceIds) {
+    const occurrence = await prisma.occurrence.findUnique({
+      where: { id: occurrenceId },
+      include: {
+        incident: { include: { severity: true } },
+      },
+    });
+
+    if (!occurrence) continue;
+    occurrenceNos.push(occurrence.occurrenceNo);
+  }
+
+  // Then process each occurrence for notifications
+  for (const occurrenceId of occurrenceIds) {
+    const occurrence = await prisma.occurrence.findUnique({
+      where: { id: occurrenceId },
+      include: {
+        incident: { include: { severity: true } },
+      },
+    });
+
+    if (!occurrence) continue;
+
+    const topLevelIncident =
+      occurrence.incident.id &&
+      (await getTopLevelIncidentForIncident(occurrence.incident.id));
+
+    for (const user of users) {
+      const shouldNotify =
+        (topLevelIncident
+          ? shouldNotifyUserForIncident(user, topLevelIncident.id)
+          : false) ||
+        shouldNotifyUserForSeverity(user, occurrence.incident.severity.id);
+
+      if (shouldNotify) {
+        if (!userNotifications.has(user.id)) {
+          userNotifications.set(user.id, {
+            userId: user.id,
+            channel: user.notificationPreferences[0].channel,
+            severityLevel: occurrence.incident.severity?.level || null,
+          });
+        }
+      }
+    }
+  }
+
+  // Send one aggregated notification per user
+  for (const [userId, notification] of userNotifications.entries()) {
     await sendNotification({
-      userId: qaUser.id,
-      title: `Department Response: ${occurrence.occurrenceNo}`,
-      message: `${
-        department?.name || "A department"
-      } has responded to occurrence ${occurrence.occurrenceNo}`,
-      type: NotificationType.ASSIGNMENT,
-      referenceIds: [occurrenceId],
+      userId: notification.userId,
+      title: `Occurrences Referral`,
+      message: `${occurrenceIds.length} occurrences have been referred to your department`,
+      type: NotificationType.REFERRAL,
+      referenceIds: occurrenceIds,
+      channel: notification.channel,
       metadata: {
-        occurrenceNo: occurrence.occurrenceNo,
-        departmentId,
-        departmentName: department?.name,
+        occurrenceNos,
+        severityLevel: notification.severityLevel,
+        departmentId: departmentIds[0],
+        departmentName: departmentIds[0],
+        message,
       },
     });
   }
@@ -223,6 +300,7 @@ export async function notifyOccurrenceMessage(
       }`,
       type: NotificationType.OCCURRENCE_UPDATED,
       referenceIds: [occurrenceId],
+      channel: NotificationChannel.EMAIL,
       metadata: {
         occurrenceNo: occurrence.occurrenceNo,
         messageSnippet:
@@ -257,6 +335,7 @@ export async function notifyOccurrenceMessage(
       }`,
       type: NotificationType.OCCURRENCE_UPDATED,
       referenceIds: [occurrenceId],
+      channel: NotificationChannel.EMAIL,
       metadata: {
         occurrenceNo: occurrence.occurrenceNo,
         messageSnippet:
@@ -295,6 +374,7 @@ export async function notifyOccurrenceMessage(
           } has sent a message on occurrence ${occurrence.occurrenceNo}`,
           type: NotificationType.OCCURRENCE_UPDATED,
           referenceIds: [occurrenceId],
+          channel: NotificationChannel.EMAIL,
           metadata: {
             occurrenceNo: occurrence.occurrenceNo,
             messageSnippet:
@@ -342,6 +422,7 @@ export async function notifyOccurrenceResolved(
       message: `Your reported occurrence ${occurrence.occurrenceNo} has been resolved and closed`,
       type: NotificationType.OCCURRENCE_UPDATED,
       referenceIds: [occurrenceId],
+      channel: NotificationChannel.EMAIL,
       metadata: {
         occurrenceNo: occurrence.occurrenceNo,
         resolvedBy: resolver?.name || "A user",
@@ -371,6 +452,7 @@ export async function notifyOccurrenceResolved(
         message: `Occurrence ${occurrence.occurrenceNo} that was assigned to your department has been resolved and closed`,
         type: NotificationType.OCCURRENCE_UPDATED,
         referenceIds: [occurrenceId],
+        channel: NotificationChannel.EMAIL,
         metadata: {
           occurrenceNo: occurrence.occurrenceNo,
           resolvedBy: resolver?.name || "A user",
@@ -418,6 +500,7 @@ export async function sendBulkReferralNotification({
         message: notificationMessage,
         type: NotificationType.REFERRAL,
         referenceIds: occurrenceIds,
+        channel: NotificationChannel.EMAIL,
         metadata: {
           occurrenceNumbers: occurrences.map((o) => o.occurrenceNo),
           departmentId,

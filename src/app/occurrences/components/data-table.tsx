@@ -181,21 +181,18 @@ export function DataTable<TData, TValue>({
       );
 
       // Process each occurrence referral
-      for (const occurrenceId of selectedOccurrenceIds) {
-        const result = await referOccurrenceToDepartments({
-          occurrenceId,
-          departmentIds: selectedDepartmentIds,
-          message: message.trim() || undefined,
+      const result = await referOccurrenceToDepartments({
+        occurrenceIds: selectedOccurrenceIds,
+        departmentIds: selectedDepartmentIds,
+        message: message.trim() || undefined,
+      });
+      if (!result.success) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: result.error || "Failed to refer occurrences",
         });
-
-        if (!result.success) {
-          toast({
-            variant: "destructive",
-            title: "Error",
-            description:
-              result.error || `Failed to refer occurrence ${occurrenceId}`,
-          });
-        }
+        return;
       }
 
       toast({

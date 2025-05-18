@@ -9,9 +9,9 @@ import { authOptions } from "@/lib/auth";
 import {
   notifyOccurrenceCreated,
   notifyOccurrenceReferral,
-  notifyOccurrenceActionCompleted,
   notifyOccurrenceMessage,
   notifyOccurrenceResolved,
+  notifyOccurrenceReferralBulk,
 } from "@/lib/notifications/occurrence-notifications";
 import {
   occurrenceSchema,
@@ -269,30 +269,6 @@ export async function deleteOccurrence(occurrenceId: string) {
   }
 }
 
-export async function assignToDepartments(
-  occurrenceId: string,
-  departmentIds: string[]
-) {
-  await prisma.$transaction(async (tx) => {
-    await tx.occurrence.update({
-      where: { id: occurrenceId },
-      data: {
-        assignedByQualityAt: new Date(),
-        status: { connect: { id: "ASSIGNED" } },
-      },
-    });
-
-    for (const deptId of departmentIds) {
-      await tx.occurrenceAssignment.create({
-        data: {
-          occurrenceId,
-          departmentId: deptId,
-        },
-      });
-    }
-  });
-}
-
 export async function resolveOccurrence(occurrenceId: string) {
   const user = await getCurrentUser();
 
@@ -326,75 +302,89 @@ export async function resolveOccurrence(occurrenceId: string) {
 }
 
 export async function referOccurrenceToDepartments(data: ReferOccurrenceInput) {
-  const session = await getServerSession(authOptions);
+  const user = await getCurrentUser();
 
-  if (!session?.user) {
-    return { success: false, error: "Not authenticated" };
-  }
+  if (!user) return { success: false, error: "Not authenticated" };
 
   try {
     // Validate data
     const validatedData = referOccurrenceSchema.parse(data);
 
-    // First update the occurrence status to ASSIGNED if it's not already
-    await prisma.occurrence.update({
-      where: { id: validatedData.occurrenceId },
-      data: {
-        status: { connect: { name: "ASSIGNED" } },
-      },
-    });
-
-    // Create referrals for each department
-    const referrals = await Promise.all(
-      validatedData.departmentIds.map(async (departmentId) => {
-        // Check if referral already exists
-        const existingReferral = await prisma.occurrenceAssignment.findFirst({
-          where: {
-            occurrenceId: validatedData.occurrenceId,
-            departmentId,
+    // Use a transaction to ensure all database operations are atomic
+    const result: any = await prisma.$transaction(async (tx) => {
+      // First update the occurrence status to ASSIGNED if it's not already
+      for (const occurrenceId of validatedData.occurrenceIds) {
+        await tx.occurrence.update({
+          where: { id: occurrenceId },
+          data: {
+            assignedByQualityAt: new Date(),
+            status: { connect: { name: "ASSIGNED" } },
           },
         });
 
-        if (existingReferral) {
-          // Update existing referral if it exists
-          return prisma.occurrenceAssignment.update({
-            where: {
-              id: existingReferral.id,
-            },
-            data: {
-              message: validatedData.message,
-              completedAt: null,
-            },
-          });
-        } else {
-          // Create new referral
-          return prisma.occurrenceAssignment.create({
-            data: {
-              occurrenceId: validatedData.occurrenceId,
-              departmentId,
-              message: validatedData.message,
-              completedAt: null,
-            },
-          });
-        }
-      })
-    );
+        // Create or update referrals for each department
+        const referrals = [];
 
-    // Send notifications to departments
-    await notifyOccurrenceReferral(
-      validatedData.occurrenceId,
-      validatedData.departmentIds,
-      validatedData.message
-    );
+        for (const departmentId of validatedData.departmentIds) {
+          // Check if referral already exists
+          const existingReferral = await tx.occurrenceAssignment.findFirst({
+            where: {
+              occurrenceId,
+              departmentId,
+            },
+          });
+
+          let referral;
+          if (existingReferral) {
+            // Update existing referral if it exists
+            referral = await tx.occurrenceAssignment.update({
+              where: {
+                id: existingReferral.id,
+              },
+              data: {
+                message: validatedData.message,
+                completedAt: null,
+              },
+            });
+          } else {
+            // Create new referral
+            referral = await tx.occurrenceAssignment.create({
+              data: {
+                occurrenceId,
+                departmentId,
+                message: validatedData.message,
+                completedAt: null,
+              },
+            });
+          }
+          referrals.push(referral);
+        }
+      }
+    });
+
+    if (validatedData.occurrenceIds.length > 1) {
+      await notifyOccurrenceReferralBulk(
+        validatedData.occurrenceIds,
+        validatedData.departmentIds,
+        validatedData.message
+      );
+    } else {
+      await notifyOccurrenceReferral(
+        validatedData.occurrenceIds[0],
+        validatedData.departmentIds,
+        validatedData.message
+      );
+    }
 
     // Revalidate related pages
-    revalidatePath(`/occurrences/${validatedData.occurrenceId}`);
+    for (const occurrenceId of validatedData.occurrenceIds) {
+      revalidatePath(`/occurrences/${occurrenceId}`);
+    }
     revalidatePath("/occurrences");
     revalidatePath("/dashboard");
 
     return {
       success: true,
-      referrals: referrals.map((r) => r.id),
     };
   } catch (error) {
     console.error("Error referring occurrence:", error);
@@ -457,12 +447,12 @@ export async function updateOccurrenceAction(
       },
     });
 
-    // Send notifications
-    await notifyOccurrenceActionCompleted(
-      validatedData.occurrenceId,
-      user.departmentId,
-      validatedData.rootCause
-    );
+    // // Send notifications
+    // await notifyOccurrenceActionCompleted(
+    //   validatedData.occurrenceId,
+    //   user.departmentId,
+    //   validatedData.rootCause
+    // );
 
     // Update the occurrence status to ANSWERED if referred to one department
     const departmentsInvolvedCount = await prisma.occurrenceAssignment.count({
