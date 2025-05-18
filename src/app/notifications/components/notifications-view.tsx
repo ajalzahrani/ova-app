@@ -112,9 +112,7 @@ export function NotificationsView() {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <p className="text-muted-foreground">
-          {unreadCount > 0
-            ? `You have ${unreadCount} unread notifications`
-            : "No unread notifications"}
+          {unreadCount > 0 && `You have ${unreadCount} unread notifications`}
         </p>
         {unreadCount > 0 && (
           <Button variant="outline" onClick={handleMarkAllAsRead}>

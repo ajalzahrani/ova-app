@@ -32,17 +32,11 @@ export function NotificationDropdown() {
   const fetchNotifications = async () => {
     setLoading(true);
     try {
-      const [notificationsResult, unreadCountResult] = await Promise.all([
-        getUserNotifications(10),
-        getUnreadNotificationCount(),
-      ]);
+      const notificationsResult = await getUserNotifications(10);
 
       if (notificationsResult.success) {
         setNotifications(notificationsResult.notifications || []);
-      }
-
-      if (unreadCountResult.success) {
-        setUnreadCount(unreadCountResult.count);
+        setUnreadCount(notificationsResult.count || 0);
       }
     } catch (error) {
       console.error("Error fetching notifications:", error);

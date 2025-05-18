@@ -17,6 +17,7 @@ export async function getUserNotifications(limit = 10) {
     const notifications = await prisma.notification.findMany({
       where: {
         userId: currentUser.id,
+        read: false,
       },
       orderBy: {
         createdAt: "desc",
@@ -24,9 +25,17 @@ export async function getUserNotifications(limit = 10) {
       take: limit,
     });
 
+    const count = await prisma.notification.count({
+      where: {
+        userId: currentUser.id,
+        read: false,
+      },
+    });
+
     return {
       success: true,
       notifications,
+      count,
     };
   } catch (error: any) {
     console.error("Error fetching user notifications", error);

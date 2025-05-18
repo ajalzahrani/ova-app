@@ -27,9 +27,9 @@ import {
 } from "@/actions/occurrences.validations";
 
 export async function createOccurrence(formValues: OccurrenceFormValues) {
-  const user = await getCurrentUser();
+  // const user = await getCurrentUser();
 
-  if (!user) throw new Error("Unauthorized");
+  // if (!user) throw new Error("Unauthorized");
 
   try {
     // Validate data
@@ -54,7 +54,7 @@ export async function createOccurrence(formValues: OccurrenceFormValues) {
       location: { connect: { id: validatedData.locationId } },
       status: { connect: { name: "OPEN" } },
       incident: { connect: { id: validatedData.incidentId } },
-      createdBy: { connect: { id: user.id } },
+      // createdBy: { connect: { id: user.id } },
       occurrenceDate: validatedData.occurrenceDate
         ? new Date(validatedData.occurrenceDate)
         : null,

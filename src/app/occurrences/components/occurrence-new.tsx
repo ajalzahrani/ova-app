@@ -78,11 +78,6 @@ export function OccurrenceNew() {
       const result = await createOccurrence(data);
 
       if (result.success) {
-        // toast({
-        //   title: "Success",
-        //   description: "Occurrence reported successfully",
-        // });
-
         setNewOccurrenceNo(
           result.occurrence?.occurrenceNo || result.occurrence?.id || null
         );
