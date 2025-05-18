@@ -40,7 +40,7 @@ export type AnonymousOccurrenceInput = z.infer<
 
 // Schema for referring occurrences to departments
 export const referOccurrenceSchema = z.object({
-  occurrenceId: z.string().uuid("Invalid occurrence ID"),
+  occurrenceIds: z.array(z.string().uuid("Invalid occurrence ID")),
   departmentIds: z
     .array(z.string().uuid("Invalid department ID"))
     .min(1, "At least one department must be selected"),

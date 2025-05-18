@@ -63,7 +63,7 @@ export function ReferOccurrenceDialog({
     setIsSubmitting(true);
     try {
       const result = await referOccurrenceToDepartments({
-        occurrenceId,
+        occurrenceIds: [occurrenceId],
         departmentIds: selectedDepartmentIds,
         message: message.trim() || undefined,
       });
