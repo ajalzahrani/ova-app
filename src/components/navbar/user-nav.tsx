@@ -18,6 +18,8 @@ import { Label } from "@radix-ui/react-label";
 import { getOccurrenceByNo } from "@/actions/occurrences";
 import { useToast } from "@/components/ui/use-toast";
 import { useOccurrenceSearchStore } from "@/stores/occurrenceStore";
+import { NotificationDropdown } from "@/components/notifications/notification-dropdown";
+
 export function UserNav() {
   const { data: session } = useSession();
 
@@ -73,6 +75,7 @@ export function UserNav() {
           className="w-64"
         />
       </form>
+      <NotificationDropdown />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-8 w-8 rounded-full">
@@ -105,6 +108,9 @@ export function UserNav() {
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => router.push("/settings")}>
               Settings
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push("/notifications")}>
+              Notifications
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
