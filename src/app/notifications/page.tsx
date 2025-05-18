@@ -1,6 +1,7 @@
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { NotificationsView } from "./components/notifications-view";
+import { Suspense } from "react";
 
 export default function NotificationsPage() {
   return (
@@ -9,7 +10,9 @@ export default function NotificationsPage() {
         heading="Notifications"
         text="View and manage your notifications"
       />
-      <NotificationsView />
+      <Suspense fallback={<div>Loading...</div>}>
+        <NotificationsView />
+      </Suspense>
     </DashboardShell>
   );
 }
