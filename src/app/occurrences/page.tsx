@@ -2,32 +2,30 @@ import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import Link from "next/link";
 import { PlusCircle } from "lucide-react";
-import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions, getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { OccurrencesTable } from "./components/occurrences-table";
 import { PermissionButton } from "@/components/auth/permission-button";
 import { checkServerPermission } from "@/lib/server-permissions";
-import { getCurrentUserFromDB } from "@/actions/auths";
+import { getOccurrences } from "@/actions/occurrences";
+import { GetOccurrencesParams } from "@/actions/occurrences.validations";
+import { getCurrentUser } from "@/lib/auth";
+import { cookies } from "next/headers"; // Next.js 13+ API
+import { Suspense } from "react";
 
-export default async function OccurrencesPage({
-  searchParams,
-}: {
-  searchParams: Promise<{
-    page?: string;
-    pageSize?: string;
-    search?: string;
-    status?: string;
-    severity?: string;
-    location?: string;
-    dateFrom?: string;
-    dateTo?: string;
-    mrn?: string;
-    assignedToDepartment?: string;
-  }>;
-}) {
-  const resolvedSearchParams = await searchParams;
+async function getSearchParamsFromCookie(): Promise<GetOccurrencesParams> {
+  const cookieStore = await cookies();
+  const lastSearch = cookieStore.get("occurrencesSearchParams");
+  if (lastSearch?.value) {
+    try {
+      return JSON.parse(decodeURIComponent(lastSearch.value));
+    } catch {
+      return {};
+    }
+  }
+  return {};
+}
+
+export default async function OccurrencesPage() {
   const user = await getCurrentUser();
 
   if (!user) {
@@ -40,112 +38,10 @@ export default async function OccurrencesPage({
     redirect("/unauthorized");
   }
 
-  // Parse pagination params with defaults
-  const page = Number(resolvedSearchParams.page) || 1;
-  const pageSize = Number(resolvedSearchParams.pageSize) || 10;
-  const skip = (page - 1) * pageSize;
+  // Get search params from cookie
+  const searchParams = await getSearchParamsFromCookie();
 
-  const isAllowedToViewAllOccurrences =
-    user?.role === "ADMIN" || user?.role === "QUALITY_ASSURANCE";
-
-  // Build search conditions
-  const searchConditions = {
-    ...(resolvedSearchParams.search && {
-      OR: [
-        {
-          mrn: {
-            contains: resolvedSearchParams.search,
-            mode: "insensitive" as const,
-          },
-        },
-        {
-          occurrenceNo: {
-            contains: resolvedSearchParams.search,
-            mode: "insensitive" as const,
-          },
-        },
-      ],
-    }),
-    ...(resolvedSearchParams.status &&
-      resolvedSearchParams.status !== "all" && {
-        status: { id: resolvedSearchParams.status },
-      }),
-    ...(resolvedSearchParams.severity &&
-      resolvedSearchParams.severity !== "all" && {
-        incident: { severity: { id: resolvedSearchParams.severity } },
-      }),
-    ...(resolvedSearchParams.location && {
-      location: { name: resolvedSearchParams.location },
-    }),
-    ...(resolvedSearchParams.mrn && {
-      mrn: { contains: resolvedSearchParams.mrn, mode: "insensitive" as const },
-    }),
-    ...(resolvedSearchParams.dateFrom &&
-      resolvedSearchParams.dateTo && {
-        occurrenceDate: {
-          gte: new Date(resolvedSearchParams.dateFrom),
-          lte: new Date(resolvedSearchParams.dateTo),
-        },
-      }),
-    ...(resolvedSearchParams.assignedToDepartment &&
-      resolvedSearchParams.assignedToDepartment !== "all" && {
-        assignments: {
-          some: { departmentId: resolvedSearchParams.assignedToDepartment },
-        },
-      }),
-  };
-
-  // Combine with existing department filter
-  const whereCondition = {
-    ...searchConditions,
-    ...(isAllowedToViewAllOccurrences || !user?.departmentId
-      ? {}
-      : {
-          assignments: {
-            some: {
-              departmentId: user.departmentId,
-            },
-          },
-        }),
-  };
-
-  // Get total count for pagination
-  const totalOccurrences = await prisma.occurrence.count({
-    where: whereCondition,
-  });
-
-  // Get paginated data with search
-  const occurrences = await prisma.occurrence.findMany({
-    where: whereCondition,
-    include: {
-      assignments: {
-        include: {
-          department: true,
-        },
-      },
-      status: true,
-      incident: {
-        include: {
-          severity: true,
-        },
-      },
-      location: true,
-    },
-    orderBy: [
-      {
-        createdAt: "desc",
-      },
-    ],
-    skip,
-    take: pageSize,
-  });
-
-  const paginationInfo = {
-    totalCount: totalOccurrences,
-    pageCount: Math.ceil(totalOccurrences / pageSize),
-    currentPage: page,
-    pageSize,
-  };
+  const { occurrences, paginationInfo } = await getOccurrences(searchParams);
 
   return (
     <DashboardShell>
@@ -162,8 +58,15 @@ export default async function OccurrencesPage({
 
       <div className="grid gap-4">
         <OccurrencesTable
-          occurrences={occurrences}
-          paginationInfo={paginationInfo}
+          occurrences={occurrences || []}
+          paginationInfo={
+            paginationInfo || {
+              totalCount: 0,
+              pageCount: 1,
+              currentPage: 1,
+              pageSize: 10,
+            }
+          }
         />
       </div>
     </DashboardShell>

@@ -66,3 +66,18 @@ export const sendMessageSchema = z.object({
 });
 
 export type SendMessageInput = z.infer<typeof sendMessageSchema>;
+
+export const getOccurrencesParamsSchema = z.object({
+  page: z.string().optional(),
+  pageSize: z.string().optional(),
+  search: z.string().optional(),
+  status: z.string().optional(),
+  severity: z.string().optional(),
+  location: z.string().optional(),
+  dateFrom: z.string().optional(),
+  dateTo: z.string().optional(),
+  mrn: z.string().optional(),
+  assignedToDepartment: z.string().optional(),
+});
+
+export type GetOccurrencesParams = z.infer<typeof getOccurrencesParamsSchema>;

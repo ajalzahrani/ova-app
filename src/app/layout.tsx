@@ -6,6 +6,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/providers/auth-provider";
 import { Navbar } from "@/components/navbar/navbar";
+import { TanstackProvider } from "@/providers/tanstack-provider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -29,9 +30,11 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange>
           <AuthProvider>
-            <Navbar />
-            <div className="flex-1 flex flex-col pt-16">{children}</div>
-            <Toaster />
+            <TanstackProvider>
+              <Navbar />
+              <div className="flex-1 flex flex-col pt-16">{children}</div>
+              <Toaster />
+            </TanstackProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

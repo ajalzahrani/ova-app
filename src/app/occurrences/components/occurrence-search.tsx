@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Filter, X } from "lucide-react";
+import { Filter, X } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -31,76 +31,62 @@ import {
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
-import { prisma } from "@/lib/prisma";
 import {
   getOccurrenceSeverities,
   getOccurrenceStatuses,
 } from "@/actions/occurrences";
-import { useOccurrenceSearchStore } from "@/stores/occurrenceStore";
 import { getDepartments } from "@/actions/departments";
 import { PermissionCheck } from "@/components/auth/permission-check";
+// import { cookies } from "next/headers";
+
+function getSearchCookie(): Record<string, string> {
+  if (typeof window !== "undefined") {
+    const match = document.cookie.match(
+      /(?:^|; )occurrencesSearchParams=([^;]*)/
+    );
+    if (match) {
+      try {
+        return JSON.parse(decodeURIComponent(match[1]));
+      } catch {
+        return {};
+      }
+    }
+  }
+  return {};
+}
+
+function setSearchCookie(params: Record<string, string>) {
+  document.cookie = `occurrencesSearchParams=${encodeURIComponent(
+    JSON.stringify(params)
+  )}; path=/`;
+}
 
 export function OccurrencesSearch() {
-  const {
-    searchParams: storedParams,
-    setSearchParams,
-    resetSearchParams,
-  } = useOccurrenceSearchStore();
+  // Local state for search params
+  const [searchParams, setSearchParams] = React.useState<
+    Record<string, string>
+  >(getSearchCookie());
 
   const [dateRange, setDateRange] = React.useState<{
     from: Date | undefined;
     to: Date | undefined;
   }>({
-    from: storedParams.dateFrom ? new Date(storedParams.dateFrom) : undefined,
-    to: storedParams.dateTo ? new Date(storedParams.dateTo) : undefined,
+    from: searchParams.dateFrom ? new Date(searchParams.dateFrom) : undefined,
+    to: searchParams.dateTo ? new Date(searchParams.dateTo) : undefined,
   });
 
   const [statuses, setStatuses] = useState<any[]>([]);
   const [severities, setSeverities] = useState<any[]>([]);
   const [departments, setDepartments] = useState<any[]>([]);
   const router = useRouter();
-  const urlSearchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
 
-  // Create query string from params
-  const createQueryString = useCallback((params: Record<string, string>) => {
-    const urlParams = new URLSearchParams();
-
-    // Add all params that have values
-    Object.entries(params).forEach(([key, value]) => {
-      if (value) urlParams.set(key, value);
-    });
-
-    return urlParams.toString();
-  }, []);
-
-  // Initialize from URL on first load
+  // On mount, hydrate local state from cookie if needed
   useEffect(() => {
-    const initialParams: Record<string, string> = {};
-
-    // If URL has params and store is empty, initialize from URL
-    if (urlSearchParams.toString() && Object.keys(storedParams).length === 0) {
-      urlSearchParams.forEach((value, key) => {
-        initialParams[key] = value;
-      });
-
-      if (Object.keys(initialParams).length > 0) {
-        setSearchParams(initialParams);
-      }
-    }
-    // If store has params but URL doesn't, update URL from store
-    else if (
-      Object.keys(storedParams).length > 0 &&
-      !urlSearchParams.toString()
-    ) {
-      router.push(
-        `/occurrences?${createQueryString(
-          storedParams as Record<string, string>
-        )}`
-      );
-    }
+    setSearchParams(getSearchCookie());
   }, []);
 
+  // Fetch statuses, severities, and departments
   useEffect(() => {
     const fetchStatuses = async () => {
       const statuses = await getOccurrenceStatuses();
@@ -125,39 +111,36 @@ export function OccurrencesSearch() {
   useEffect(() => {
     if (dateRange.from || dateRange.to) {
       const newParams = {
-        ...storedParams,
+        ...searchParams,
         dateFrom: dateRange.from?.toISOString() ?? "",
         dateTo: dateRange.to?.toISOString() ?? "",
       };
-
       setSearchParams(newParams);
-      router.push(
-        `/occurrences?${createQueryString(newParams as Record<string, string>)}`
-      );
     }
   }, [dateRange]);
 
   const updateFilter = (key: string, value: string) => {
-    let newParams;
-
+    let newParams = { ...searchParams };
     if (value === "all" || value === "") {
-      // Create a new object without the specified key
-      const { [key]: _, ...rest } = storedParams;
-      newParams = rest;
+      delete newParams[key];
     } else {
-      newParams = { ...storedParams, [key]: value };
+      newParams[key] = value;
     }
-
     setSearchParams(newParams);
-    router.push(
-      `/occurrences?${createQueryString(newParams as Record<string, string>)}`
-    );
   };
 
   const clearFilters = () => {
-    resetSearchParams();
+    setSearchParams({});
     setDateRange({ from: undefined, to: undefined });
-    router.push("/occurrences");
+    setSearchCookie({});
+    // reset statuses, severities, and departments to all items
+    router.refresh();
+  };
+
+  const handleApplyFilters = () => {
+    setIsOpen(false);
+    setSearchCookie(searchParams);
+    router.refresh();
   };
 
   return (
@@ -176,7 +159,7 @@ export function OccurrencesSearch() {
             <div className="space-y-2">
               <label>Status</label>
               <Select
-                defaultValue={storedParams.status ?? "all"}
+                defaultValue={searchParams.status ?? "all"}
                 onValueChange={(value) => updateFilter("status", value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select status" />
@@ -195,7 +178,7 @@ export function OccurrencesSearch() {
             <div className="space-y-2">
               <label>Severity</label>
               <Select
-                defaultValue={storedParams.severity ?? "all"}
+                defaultValue={searchParams.severity ?? "all"}
                 onValueChange={(value) => updateFilter("severity", value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select severity" />
@@ -259,7 +242,7 @@ export function OccurrencesSearch() {
               <div className="space-y-2">
                 <label>Assigned to Department</label>
                 <Select
-                  defaultValue={storedParams.assignedToDepartment ?? "all"}
+                  defaultValue={searchParams.assignedToDepartment ?? "all"}
                   onValueChange={(value) =>
                     updateFilter("assignedToDepartment", value)
                   }>
@@ -282,7 +265,7 @@ export function OccurrencesSearch() {
               <label>MRN</label>
               <Input
                 placeholder="Enter MRN..."
-                defaultValue={storedParams.mrn ?? ""}
+                defaultValue={searchParams.mrn ?? ""}
                 onChange={(e) => updateFilter("mrn", e.target.value)}
               />
             </div>
@@ -293,7 +276,7 @@ export function OccurrencesSearch() {
               <X className="mr-2 h-4 w-4" />
               Clear Filters
             </Button>
-            <Button onClick={() => setIsOpen(false)}>Apply Filters</Button>
+            <Button onClick={handleApplyFilters}>Apply Filters</Button>
           </div>
         </SheetContent>
       </Sheet>

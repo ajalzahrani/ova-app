@@ -24,6 +24,8 @@ import {
   UpdateOccurrenceActionInput,
   SendMessageInput,
   sendMessageSchema,
+  getOccurrencesParamsSchema,
+  GetOccurrencesParams,
 } from "@/actions/occurrences.validations";
 
 export async function createOccurrence(formValues: OccurrenceFormValues) {
@@ -160,6 +162,129 @@ export async function createAnonymousOccurrence(
         error instanceof Error ? error.message : "Failed to create occurrence",
     };
   }
+}
+
+export async function getOccurrences(params: GetOccurrencesParams) {
+  // make test delay
+  // await new Promise((resolve) => setTimeout(resolve, 2000));
+
+  const user = await getCurrentUser();
+
+  if (!user) {
+    return { success: false, error: "Not authenticated" };
+  }
+
+  // Validate params
+  const safeParams = getOccurrencesParamsSchema.parse(params);
+
+  // Parse pagination params with defaults
+  const page = Number(safeParams.page) || 1;
+  const pageSize = Number(safeParams.pageSize) || 10;
+  const skip = (page - 1) * pageSize;
+
+  const isAllowedToViewAllOccurrences =
+    user?.role === "ADMIN" || user?.role === "QUALITY_ASSURANCE";
+
+  // Build search conditions
+  const searchConditions: any = {
+    ...(safeParams.search && {
+      OR: [
+        {
+          mrn: {
+            contains: safeParams.search,
+            mode: "insensitive" as const,
+          },
+        },
+        {
+          occurrenceNo: {
+            contains: safeParams.search,
+            mode: "insensitive" as const,
+          },
+        },
+      ],
+    }),
+    ...(safeParams.status &&
+      safeParams.status !== "all" && {
+        status: { id: safeParams.status },
+      }),
+    ...(safeParams.severity &&
+      safeParams.severity !== "all" && {
+        incident: { severity: { id: safeParams.severity } },
+      }),
+    ...(safeParams.location && {
+      location: { name: safeParams.location },
+    }),
+    ...(safeParams.mrn && {
+      mrn: { contains: safeParams.mrn, mode: "insensitive" as const },
+    }),
+    ...(safeParams.dateFrom &&
+      safeParams.dateTo && {
+        occurrenceDate: {
+          gte: new Date(safeParams.dateFrom),
+          lte: new Date(safeParams.dateTo),
+        },
+      }),
+    ...(safeParams.assignedToDepartment &&
+      safeParams.assignedToDepartment !== "all" && {
+        assignments: {
+          some: { departmentId: safeParams.assignedToDepartment },
+        },
+      }),
+  };
+
+  // Combine with existing department filter
+  const whereCondition = {
+    ...searchConditions,
+    ...(isAllowedToViewAllOccurrences || !user?.departmentId
+      ? {}
+      : {
+          assignments: {
+            some: {
+              departmentId: user.departmentId,
+            },
+          },
+        }),
+  };
+
+  // Get total count for pagination
+  const totalOccurrences = await prisma.occurrence.count({
+    where: { ...whereCondition },
+  });
+
+  // Get paginated data with search
+  const occurrences = await prisma.occurrence.findMany({
+    where: { ...whereCondition },
+    include: {
+      assignments: {
+        include: {
+          department: true,
+        },
+      },
+      status: true,
+      incident: {
+        include: {
+          severity: true,
+        },
+      },
+      location: true,
+    },
+    orderBy: [
+      {
+        createdAt: "desc",
+      },
+    ],
+    skip,
+    take: pageSize,
+  });
+
+  const paginationInfo = {
+    totalCount: totalOccurrences,
+    pageCount: Math.ceil(totalOccurrences / pageSize),
+    currentPage: page,
+    pageSize,
+  };
+
+  return { occurrences, paginationInfo };
 }
 
 export async function getOccurrenceById(occurrenceId: string) {
