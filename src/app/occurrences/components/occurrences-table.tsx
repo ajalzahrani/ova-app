@@ -8,7 +8,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useOccurrenceSearchStore } from "@/stores/occurrenceStore";
 import { getDepartments } from "@/actions/departments";
-
+import { getSearchCookie, setSearchCookie } from "@/lib/cookies-service";
 type OccurrenceWithRelations = Prisma.OccurrenceGetPayload<{
   include: {
     assignments: {
@@ -44,13 +44,13 @@ export function OccurrencesTable({
 }: OccurrencesListProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const { searchParams: storedParams, setSearchParams } =
-    useOccurrenceSearchStore();
 
   const [departments, setDepartments] = useState<
     Array<{ id: string; name: string }>
   >([]);
+  const [searchParams, setSearchParams] = useState<Record<string, string>>(
+    getSearchCookie()
+  );
 
   // Fetch departments
   useEffect(() => {
@@ -64,59 +64,21 @@ export function OccurrencesTable({
     fetchDepartments();
   }, []);
 
-  // Create query string from all params
-  const createQueryString = useCallback((params: Record<string, string>) => {
-    const urlParams = new URLSearchParams();
-
-    // Add all params that have values
-    Object.entries(params).forEach(([key, value]) => {
-      if (value) urlParams.set(key, value);
-    });
-
-    return urlParams.toString();
-  }, []);
-
-  // Initialize pagination from URL or stored params
-  useEffect(() => {
-    const currentPage = searchParams.get("page");
-    const currentPageSize = searchParams.get("pageSize");
-
-    // If URL has pagination params, save them to store
-    if (currentPage || currentPageSize) {
-      const updates: Record<string, string> = {};
-      if (currentPage) updates.page = currentPage;
-      if (currentPageSize) updates.pageSize = currentPageSize;
-
-      setSearchParams(updates);
-    }
-    // If store has pagination but URL doesn't, update URL
-    else if (
-      (storedParams.page || storedParams.pageSize) &&
-      (!searchParams.has("page") || !searchParams.has("pageSize"))
-    ) {
-      const newParams = { ...storedParams };
-      router.push(
-        `${pathname}?${createQueryString(newParams as Record<string, string>)}`
-      );
-    }
-  }, []);
-
   // Create callback to update pagination
   const onPaginationChange = useCallback(
     (page: number, pageSize: number) => {
       // Update both URL and stored state
       const newParams = {
-        ...storedParams,
+        ...getSearchCookie(),
         page: page.toString(),
         pageSize: pageSize.toString(),
       };
 
       setSearchParams(newParams);
-      router.push(
-        `${pathname}?${createQueryString(newParams as Record<string, string>)}`
-      );
+      setSearchCookie(newParams);
+      router.refresh();
     },
-    [pathname, router, storedParams, setSearchParams, createQueryString]
+    [searchParams]
   );
 
   const tableData = convertOccurrencesToDataTable(occurrences);

@@ -19,7 +19,7 @@ import { getOccurrenceByNo } from "@/actions/occurrences";
 import { useToast } from "@/components/ui/use-toast";
 import { useOccurrenceSearchStore } from "@/stores/occurrenceStore";
 import { NotificationDropdown } from "@/components/notifications/notification-dropdown";
-
+import { setSearchCookie } from "@/lib/cookies-service";
 export function UserNav() {
   const { data: session } = useSession();
 
@@ -28,7 +28,8 @@ export function UserNav() {
 
   const handleSignOut = async () => {
     // clear the occurrence search store
-    useOccurrenceSearchStore.getState().resetSearchParams();
+    // useOccurrenceSearchStore.getState().resetSearchParams();
+    setSearchCookie({});
     await signOut({ redirect: false });
     router.push("/login");
   };

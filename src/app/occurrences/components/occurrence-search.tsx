@@ -37,29 +37,7 @@ import {
 } from "@/actions/occurrences";
 import { getDepartments } from "@/actions/departments";
 import { PermissionCheck } from "@/components/auth/permission-check";
-// import { cookies } from "next/headers";
-
-function getSearchCookie(): Record<string, string> {
-  if (typeof window !== "undefined") {
-    const match = document.cookie.match(
-      /(?:^|; )occurrencesSearchParams=([^;]*)/
-    );
-    if (match) {
-      try {
-        return JSON.parse(decodeURIComponent(match[1]));
-      } catch {
-        return {};
-      }
-    }
-  }
-  return {};
-}
-
-function setSearchCookie(params: Record<string, string>) {
-  document.cookie = `occurrencesSearchParams=${encodeURIComponent(
-    JSON.stringify(params)
-  )}; path=/`;
-}
+import { getSearchCookie, setSearchCookie } from "@/lib/cookies-service";
 
 export function OccurrencesSearch() {
   // Local state for search params
