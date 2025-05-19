@@ -3,7 +3,17 @@ import { prisma } from "@/lib/prisma";
 import { sendNotification } from "@/lib/notification-service";
 import { getTopLevelIncidentForIncident } from "@/actions/incidents";
 
+function doesUserHaveNotificationPreferences(user: any) {
+  return (
+    user.notificationPreferences &&
+    user.notificationPreferences.length > 0 &&
+    user.notificationPreferences[0].enabled
+  );
+}
+
 function shouldNotifyUserForIncident(user: any, incidentId: string) {
+  if (!doesUserHaveNotificationPreferences(user)) return false;
+
   // if incident is null, return false to not notify user for all incidents
   if (user.notificationPreferences[0].incidents.length === 0) return false;
 
@@ -14,7 +24,7 @@ function shouldNotifyUserForIncident(user: any, incidentId: string) {
 }
 
 function shouldNotifyUserForSeverity(user: any, severityId: string) {
-  if (!user.notificationPreferences) return false;
+  if (!doesUserHaveNotificationPreferences(user)) return false;
 
   // if severity is null, return false to not notify user for all severity levels
   if (user.notificationPreferences[0].severityLevels.length === 0) return false;
