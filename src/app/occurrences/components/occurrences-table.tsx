@@ -65,21 +65,19 @@ export function OccurrencesTable({
   }, []);
 
   // Create callback to update pagination
-  const onPaginationChange = useCallback(
-    (page: number, pageSize: number) => {
-      // Update both URL and stored state
-      const newParams = {
-        ...getSearchCookie(),
-        page: page.toString(),
-        pageSize: pageSize.toString(),
-      };
+  const onPaginationChange = useCallback((page: number, pageSize: number) => {
+    const current = getSearchCookie();
+    // Update both URL and stored state
+    const newParams = {
+      ...current,
+      page: page.toString(),
+      pageSize: pageSize.toString(),
+    };
 
-      setSearchParams(newParams);
-      setSearchCookie(newParams);
-      router.refresh();
-    },
-    [searchParams]
-  );
+    setSearchParams(newParams);
+    setSearchCookie(newParams);
+    router.refresh();
+  }, []);
 
   const tableData = convertOccurrencesToDataTable(occurrences);
 

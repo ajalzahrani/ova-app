@@ -104,6 +104,8 @@ export function OccurrencesSearch() {
     } else {
       newParams[key] = value;
     }
+    newParams.page = "1"; // Reset to first page on filter change
+    newParams.pageSize = newParams.pageSize || "10";
     setSearchParams(newParams);
   };
 
