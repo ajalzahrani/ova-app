@@ -45,13 +45,13 @@ export function OccurrencesSearch() {
     Record<string, string>
   >(getSearchCookie());
 
-  const [dateRange, setDateRange] = React.useState<{
-    from: Date | undefined;
-    to: Date | undefined;
-  }>({
-    from: searchParams.dateFrom ? new Date(searchParams.dateFrom) : undefined,
-    to: searchParams.dateTo ? new Date(searchParams.dateTo) : undefined,
-  });
+  const [fromDate, setFromDate] = React.useState<Date | undefined>(
+    searchParams.dateFrom ? new Date(searchParams.dateFrom) : undefined
+  );
+
+  const [toDate, setToDate] = React.useState<Date | undefined>(
+    searchParams.dateTo ? new Date(searchParams.dateTo) : undefined
+  );
 
   const [statuses, setStatuses] = useState<any[]>([]);
   const [severities, setSeverities] = useState<any[]>([]);
@@ -85,17 +85,24 @@ export function OccurrencesSearch() {
     fetchDepartments();
   }, []);
 
-  // Update date filter when date range changes
+  // Update date filters when dates change
   useEffect(() => {
-    if (dateRange.from || dateRange.to) {
-      const newParams = {
-        ...searchParams,
-        dateFrom: dateRange.from?.toISOString() ?? "",
-        dateTo: dateRange.to?.toISOString() ?? "",
-      };
-      setSearchParams(newParams);
+    const newParams = { ...searchParams };
+
+    if (fromDate) {
+      newParams.dateFrom = fromDate.toISOString();
+    } else {
+      delete newParams.dateFrom;
     }
-  }, [dateRange]);
+
+    if (toDate) {
+      newParams.dateTo = toDate.toISOString();
+    } else {
+      delete newParams.dateTo;
+    }
+
+    setSearchParams(newParams);
+  }, [fromDate, toDate]);
 
   const updateFilter = (key: string, value: string) => {
     let newParams = { ...searchParams };
@@ -111,7 +118,8 @@ export function OccurrencesSearch() {
 
   const clearFilters = () => {
     setSearchParams({});
-    setDateRange({ from: undefined, to: undefined });
+    setFromDate(undefined);
+    setToDate(undefined);
     setSearchCookie({});
     // reset statuses, severities, and departments to all items
     router.refresh();
@@ -174,47 +182,23 @@ export function OccurrencesSearch() {
               </Select>
             </div>
 
+            {/* Separate date pickers */}
             <div className="space-y-2">
               <label>Date Range</label>
-              <div className="flex items-center gap-2">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !dateRange.from && "text-muted-foreground"
-                      )}>
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {dateRange.from ? (
-                        dateRange.to ? (
-                          <>
-                            {format(dateRange.from, "LLL dd, y")} -{" "}
-                            {format(dateRange.to, "LLL dd, y")}
-                          </>
-                        ) : (
-                          format(dateRange.from, "LLL dd, y")
-                        )
-                      ) : (
-                        <span>Pick a date range</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      initialFocus
-                      mode="range"
-                      selected={{ from: dateRange.from, to: dateRange.to }}
-                      onSelect={(range) =>
-                        setDateRange({
-                          from: range?.from,
-                          to: range?.to || range?.from,
-                        })
-                      }
-                      numberOfMonths={2}
-                    />
-                  </PopoverContent>
-                </Popover>
+              <div className="flex flex-row gap-2">
+                <Input
+                  type="date"
+                  placeholder="From Date"
+                  defaultValue={fromDate ? format(fromDate, "yyyy-MM-dd") : ""}
+                  onChange={(e) => setFromDate(new Date(e.target.value))}
+                />
+
+                <Input
+                  type="date"
+                  placeholder="To Date"
+                  defaultValue={toDate ? format(toDate, "yyyy-MM-dd") : ""}
+                  onChange={(e) => setToDate(new Date(e.target.value))}
+                />
               </div>
             </div>
 
