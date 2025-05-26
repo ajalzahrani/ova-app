@@ -41,6 +41,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { DialogContent } from "@/components/ui/dialog";
+import {
+  PatientDemoCard,
+  PatientDemoCardProps,
+} from "@/app/occurrences/components/patient-demo-card";
 
 export function OccurrenceNew() {
   const router = useRouter();
@@ -48,6 +52,8 @@ export function OccurrenceNew() {
   const [locations, setLocations] = useState<any[]>([]);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [newOccurrenceNo, setNewOccurrenceNo] = useState<string | null>(null);
+  const [patientDetails, setPatientDetails] =
+    useState<PatientDemoCardProps | null>(null);
 
   const form = useForm<OccurrenceFormValues>({
     resolver: zodResolver(occurrenceSchema),
@@ -78,6 +84,11 @@ export function OccurrenceNew() {
       const result = await createOccurrence(data);
 
       if (result.success) {
+        // toast({
+        //   title: "Success",
+        //   description: "Occurrence reported successfully",
+        // });
+
         setNewOccurrenceNo(
           result.occurrence?.occurrenceNo || result.occurrence?.id || null
         );
@@ -117,6 +128,31 @@ export function OccurrenceNew() {
     fetchLocations();
   }, []);
 
+  const handleFetchPatientDetails = async (mrn: string) => {
+    try {
+      const data = await fetch(
+        `http://172.16.51.49:3002/api/v1/patient/by-mrn/${mrn}`
+      );
+      const response = await data.json();
+      if (response) {
+        setPatientDetails(response[0]);
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: response.error || "Failed to fetch patient details",
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching patient details:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to fetch patient details",
+      });
+    }
+  };
+
   return (
     <div className="grid gap-6">
       <Form {...form}>
@@ -128,102 +164,118 @@ export function OccurrenceNew() {
                 Provide details about the occurrence that occurred
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="grid grid-cols-3 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="mrn">MRN</Label>
-                <Input
-                  id="mrn"
-                  placeholder="Enter the MRN"
-                  {...register("mrn")}
-                />
-                {errors.mrn && (
-                  <p className="text-sm text-red-500">{errors.mrn.message}</p>
+                <div className="flex flex-row gap-2 justify-between items-center">
+                  <div className="flex flex-row gap-2 items-center w-full">
+                    <Label htmlFor="mrn">MRN</Label>
+                    <Input
+                      id="mrn"
+                      placeholder="Enter the MRN"
+                      {...register("mrn")}
+                      maxLength={10}
+                    />
+                    {errors.mrn && (
+                      <p className="text-sm text-red-500">
+                        {errors.mrn.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="">
+                    <Button
+                      variant="outline"
+                      type="button"
+                      onClick={() =>
+                        handleFetchPatientDetails(getValues("mrn"))
+                      }>
+                      Fetch
+                    </Button>
+                  </div>
+                </div>
+                {patientDetails && (
+                  <PatientDemoCard patientDetails={patientDetails} />
                 )}
               </div>
 
               <div className="space-y-2">
-                {/* <Label htmlFor="dateOccurred">Date Occurred</Label> */}
-                <DateTimePicker
-                  form={form}
-                  name="occurrenceDate"
-                  label="Date and Time"
-                />
-                {errors.occurrenceDate && (
-                  <p className="text-sm text-red-500">
-                    {errors.occurrenceDate.message}
-                  </p>
-                )}
+                <div className="space-y-2">
+                  {/* Incident selector component */}
+                  <div>
+                    <IncidentSelector
+                      onIncidentChange={(value) =>
+                        setValue("incidentId", value)
+                      }
+                    />
+                    {errors.incidentId && (
+                      <p className="text-sm text-red-500">
+                        {errors.incidentId.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea
+                      id="description"
+                      placeholder="Detailed description of what happened"
+                      className="min-h-[100px]"
+                      {...register("description")}
+                    />
+                    {errors.description && (
+                      <p className="text-sm text-red-500">
+                        {errors.description.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
-
               <div className="space-y-2">
-                <Label htmlFor="location">Location</Label>
-                <Select
-                  onValueChange={(value) => setValue("locationId", value)}
-                  defaultValue="">
-                  <SelectTrigger id="location">
-                    <SelectValue placeholder="Select location" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {locations.map((location) => (
-                      <SelectItem key={location.id} value={location.id}>
-                        {location.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.locationId && (
-                  <p className="text-sm text-red-500">
-                    {errors.locationId.message}
-                  </p>
-                )}
-              </div>
+                <div className="space-y-2">
+                  <Label htmlFor="location">Location</Label>
+                  <Select
+                    onValueChange={(value) => setValue("locationId", value)}
+                    defaultValue="">
+                    <SelectTrigger id="location">
+                      <SelectValue placeholder="Select location" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {locations.map((location) => (
+                        <SelectItem key={location.id} value={location.id}>
+                          {location.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.locationId && (
+                    <p className="text-sm text-red-500">
+                      {errors.locationId.message}
+                    </p>
+                  )}
+                </div>
 
-              {/* Incident selector component */}
-              <IncidentSelector
-                onIncidentChange={(value) => setValue("incidentId", value)}
-              />
-              {errors.incidentId && (
-                <p className="text-sm text-red-500">
-                  {errors.incidentId.message}
-                </p>
-              )}
+                <div className="space-y-2">
+                  <Label htmlFor="contactEmail">Contact Email</Label>
+                  <Input
+                    id="contactEmail"
+                    placeholder="user@example.com"
+                    {...register("contactEmail")}
+                  />
+                  {errors.contactEmail && (
+                    <p className="text-sm text-red-500">
+                      {errors.contactEmail.message}
+                    </p>
+                  )}
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  placeholder="Detailed description of what happened"
-                  className="min-h-[100px]"
-                  {...register("description")}
-                />
-                {errors.description && (
-                  <p className="text-sm text-red-500">
-                    {errors.description.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="contactEmail">Contact Email</Label>
-                <Input
-                  id="contactEmail"
-                  placeholder="Enter your email"
-                  {...register("contactEmail")}
-                />
-                {errors.contactEmail && (
-                  <p className="text-sm text-red-500">
-                    {errors.contactEmail.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="contactPhone">Contact Phone</Label>
-                <Input
-                  id="contactPhone"
-                  placeholder="Enter your phone number"
-                  {...register("contactPhone")}
-                />
+                <div className="space-y-2">
+                  <Label htmlFor="contactPhone">Contact Phone</Label>
+                  <Input
+                    id="contactPhone"
+                    placeholder="0512345678"
+                    {...register("contactPhone")}
+                  />
+                </div>
               </div>
             </CardContent>
             <CardFooter className="flex justify-between">
