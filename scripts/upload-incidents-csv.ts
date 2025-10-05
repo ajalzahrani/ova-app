@@ -1,10 +1,9 @@
 import { Incident, PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
-
 const fs = require("fs");
 const csv = require("csv-parser");
+import { deleteIncidents } from "./delete-occurrences";
 
-import IncidentMasterData from "../IncidentMasterData.json";
 import { readFile } from "fs/promises";
 
 async function loadcsvAdvanced() {
@@ -47,52 +46,8 @@ async function loadcsv() {
   const rows = csv.split("\n");
   return rows.map((row) => {
     const [id, name, parentId, level] = row.split(",");
-    const levelTrim = level.trim();
-    console.log(id, " ", name, " ", parentId, " ", levelTrim);
-    return { id, name, parentId, levelTrim };
+    return { id, name, parentId, level };
   });
-}
-
-async function getParentUUID(oldId: string, category: string) {
-  // Find the parent incident by oldId and category
-  const parent = await prisma.incident.findFirst({
-    where: {
-      oldId: oldId,
-      category: category,
-    },
-  });
-
-  return parent ? parent.id : null;
-}
-
-async function getParentId(
-  parentId: number | null,
-  currentLevel: string
-): Promise<string | null> {
-  if (parentId === null || parentId === undefined) {
-    return null;
-  }
-
-  // For level 2, parent is level 1; for level 3, parent is level 2
-  if (currentLevel === "2") {
-    return getParentUUID(parentId.toString(), "1");
-  }
-  if (currentLevel === "3") {
-    return getParentUUID(parentId.toString(), "2");
-  }
-  return null;
-}
-
-export async function deleteIncidents() {
-  const incidents = await prisma.incident.count();
-
-  if (incidents > 0) {
-    await prisma.incident.deleteMany({});
-  }
-
-  return {
-    incidents,
-  };
 }
 
 async function main() {
@@ -105,18 +60,60 @@ async function main() {
 
   await deleteIncidents();
 
-  for (const incident of incidents) {
-    const { id, name, parentId, levelTrim } = incident;
+  // First, create all incidents without parentId to establish the oldId mappings
+  const incidentMap = new Map<string, string>(); // oldId -> new UUID
 
-    await prisma.incident.create({
+  for (const incident of incidents) {
+    const { id, name, levelTrim } = incident;
+
+    const created = await prisma.incident.create({
       data: {
         name,
-        parentId: await getParentId(parseInt(parentId), levelTrim),
         oldId: id.toString(),
         category: levelTrim,
         severityId: "1d4fc0a6-2656-472e-82ca-d3bb1f402afe", // Adjust as needed
       },
     });
+
+    // Store the mapping of oldId to new UUID
+    incidentMap.set(id.toString(), created.id);
+  }
+
+  // Now update all incidents with their correct parentId
+  for (const incident of incidents) {
+    const { id, parentId } = incident;
+
+    // Skip if no parentId or if parentId is empty/null
+    if (!parentId || parentId.trim() === "" || parentId === "null") {
+      continue;
+    }
+
+    // Get the current incident's UUID from our mapping
+    const currentIncidentUuid = incidentMap.get(id.toString());
+    if (!currentIncidentUuid) {
+      console.warn(`Incident with oldId ${id} not found in mapping`);
+      continue;
+    }
+
+    // Find the UUID of the parent incident
+    const parentUuid = incidentMap.get(parentId.toString());
+
+    if (parentUuid) {
+      // Update the incident with the correct parentId
+      await prisma.incident.update({
+        where: { id: currentIncidentUuid },
+        data: { parentId: parentUuid },
+      });
+    } else if (parentId === "0" || parentId === "null") {
+      await prisma.incident.update({
+        where: { id: currentIncidentUuid },
+        data: { parentId: null },
+      });
+    } else {
+      console.warn(
+        `Parent incident with oldId ${parentId} not found for incident ${id}`
+      );
+    }
   }
 }
 

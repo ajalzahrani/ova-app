@@ -13,7 +13,8 @@
     "prisma:seed": "ts-node --compiler-options '{\"module\":\"CommonJS\"}' prisma/seed.ts",
     "generate:occurrences": "npx ts-node --compiler-options '{\"module\":\"CommonJS\"}' scripts/generate-occurrences.ts",
     "delete:occurrences": "npx ts-node --compiler-options '{\"module\":\"CommonJS\"}' scripts/delete-occurrences.ts",
-    "upload:incidents": "npx ts-node --compiler-options '{\"module\":\"CommonJS\"}' scripts/upload-incidents.ts"
+    "upload:incidents": "npx ts-node --compiler-options '{\"module\":\"CommonJS\"}' scripts/upload-incidents.ts",
+    "upload:incidents-csv": "npx ts-node --compiler-options '{\"module\":\"CommonJS\"}' scripts/upload-incidents-csv.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.8.0",
@@ -39,6 +40,7 @@
     "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "csv-parser": "^3.2.0",
     "date-fns": "^4.1.0",
     "dotenv": "^16.5.0",
     "lodash": "^4.17.21",

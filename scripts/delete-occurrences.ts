@@ -14,6 +14,18 @@ async function deleteOccurrencesMessages() {
   };
 }
 
+async function deleteFeedBackTokens() {
+  const feedBackTokens = await prisma.feedbackToken.count();
+
+  if (feedBackTokens > 0) {
+    await prisma.feedbackToken.deleteMany({});
+  }
+
+  return {
+    feedBackTokens,
+  };
+}
+
 async function deleteOccurrencesAssignments() {
   const occurrenceAssignments = await prisma.occurrenceAssignment.count();
 
@@ -38,8 +50,21 @@ async function deleteOccurrences() {
   };
 }
 
+export async function deleteIncidents() {
+  const incidents = await prisma.incident.count();
+
+  if (incidents > 0) {
+    await prisma.incident.deleteMany({});
+  }
+
+  return {
+    incidents,
+  };
+}
+
 async function deleteOccurrencesAction() {
   await deleteOccurrencesMessages();
+  await deleteFeedBackTokens();
   await deleteOccurrencesAssignments();
   await deleteOccurrences();
 }
