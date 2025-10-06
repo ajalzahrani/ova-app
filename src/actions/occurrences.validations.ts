@@ -4,7 +4,9 @@ export const occurrenceSchema = z.object({
   mrn: z
     .string()
     .min(10, "MRN must be at least 10 characters")
-    .max(10, "MRN must be 10 characters"),
+    .max(10, "MRN must be 10 characters")
+    .optional(),
+  isPatientInvolve: z.boolean().optional(),
   description: z.string().min(10, "Description must be at least 10 characters"),
   locationId: z.string().min(1, "Location is required"),
   incidentId: z.string().min(1, "Incident is required"),
@@ -22,7 +24,9 @@ export const anonymousOccurrenceSchema = z.object({
   mrn: z
     .string()
     .min(10, "MRN must be at least 10 characters")
-    .max(10, "MRN must be 10 characters"),
+    .max(10, "MRN must be 10 characters")
+    .optional(),
+  isPatientInvolve: z.boolean().optional(),
   description: z.string().min(10, "Description must be at least 10 characters"),
   locationId: z.string().min(1, "Location is required"),
   incidentId: z.string().min(1, "Incident is required"),

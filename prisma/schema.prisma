@@ -73,7 +73,8 @@ model Department {
 model Occurrence {
   id                  String                 @id @default(uuid())
   occurrenceNo        String                 @unique @default("OCC25-0000") // User-friendly ID
-  mrn                 String                 @default("0000000000")
+  mrn                 String?                @default("0000000000")
+  isPatientInvolve    Boolean                @default(false)
   description         String
   statusId            String
   incidentId          String

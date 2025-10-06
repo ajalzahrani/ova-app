@@ -23,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/components/ui/use-toast";
 import { createOccurrence } from "@/actions/occurrences";
 import { getOccurrenceLocations } from "@/actions/locations";
@@ -32,7 +33,15 @@ import {
   OccurrenceFormValues,
   occurrenceSchema,
 } from "@/actions/occurrences.validations";
-import { Form } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import {
   Dialog,
   DialogDescription,
@@ -45,6 +54,8 @@ import {
   PatientDemoCard,
   PatientDemoCardProps,
 } from "@/app/occurrences/components/patient-demo-card";
+import { Separator } from "@/components/ui/separator";
+import { UserCheck, AlertCircle, MapPin, Phone } from "lucide-react";
 
 export function OccurrenceNew() {
   const router = useRouter();
@@ -59,6 +70,7 @@ export function OccurrenceNew() {
     resolver: zodResolver(occurrenceSchema),
     defaultValues: {
       mrn: "",
+      isPatientInvolve: false,
       description: "",
       locationId: "",
       incidentId: "",
@@ -129,11 +141,15 @@ export function OccurrenceNew() {
   }, []);
 
   const handleFetchPatientDetails = async (mrn: string) => {
+    if (!mrn) {
+      return;
+    }
     try {
       const data = await fetch(
         `http://172.16.51.49:3002/api/v1/patient/by-mrn/${mrn}`
       );
       const response = await data.json();
+      console.log("API response", response);
       if (response) {
         setPatientDetails(response[0]);
       } else {
@@ -154,173 +170,312 @@ export function OccurrenceNew() {
   };
 
   return (
-    <div className="grid gap-6">
+    <div className="w-full max-w-3xl min-w-0  mx-auto  overflow-hidden space-y-6 ">
       <Form {...form}>
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          {/* Patient Information Section */}
+          <Card className="">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <UserCheck className="h-5 w-5 text-primary" />
+                <CardTitle>Patient Information</CardTitle>
+              </div>
+              <CardDescription>
+                Indicate if a patient is involved and provide their details
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Patient Involvement Checkbox */}
+              <FormField
+                control={form.control}
+                name="isPatientInvolve"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 bg-muted/50">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="font-medium">
+                        This occurrence involves a patient
+                      </FormLabel>
+                      <FormDescription>
+                        Check this box if a patient was involved in this
+                        occurrence
+                      </FormDescription>
+                    </div>
+                  </FormItem>
+                )}
+              />
+
+              {/* MRN Input - Only show if patient is involved */}
+              {form.watch("isPatientInvolve") && (
+                <div className="space-y-4">
+                  <div className="flex gap-2">
+                    <FormField
+                      control={form.control}
+                      name="mrn"
+                      render={({ field }) => (
+                        <FormItem className="flex-1">
+                          <FormLabel>Medical Record Number (MRN)</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Enter 10-digit MRN"
+                              maxLength={10}
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Enter the patient's medical record number
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div className="flex items-end">
+                      <Button
+                        variant="outline"
+                        type="button"
+                        onClick={() =>
+                          handleFetchPatientDetails(getValues("mrn") || "")
+                        }
+                        disabled={
+                          !getValues("mrn") || getValues("mrn")?.length !== 10
+                        }>
+                        Fetch Details
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Patient Details Card */}
+                  {patientDetails && (
+                    <PatientDemoCard patientDetails={patientDetails} />
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Incident Category Section */}
+          <Card className="">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <AlertCircle className="h-5 w-5 text-primary" />
+                <CardTitle>Incident Classification</CardTitle>
+              </div>
+              <CardDescription>
+                Select the incident category and subcategories
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <IncidentSelector
+                onIncidentChange={(value) => setValue("incidentId", value)}
+              />
+              {errors.incidentId && (
+                <p className="text-sm text-destructive mt-2">
+                  {errors.incidentId.message}
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Occurrence Details Section */}
           <Card>
             <CardHeader>
               <CardTitle>Occurrence Details</CardTitle>
               <CardDescription>
-                Provide details about the occurrence that occurred
+                Describe what happened and when it occurred
               </CardDescription>
             </CardHeader>
-            <CardContent className="grid grid-cols-3 gap-6">
-              <div className="space-y-2">
-                <div className="flex flex-row gap-2 justify-between items-center">
-                  <div className="flex flex-row gap-2 items-center w-full">
-                    <Label htmlFor="mrn">MRN</Label>
-                    <Input
-                      id="mrn"
-                      placeholder="Enter the MRN"
-                      {...register("mrn")}
-                      maxLength={10}
-                    />
-                    {errors.mrn && (
-                      <p className="text-sm text-red-500">
-                        {errors.mrn.message}
-                      </p>
-                    )}
-                  </div>
+            <CardContent className="space-y-6">
+              {/* Date and Time */}
+              <DateTimePicker
+                form={form}
+                name="occurrenceDate"
+                label="Date and Time of Occurrence"
+                description="Select when this occurrence happened"
+              />
 
-                  <div className="">
-                    <Button
-                      variant="outline"
-                      type="button"
-                      onClick={() =>
-                        handleFetchPatientDetails(getValues("mrn"))
-                      }>
-                      Fetch
-                    </Button>
-                  </div>
-                </div>
-                {patientDetails && (
-                  <PatientDemoCard patientDetails={patientDetails} />
+              <Separator />
+
+              {/* Description */}
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description of Occurrence</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Provide a detailed description of what happened, including the sequence of events, people involved, and any immediate actions taken..."
+                        className="min-h-[150px] resize-none"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Please be as detailed and specific as possible. Include
+                      who, what, when, where, and how.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
                 )}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Location & Contact Section */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-primary" />
+                <CardTitle>Location & Contact Information</CardTitle>
               </div>
+              <CardDescription>
+                Specify where the occurrence happened and contact details
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Location */}
+              <FormField
+                control={form.control}
+                name="locationId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Location</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="w-full min-w-0  whitespace-nowrap [&>span]:truncate [&>span]:inline-block [&>span]:max-w-full">
+                          <SelectValue placeholder="Select the location where this occurred" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="max-h-[300px] overflow-y-auto w-[--radix-select-trigger-width] min-w-[280px] max-w-[90vw]">
+                        {locations.map((location) => (
+                          <SelectItem key={location.id} value={location.id}>
+                            <div className="whitespace-normal break-words leading-snug pe-6">
+                              {location.name}
+                              {location.level && (
+                                <span className="text-muted-foreground ml-2">
+                                  - {location.level}
+                                </span>
+                              )}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      Select the specific location or department where this
+                      occurred
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-              <div className="space-y-2">
-                <div className="space-y-2">
-                  {/* Incident selector component */}
-                  <div>
-                    <IncidentSelector
-                      onIncidentChange={(value) =>
-                        setValue("incidentId", value)
-                      }
-                    />
-                    {errors.incidentId && (
-                      <p className="text-sm text-red-500">
-                        {errors.incidentId.message}
-                      </p>
-                    )}
-                  </div>
+              <Separator />
 
-                  <div className="space-y-2">
-                    <Label htmlFor="description">Description</Label>
-                    <Textarea
-                      id="description"
-                      placeholder="Detailed description of what happened"
-                      className="min-h-[100px]"
-                      {...register("description")}
-                    />
-                    {errors.description && (
-                      <p className="text-sm text-red-500">
-                        {errors.description.message}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <div className="space-y-2">
-                  <Label htmlFor="location">Location</Label>
-                  <Select
-                    onValueChange={(value) => setValue("locationId", value)}
-                    defaultValue="">
-                    <SelectTrigger id="location">
-                      <SelectValue placeholder="Select location" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {locations.map((location) => (
-                        <SelectItem key={location.id} value={location.id}>
-                          {location.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {errors.locationId && (
-                    <p className="text-sm text-red-500">
-                      {errors.locationId.message}
-                    </p>
+              <div className="grid gap-6 md:grid-cols-2">
+                {/* Contact Email */}
+                <FormField
+                  control={form.control}
+                  name="contactEmail"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Contact Email</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="email"
+                          placeholder="email@example.com"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Email for follow-up communication
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
                   )}
-                </div>
+                />
 
-                <div className="space-y-2">
-                  <Label htmlFor="contactEmail">Contact Email</Label>
-                  <Input
-                    id="contactEmail"
-                    placeholder="user@example.com"
-                    {...register("contactEmail")}
-                  />
-                  {errors.contactEmail && (
-                    <p className="text-sm text-red-500">
-                      {errors.contactEmail.message}
-                    </p>
+                {/* Contact Phone */}
+                <FormField
+                  control={form.control}
+                  name="contactPhone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Contact Phone</FormLabel>
+                      <FormControl>
+                        <Input type="tel" placeholder="0512345678" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        Phone number for urgent follow-up
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
                   )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="contactPhone">Contact Phone</Label>
-                  <Input
-                    id="contactPhone"
-                    placeholder="0512345678"
-                    {...register("contactPhone")}
-                  />
-                </div>
+                />
               </div>
             </CardContent>
-            <CardFooter className="flex justify-between">
-              <div>
-                <Button
-                  variant="outline"
-                  onClick={() => router.back()}
-                  className="mr-2">
-                  Cancel
-                </Button>
+          </Card>
+
+          {/* Form Actions */}
+          <div className="flex justify-between items-center">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.back()}
+              disabled={isSubmitting}>
+              Cancel
+            </Button>
+            <div className="flex gap-2">
+              {process.env.NODE_ENV === "development" && (
                 <Button
                   type="button"
                   variant="secondary"
                   onClick={checkFormErrors}>
                   Debug
                 </Button>
-              </div>
+              )}
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? "Submitting..." : "Submit Report"}
               </Button>
-            </CardFooter>
-          </Card>
+            </div>
+          </div>
         </form>
       </Form>
 
       {/* Success Modal */}
       <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Occurrence Submitted</DialogTitle>
-            <DialogDescription>
-              Your occurrence has been submitted successfully.
+            <DialogTitle className="text-center text-2xl">
+              Occurrence Submitted Successfully
+            </DialogTitle>
+            <DialogDescription className="text-center">
+              Your occurrence report has been recorded in the system
             </DialogDescription>
           </DialogHeader>
-          <div className="py-4 text-center">
-            <p className="text-lg font-semibold">Occurrence Number:</p>
-            <p className="text-2xl font-bold text-primary">{newOccurrenceNo}</p>
+          <div className="py-6 text-center space-y-2">
+            <p className="text-sm text-muted-foreground">Occurrence Number</p>
+            <p className="text-3xl font-bold text-primary tracking-wide">
+              {newOccurrenceNo}
+            </p>
+            <p className="text-xs text-muted-foreground pt-2">
+              Please save this number for future reference
+            </p>
           </div>
-          <DialogFooter>
+          <DialogFooter className="sm:justify-center">
             <Button
               onClick={() => {
                 setShowSuccessModal(false);
-                router.push("/");
-              }}>
-              Close
+                router.push("/occurrences");
+              }}
+              className="w-full sm:w-auto">
+              View All Occurrences
             </Button>
           </DialogFooter>
         </DialogContent>

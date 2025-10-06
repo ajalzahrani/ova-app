@@ -153,13 +153,17 @@ export function IncidentSelector({
         onValueChange={handleIncidentChange}
         value={selectedIncidentId}
         defaultValue={selectedIncidentId}>
-        <SelectTrigger id="incidentType">
+        <SelectTrigger
+          id="incidentType"
+          className="w-full min-w-0 overflow-hidden whitespace-nowrap [&>span]:truncate [&>span]:inline-block [&>span]:max-w-full">
           <SelectValue placeholder="Select incident type" />
         </SelectTrigger>
-        <SelectContent className="max-h-[300px] overflow-y-auto">
+        <SelectContent className="max-h-[300px] overflow-y-auto w-[--radix-select-trigger-width] min-w-[280px] max-w-[90vw]">
           {incidents.map((incident) => (
             <SelectItem key={incident.id} value={incident.id}>
-              {incident.name}
+              <div className="whitespace-normal break-words leading-snug pe-6">
+                {incident.name}
+              </div>
             </SelectItem>
           ))}
         </SelectContent>
@@ -172,13 +176,17 @@ export function IncidentSelector({
             onValueChange={handleSubIncidentChange}
             value={selectedSubIncidentId}
             defaultValue={selectedSubIncidentId}>
-            <SelectTrigger id="subIncidentType">
+            <SelectTrigger
+              id="subIncidentType"
+              className="w-full min-w-0 overflow-hidden whitespace-nowrap [&>span]:truncate [&>span]:inline-block [&>span]:max-w-full">
               <SelectValue placeholder="Select sub-category" />
             </SelectTrigger>
-            <SelectContent className="max-h-[300px] overflow-y-auto">
+            <SelectContent className="max-h-[300px] overflow-y-auto w-[--radix-select-trigger-width] min-w-[280px] max-w-[90vw]">
               {subIncidents.map((subIncident) => (
                 <SelectItem key={subIncident.id} value={subIncident.id}>
-                  {subIncident.name}
+                  <div className="whitespace-normal break-words leading-snug pe-6">
+                    {subIncident.name}
+                  </div>
                 </SelectItem>
               ))}
             </SelectContent>
@@ -193,13 +201,17 @@ export function IncidentSelector({
             onValueChange={handleSubSubIncidentChange}
             value={selectedSubSubIncidentId}
             defaultValue={selectedSubSubIncidentId}>
-            <SelectTrigger id="subSubIncidentType">
+            <SelectTrigger
+              id="subSubIncidentType"
+              className="w-full min-w-0 overflow-hidden whitespace-nowrap [&>span]:truncate [&>span]:inline-block [&>span]:max-w-full">
               <SelectValue placeholder="Select sub-sub-category" />
             </SelectTrigger>
-            <SelectContent className="max-h-[300px] overflow-y-auto">
+            <SelectContent className="max-h-[300px] overflow-y-auto w-[--radix-select-trigger-width] min-w-[280px] max-w-[90vw]">
               {subSubIncidents.map((subSubIncident) => (
                 <SelectItem key={subSubIncident.id} value={subSubIncident.id}>
-                  {subSubIncident.name}
+                  <div className="whitespace-normal break-words leading-snug pe-6">
+                    {subSubIncident.name}
+                  </div>
                 </SelectItem>
               ))}
             </SelectContent>
