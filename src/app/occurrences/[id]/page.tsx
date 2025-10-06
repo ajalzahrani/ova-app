@@ -12,10 +12,10 @@ import { PermissionCheck } from "@/components/auth/permission-check";
 import { checkServerPermission } from "@/lib/server-permissions";
 import { checkBusinessPermission } from "@/lib/business-permissions";
 import { getDepartments } from "@/actions/departments";
-import { notFound } from "next/navigation";
 import { OccurrenceFeedbackLinkDialog } from "../components/occurrence-feedback-link-dialog";
 import { BackToOccurrencesButton } from "@/app/occurrences/components/back-to-occurrences-button";
 import { DeleteOccurrenceDialog } from "../components/occurrence-delete-dialog";
+import { OccurrenceNotFound } from "../components/occurrence-notfound";
 
 export default async function OccurrenceDetails({
   params,
@@ -28,7 +28,7 @@ export default async function OccurrenceDetails({
   const occurrence = await getOccurrenceById(id).then((res) => res.occurrence);
 
   if (!occurrence) {
-    return notFound();
+    return <OccurrenceNotFound />;
   }
 
   await checkBusinessPermission(occurrence);

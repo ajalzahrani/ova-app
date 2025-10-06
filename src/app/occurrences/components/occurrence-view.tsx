@@ -97,13 +97,17 @@ export async function OccurrenceView(props: {
         </CardHeader>
         <CardContent className="pb-3">
           <div className="rounded-md bg-muted/50 p-4">
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">MRN</span>
-              <span className="font-normal text-sm text-foreground">
-                {occurrence?.mrn}
-              </span>
-            </div>
-            <Separator className="my-2" />
+            {occurrence?.isPatientInvolve && occurrence?.mrn ? (
+              <>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">MRN</span>
+                  <span className="font-normal text-sm text-foreground">
+                    {occurrence?.mrn}
+                  </span>
+                </div>
+                <Separator className="my-2" />
+              </>
+            ) : null}
             <div className="flex items-start gap-2">
               <span className="text-sm text-muted-foreground">
                 Description:

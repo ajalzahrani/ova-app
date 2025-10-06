@@ -41,7 +41,7 @@ export async function createOccurrence(formValues: OccurrenceFormValues) {
     let fullDescription = validatedData.description;
 
     if (validatedData.contactEmail || validatedData.contactPhone) {
-      fullDescription += "\n\nContact Information:";
+      fullDescription += "\n\nReporter's Contact Information:";
       if (validatedData.contactEmail) {
         fullDescription += `\nEmail: ${validatedData.contactEmail}`;
       }
@@ -52,6 +52,7 @@ export async function createOccurrence(formValues: OccurrenceFormValues) {
 
     const createData: any = {
       mrn: validatedData.mrn,
+      isPatientInvolve: validatedData.isPatientInvolve,
       description: fullDescription,
       location: { connect: { id: validatedData.locationId } },
       status: { connect: { name: "OPEN" } },
@@ -101,7 +102,7 @@ export async function createAnonymousOccurrence(
     let fullDescription = validatedData.description;
 
     if (validatedData.contactEmail || validatedData.contactPhone) {
-      fullDescription += "\n\nContact Information:";
+      fullDescription += "\n\nReporter's Contact Information:";
       if (validatedData.contactEmail) {
         fullDescription += `\nEmail: ${validatedData.contactEmail}`;
       }
@@ -113,6 +114,7 @@ export async function createAnonymousOccurrence(
     // Use a type assertion to bypass the type checking issue
     const createData: any = {
       mrn: validatedData.mrn,
+      isPatientInvolve: validatedData.isPatientInvolve,
       description: validatedData.description,
       location: { connect: { id: validatedData.locationId } },
       status: { connect: { name: "OPEN" } },

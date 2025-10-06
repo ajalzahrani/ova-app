@@ -1,11 +1,45 @@
 import { z } from "zod";
 
+// Examples of different patterns for optional fields with restrictions:
+
+// Pattern 1: Optional string with min/max when provided
+// const optionalStringWithRestrictions = z
+//   .string()
+//   .min(5, "Must be at least 5 characters")
+//   .max(50, "Must be at most 50 characters")
+//   .optional()
+//   .or(z.literal(""));
+
+// Pattern 2: Using refine for complex validation
+// const optionalEmail = z
+//   .string()
+//   .optional()
+//   .refine(
+//     (val) => !val || z.string().email().safeParse(val).success,
+//     "Invalid email format"
+//   );
+
+// Pattern 3: Using transform to handle empty strings
+// const optionalNumber = z
+//   .string()
+//   .optional()
+//   .transform((val) => (val === "" ? undefined : val))
+//   .pipe(z.number().min(0).optional());
+
+// Pattern 4: Union type for optional with restrictions
+// const optionalWithRestrictions = z.union([
+//   z.string().min(5).max(20),
+//   z.literal(""),
+//   z.undefined(),
+// ]);
+
 export const occurrenceSchema = z.object({
   mrn: z
     .string()
     .min(10, "MRN must be at least 10 characters")
     .max(10, "MRN must be 10 characters")
-    .optional(),
+    .optional()
+    .or(z.literal("")),
   isPatientInvolve: z.boolean().optional(),
   description: z.string().min(10, "Description must be at least 10 characters"),
   locationId: z.string().min(1, "Location is required"),
@@ -25,7 +59,8 @@ export const anonymousOccurrenceSchema = z.object({
     .string()
     .min(10, "MRN must be at least 10 characters")
     .max(10, "MRN must be 10 characters")
-    .optional(),
+    .optional()
+    .or(z.literal("")),
   isPatientInvolve: z.boolean().optional(),
   description: z.string().min(10, "Description must be at least 10 characters"),
   locationId: z.string().min(1, "Location is required"),

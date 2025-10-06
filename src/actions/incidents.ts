@@ -85,6 +85,8 @@ export async function editIncident(incident: IncidentFormValues) {
       where: { id: incident.id },
       data: incident,
     });
+
+    revalidatePath("/incidents");
     return { success: true, incident: updatedIncident };
   } catch (error) {
     console.error(error);
