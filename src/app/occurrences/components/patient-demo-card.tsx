@@ -2,9 +2,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export interface PatientDemoCardProps {
   FirstName: string;
-  Lastname: string;
+  LastName: string;
   MRN: string;
   MobileNo: string;
+  FatherName: string;
 }
 
 export function PatientDemoCard({
@@ -22,7 +23,8 @@ export function PatientDemoCard({
           <div className="flex flex-col gap-2">
             <span className="text-sm text-muted-foreground">Name</span>
             <span className="font-normal text-sm text-foreground">
-              {patientDetails.FirstName} {patientDetails.Lastname}
+              {patientDetails.FirstName} {patientDetails.FatherName}{" "}
+              {patientDetails.LastName}
             </span>
           </div>
           <div className="flex flex-col gap-2">
