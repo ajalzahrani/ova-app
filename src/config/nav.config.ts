@@ -25,11 +25,11 @@ export const NAV_ITEMS: NavItem[] = [
     href: "/incidents",
     requiredPermissions: ["manage:incidents"],
   },
-  // {
-  //   label: "Reports",
-  //   href: "/reports",
-  //   requiredPermissions: ["manage:reports"],
-  // },
+  {
+    label: "Reports",
+    href: "/reports",
+    requiredPermissions: ["manage:reports"],
+  },
   {
     label: "Management",
     requiredPermissions: ["manage:management"],

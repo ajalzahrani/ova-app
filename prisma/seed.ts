@@ -618,6 +618,11 @@ async function main() {
       description: "Ability to create action plans for occurrence",
     },
     {
+      code: "view:reports",
+      name: "View Reports",
+      description: "Ability to view and generate reports",
+    },
+    {
       code: "view:feedback-share",
       name: "View Feedback Share",
       description: "Ability to view feedback share",
@@ -711,6 +716,7 @@ async function main() {
       "resolve:occurrence",
       "refer:occurrence",
       "view:user",
+      "view:reports",
     ],
     QUALITY_ASSURANCE: [
       "manage:reports",
@@ -720,8 +726,9 @@ async function main() {
       "edit:occurrence",
       "resolve:occurrence",
       "refer:occurrence",
+      "view:reports",
     ],
-    SAFETY_OFFICER: ["view:occurrence", "create:occurrence"],
+    SAFETY_OFFICER: ["view:occurrence", "create:occurrence", "view:reports"],
     EMPLOYEE: ["view:occurrence", "create:occurrence"],
     DEPARTMENT_MANAGER: [
       "manage:reports",
@@ -729,6 +736,7 @@ async function main() {
       "view:occurrence",
       "action:occurrence",
       "view:feedback-share",
+      "view:reports",
     ],
   };
 
