@@ -74,6 +74,8 @@ export async function notifyOccurrenceCreated(occurrenceId: string) {
     },
   });
 
+  console.log("Users", users);
+
   // Send notification to each user based on their preferences
   for (const user of users) {
     // Check if user has preferences for new occurrences
@@ -83,11 +85,13 @@ export async function notifyOccurrenceCreated(occurrenceId: string) {
         : false) ||
       shouldNotifyUserForSeverity(user, occurrence.incident.severity.id);
 
-    console.log("Should notify", shouldNotify);
+    console.log("Should notify user", user.name, shouldNotify);
     if (shouldNotify) {
       console.log("Sending notification to user", user.id);
       await sendNotification({
         userId: user.id,
+        email: user.email,
+        mobileNo: user.mobileNo,
         title: `New Occurrence: ${occurrence.occurrenceNo}`,
         message: `A new occurrence has been created: ${occurrence.occurrenceNo}`,
         type: NotificationType.OCCURRENCE_CREATED,
@@ -148,11 +152,13 @@ export async function notifyOccurrenceReferral(
         : false) ||
       shouldNotifyUserForSeverity(user, occurrence.incident.severity.id);
 
-    console.log(`Should notify ${user.name}`, shouldNotify);
+    console.log(`Should notify user ${user.name}`, shouldNotify);
     if (shouldNotify) {
       console.log("Sending notification to user", user.id);
       await sendNotification({
         userId: user.id,
+        email: user.email,
+        mobileNo: user.mobileNo,
         title: `Occurrence Referral: ${occurrence.occurrenceNo}`,
         message: `An occurrence has been referred to your department: ${occurrence.occurrenceNo}`,
         type: NotificationType.REFERRAL,
@@ -250,6 +256,8 @@ export async function notifyOccurrenceReferralBulk(
   for (const [userId, notification] of userNotifications.entries()) {
     await sendNotification({
       userId: notification.userId,
+      email: notification.email,
+      mobileNo: notification.mobileNo,
       title: `Occurrences Referral`,
       message: `You have received ${occurrenceIds.length} new occurrences for review`,
       type: NotificationType.REFERRAL,
@@ -280,7 +288,16 @@ export async function notifyOccurrenceMessage(
       createdById: true,
       assignments: {
         include: {
-          department: true,
+          department: {
+            include: {
+              users: {
+                select: {
+                  email: true,
+                  mobileNo: true,
+                },
+              },
+            },
+          },
         },
       },
       status: true,
@@ -303,23 +320,29 @@ export async function notifyOccurrenceMessage(
 
   // 1. Notify the original reporter if they're not the sender
   if (occurrence.createdById && occurrence.createdById !== senderId) {
-    await sendNotification({
-      userId: occurrence.createdById,
-      title: `New message on ${occurrence.occurrenceNo}`,
-      message: `${sender.name || "A user"} has sent a message on occurrence ${
-        occurrence.occurrenceNo
-      }`,
-      type: NotificationType.OCCURRENCE_UPDATED,
-      referenceIds: [occurrenceId],
-      channel: NotificationChannel.EMAIL,
-      metadata: {
-        occurrenceNo: occurrence.occurrenceNo,
-        messageSnippet:
-          message.substring(0, 100) + (message.length > 100 ? "..." : ""),
-        senderName: sender.name,
-        senderDepartment: sender.department?.name,
-      },
-    });
+    for (const assignment of occurrence.assignments) {
+      for (const user of assignment.department.users) {
+        await sendNotification({
+          userId: occurrence.createdById,
+          email: user.email,
+          mobileNo: user.mobileNo || null,
+          title: `New message on ${occurrence.occurrenceNo}`,
+          message: `${
+            sender.name || "A user"
+          } has sent a message on occurrence ${occurrence.occurrenceNo}`,
+          type: NotificationType.OCCURRENCE_UPDATED,
+          referenceIds: [occurrenceId],
+          channel: NotificationChannel.EMAIL,
+          metadata: {
+            occurrenceNo: occurrence.occurrenceNo,
+            messageSnippet:
+              message.substring(0, 100) + (message.length > 100 ? "..." : ""),
+            senderName: sender.name,
+            senderDepartment: sender.department?.name,
+          },
+        });
+      }
+    }
   }
 
   // 2. Notify QA users if the occurrence is answered status
@@ -341,6 +364,8 @@ export async function notifyOccurrenceMessage(
     for (const qaUser of qaUsers) {
       await sendNotification({
         userId: qaUser.id,
+        email: qaUser.email,
+        mobileNo: qaUser.mobileNo,
         title: `New message on ${occurrence.occurrenceNo}`,
         message: `${sender.name || "A user"} has sent a message on occurrence ${
           occurrence.occurrenceNo
@@ -381,6 +406,8 @@ export async function notifyOccurrenceMessage(
       for (const deptUser of departmentUsers) {
         await sendNotification({
           userId: deptUser.id,
+          email: deptUser.email,
+          mobileNo: deptUser.mobileNo,
           title: `New message on ${occurrence.occurrenceNo}`,
           message: `${sender.name || "A user"} from ${
             sender.department?.name || "another department"
@@ -431,6 +458,8 @@ export async function notifyOccurrenceResolved(
   if (occurrence.createdBy) {
     await sendNotification({
       userId: occurrence.createdBy.id,
+      email: occurrence.createdBy.email,
+      mobileNo: occurrence.createdBy.mobileNo,
       title: `Occurrence ${occurrence.occurrenceNo} Resolved`,
       message: `Your reported occurrence ${occurrence.occurrenceNo} has been resolved and closed`,
       type: NotificationType.OCCURRENCE_UPDATED,
@@ -461,6 +490,8 @@ export async function notifyOccurrenceResolved(
     for (const user of departmentUsers) {
       await sendNotification({
         userId: user.id,
+        email: user.email,
+        mobileNo: user.mobileNo,
         title: `Occurrence ${occurrence.occurrenceNo} Resolved`,
         message: `Occurrence ${occurrence.occurrenceNo} that was assigned to your department has been resolved and closed`,
         type: NotificationType.OCCURRENCE_UPDATED,

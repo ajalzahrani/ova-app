@@ -122,6 +122,7 @@ export async function createUser(data: UserFormValuesWithRolesAndDepartments) {
         name: validatedData.name,
         username: validatedData.name,
         email: validatedData.email,
+        mobileNo: validatedData.mobileNo,
         password: hashedPassword || "",
         role: {
           connect: { id: validatedData.role.id },
@@ -196,6 +197,7 @@ export async function updateUser(
       const userData: any = {
         name: validatedData.name,
         email: validatedData.email,
+        mobileNo: validatedData.mobileNo,
       };
 
       // Only update password if provided
@@ -246,7 +248,7 @@ export async function updateUser(
         issues: error.errors,
       };
     }
-    return { success: false, error: "Failed to update user" };
+    return { success: false, error: "Failed to update user" + error };
   }
 }
 

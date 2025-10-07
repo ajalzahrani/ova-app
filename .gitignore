@@ -46,3 +46,5 @@ pnpm-lock.yaml
 IncidentMasterData.json
 Incidents-v2.csv
 incidents-v3.csv
+
+package-lock.json

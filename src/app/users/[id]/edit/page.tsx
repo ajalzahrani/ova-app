@@ -17,7 +17,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { RoleFormValues } from "@/actions/roles.validation";
 import { DepartmentFormValues } from "@/actions/departments.validation";
-import { ArrowLeft, Building2 } from "lucide-react";
+import { ArrowLeft, Building2, Key, RotateCcw } from "lucide-react";
 import Link from "next/link";
 import {
   UserFormValuesWithRolesAndDepartments,
@@ -56,6 +56,7 @@ export default function EditUserPage({
       name: "",
       username: "",
       email: "",
+      mobileNo: "",
       password: "",
       role: {
         id: "",
@@ -110,6 +111,7 @@ export default function EditUserPage({
             name: user?.name || "",
             username: user?.username || "",
             email: user?.email || "",
+            mobileNo: user?.mobileNo || "",
             password: "", // Empty password field for security
             role: {
               id: user?.role?.id || "",
@@ -142,7 +144,14 @@ export default function EditUserPage({
   const onSubmit = async (data: UserFormValuesWithRolesAndDepartments) => {
     setIsSubmitting(true);
     try {
-      const result = await updateUser(userId, data);
+      // Remove password from data if it's empty to avoid validation issues
+      const { password, ...userData } = data;
+      const submitData =
+        password && password.trim() !== ""
+          ? { ...userData, password }
+          : userData;
+
+      const result = await updateUser(userId, submitData);
       if (result.success) {
         toast({
           title: "Success",
@@ -208,6 +217,22 @@ export default function EditUserPage({
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="mobileNo">Mobile Number</Label>
+            <Input
+              id="mobileNo"
+              type="tel"
+              {...register("mobileNo")}
+              placeholder="Enter mobile number"
+              className="mt-1"
+            />
+            {errors.mobileNo && (
+              <p className="mt-1 text-sm text-red-500">
+                {errors.mobileNo.message}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="username">Username</Label>
             <Input
               id="username"
@@ -223,14 +248,45 @@ export default function EditUserPage({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              {...register("password")}
-              placeholder="Enter new password (leave blank to keep current)"
-              className="mt-1"
-            />
+            <Label>Password</Label>
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  const defaultPassword = "password123";
+                  setValue("password", defaultPassword);
+                  toast({
+                    title: "Password Set",
+                    description:
+                      "Default password has been set. User should change it on first login.",
+                  });
+                }}
+                className="flex items-center gap-2">
+                <Key className="h-4 w-4" />
+                Set Default Password
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setValue("password", "");
+                  toast({
+                    title: "Password Cleared",
+                    description:
+                      "Password field has been cleared. Current password will be kept.",
+                  });
+                }}
+                className="flex items-center gap-2">
+                <RotateCcw className="h-4 w-4" />
+                Clear
+              </Button>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Click to set a default password. User should change it on first
+              login.
+            </p>
             {errors.password && (
               <p className="mt-1 text-sm text-red-500">
                 {errors.password.message}
