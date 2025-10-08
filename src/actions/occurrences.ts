@@ -83,7 +83,7 @@ export async function createOccurrence(formValues: OccurrenceFormValues) {
         issues: error.errors,
       };
     }
-    return { success: false, error: "Failed to create occurrence" };
+    return { success: false, error: "Failed to create occurrence" + error };
   }
 }
 

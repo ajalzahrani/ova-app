@@ -24,6 +24,10 @@ export function validateMobileNumber(mobileNumber: string): boolean {
 }
 
 export function padCountryCode(mobileNumber: string): string {
-  if (!mobileNumber) return "";
-  return `92${mobileNumber}`;
+  if (mobileNumber.startsWith("05")) {
+    // Eliminate 0 and add 966 to the beginning of the number
+    return `966${mobileNumber.replace("0", "")}`;
+  }
+
+  return mobileNumber;
 }

@@ -77,15 +77,10 @@ export async function saveNotificationPreferences(
       throw new Error("No preferences provided");
     }
 
-    // Use upsert to either create or update preferences
+    // Use upsert with userId only to ensure one record per user
     await prisma.notificationPreference.upsert({
       where: {
-        userId_channel: {
-          userId: currentUser.id,
-          channel:
-            (preferences[0].channels as NotificationChannel) ||
-            NotificationChannel.EMAIL,
-        },
+        userId: currentUser.id,
       },
       update: {
         channel:

@@ -14,32 +14,33 @@ function doesUserHaveNotificationPreferences(user: any) {
 function shouldNotifyUserForIncident(user: any, incidentId: string) {
   if (!doesUserHaveNotificationPreferences(user)) return false;
 
+  const userPreference = user.notificationPreferences[0];
+
   // if incident is null, return false to not notify user for all incidents
-  if (user.notificationPreferences[0].incidents.length === 0) return false;
+  if (userPreference.incidents.length === 0) return false;
 
   // Check if user has enabled incident notifications
-  return user.notificationPreferences.some(
-    (pref: any) => pref.enabled && pref.incidents.includes(incidentId)
-  );
+  return userPreference.incidents.includes(incidentId);
 }
 
 function shouldNotifyUserForSeverity(user: any, severityId: string) {
   if (!doesUserHaveNotificationPreferences(user)) return false;
 
+  const userPreference = user.notificationPreferences[0];
+
   // if severity is null, return false to not notify user for all severity levels
-  if (user.notificationPreferences[0].severityLevels.length === 0) return false;
+  if (userPreference.severityLevels.length === 0) return false;
 
   // Check if user has enabled severity notifications
-  return user.notificationPreferences.some(
-    (pref: any) => pref.enabled && pref.severityLevels.includes(severityId)
-  );
+  return userPreference.severityLevels.includes(severityId);
 }
 
 // Helper function to determine if a user should be notified for referrals
 function shouldNotifyUserForReferral(user: any) {
   return (
     user.notificationPreferences &&
-    user.notificationPreferences.some((pref: any) => pref.enabled)
+    user.notificationPreferences.length > 0 &&
+    user.notificationPreferences[0].enabled
   );
 }
 
@@ -78,25 +79,57 @@ export async function notifyOccurrenceCreated(occurrenceId: string) {
 
   // Send notification to each user based on their preferences
   for (const user of users) {
+    console.log("Rich here I'm 1");
+    // Check if user has notification preferences and if they're enabled
+    if (
+      !user.notificationPreferences ||
+      user.notificationPreferences.length === 0
+    ) {
+      console.log(`User ${user.name} has no notification preferences`);
+      continue;
+    }
+
+    const userPreference = user.notificationPreferences[0];
+    if (!userPreference.enabled) {
+      console.log(`User ${user.name} has notifications disabled`);
+      continue;
+    }
+
+    console.log("Rich here I'm 2");
     // Check if user has preferences for new occurrences
     const shouldNotify =
       (topLevelIncident
         ? shouldNotifyUserForIncident(user, topLevelIncident.id)
-        : false) ||
-      shouldNotifyUserForSeverity(user, occurrence.incident.severity.id);
+        : false) || console.log("Rich here I'm 3");
+    shouldNotifyUserForSeverity(user, occurrence.incident.severity.id);
 
     console.log("Should notify user", user.name, shouldNotify);
     if (shouldNotify) {
-      console.log("Sending notification to user", user.id);
-      await sendNotification({
-        userId: user.id,
+      console.log("Rich here I'm 4");
+      console.log("Sending notification to user", user.name);
+      console.log("User notification preferences", {
+        userId: user.name,
         email: user.email,
         mobileNo: user.mobileNo,
         title: `New Occurrence: ${occurrence.occurrenceNo}`,
         message: `A new occurrence has been created: ${occurrence.occurrenceNo}`,
         type: NotificationType.OCCURRENCE_CREATED,
         referenceIds: [occurrence.id],
-        channel: user.notificationPreferences[0].channel,
+        channel: userPreference.channel,
+        metadata: {
+          occurrenceNo: occurrence.occurrenceNo,
+          severityLevel: occurrence.incident.severity?.level || null,
+        },
+      });
+      await sendNotification({
+        userId: user.id,
+        email: userPreference.email || user.email,
+        mobileNo: userPreference.mobile || user.mobileNo,
+        title: `New Occurrence: ${occurrence.occurrenceNo}`,
+        message: `A new occurrence has been created: ${occurrence.occurrenceNo}`,
+        type: NotificationType.OCCURRENCE_CREATED,
+        referenceIds: [occurrence.id],
+        channel: userPreference.channel,
         metadata: {
           occurrenceNo: occurrence.occurrenceNo,
           severityLevel: occurrence.incident.severity?.level || null,
@@ -145,6 +178,19 @@ export async function notifyOccurrenceReferral(
   });
 
   for (const user of users) {
+    if (
+      !user.notificationPreferences ||
+      user.notificationPreferences.length === 0
+    ) {
+      console.log(`User ${user.name} has no notification preferences`);
+      continue;
+    }
+
+    const userPreference = user.notificationPreferences[0];
+    if (!userPreference.enabled) {
+      console.log(`User ${user.name} has notifications disabled`);
+      continue;
+    }
     // Check if user has preferences for new occurrences
     const shouldNotify =
       (topLevelIncident
@@ -154,16 +200,16 @@ export async function notifyOccurrenceReferral(
 
     console.log(`Should notify user ${user.name}`, shouldNotify);
     if (shouldNotify) {
-      console.log("Sending notification to user", user.id);
+      console.log("Sending notification to user", user.name);
       await sendNotification({
         userId: user.id,
-        email: user.email,
-        mobileNo: user.mobileNo,
+        email: userPreference.email || user.email,
+        mobileNo: userPreference.mobile || user.mobileNo,
         title: `Occurrence Referral: ${occurrence.occurrenceNo}`,
         message: `An occurrence has been referred to your department: ${occurrence.occurrenceNo}`,
         type: NotificationType.REFERRAL,
         referenceIds: [occurrence.id],
-        channel: user.notificationPreferences[0].channel,
+        channel: userPreference.channel,
         metadata: {
           occurrenceNo: occurrence.occurrenceNo,
           severityLevel: occurrence.incident.severity?.level || null,
@@ -234,6 +280,20 @@ export async function notifyOccurrenceReferralBulk(
       (await getTopLevelIncidentForIncident(occurrence.incident.id));
 
     for (const user of users) {
+      if (
+        !user.notificationPreferences ||
+        user.notificationPreferences.length === 0
+      ) {
+        console.log(`User ${user.name} has no notification preferences`);
+        continue;
+      }
+
+      const userPreference = user.notificationPreferences[0];
+      if (!userPreference.enabled) {
+        console.log(`User ${user.name} has notifications disabled`);
+        continue;
+      }
+
       const shouldNotify =
         (topLevelIncident
           ? shouldNotifyUserForIncident(user, topLevelIncident.id)
@@ -244,6 +304,8 @@ export async function notifyOccurrenceReferralBulk(
         if (!userNotifications.has(user.id)) {
           userNotifications.set(user.id, {
             userId: user.id,
+            email: user.notificationPreferences[0].email || user.email,
+            mobileNo: user.notificationPreferences[0].mobile || user.mobileNo,
             channel: user.notificationPreferences[0].channel,
             severityLevel: occurrence.incident.severity?.level || null,
           });
@@ -253,19 +315,20 @@ export async function notifyOccurrenceReferralBulk(
   }
 
   // Send one aggregated notification per user
-  for (const [userId, notification] of userNotifications.entries()) {
+  for (const user of users) {
+    const notificationPreference = user.notificationPreferences[0];
     await sendNotification({
-      userId: notification.userId,
-      email: notification.email,
-      mobileNo: notification.mobileNo,
+      userId: user.id,
+      email: notificationPreference.email || user.email,
+      mobileNo: notificationPreference.mobile || user.mobileNo,
       title: `Occurrences Referral`,
       message: `You have received ${occurrenceIds.length} new occurrences for review`,
       type: NotificationType.REFERRAL,
       referenceIds: occurrenceIds,
-      channel: notification.channel,
+      channel: notificationPreference.channel,
       metadata: {
         occurrenceNos,
-        severityLevel: notification.severityLevel,
+        severityLevel: notificationPreference.severityLevels,
         departmentId: departmentIds[0],
         departmentName: departmentIds[0],
         message,

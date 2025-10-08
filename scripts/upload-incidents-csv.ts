@@ -66,12 +66,21 @@ async function main() {
   for (const incident of incidents) {
     const { id, name, levelTrim } = incident;
 
+    const severityMedium = await prisma.severity.findFirst({
+      where: { name: "MEDIUM" },
+    });
+
+    if (!severityMedium) {
+      console.error("Severity MEDIUM not found");
+      return;
+    }
+
     const created = await prisma.incident.create({
       data: {
         name,
         oldId: id.toString(),
         category: levelTrim,
-        severityId: "1d4fc0a6-2656-472e-82ca-d3bb1f402afe", // Adjust as needed
+        severityId: severityMedium.id, // Adjust as needed
       },
     });
 

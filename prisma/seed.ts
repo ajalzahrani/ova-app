@@ -146,7 +146,7 @@ async function main() {
       name: "HR User",
       username: "hr",
       password: hashedPassword,
-      roleId: adminRole.id,
+      roleId: departmentRole.id,
       departmentId: hrDepartment.id,
     },
   });

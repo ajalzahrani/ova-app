@@ -41,8 +41,8 @@ export async function sendNotification({
     channel === NotificationChannel.EMAIL ||
     channel === NotificationChannel.BOTH
   ) {
-    await sendEmailNotification(userId, email, title, message, metadata);
     console.log("Sending email notification to user", userId);
+    await sendEmailNotification(userId, email, title, message, metadata);
   }
 
   if (
@@ -223,6 +223,13 @@ async function sendMobileNotification(
 
     const paddedPhoneNumber = padCountryCode(mobileNo);
 
+    console.log(
+      "Sending SMS to mobile number",
+      paddedPhoneNumber,
+      " with message: ",
+      message
+    );
+
     // Replace with your actual SMS service provider
     const smsApiUrl =
       process.env.SMS_API_URL || "https://api.smsservice.com/send";
@@ -232,14 +239,22 @@ async function sendMobileNotification(
     );
 
     if (response.ok) {
-      console.info(`SMS sent successfully to ${paddedPhoneNumber}`);
+      console.info("SMS sent successfully:", {
+        userId,
+        to: paddedPhoneNumber,
+        message: message,
+      });
       return true;
     }
 
-    console.error(`Failed to send SMS: ${response.statusText}`);
+    console.error(
+      `Failed to send SMS: ${response.status} ${
+        response.statusText
+      } ${JSON.stringify(response.body)}`
+    );
     return false;
-  } catch (error) {
-    console.error(`Error sending SMS: ${error}`);
+  } catch (error: any) {
+    console.error(`Error sending SMS: ${error.message}`);
     return false;
   }
 }
