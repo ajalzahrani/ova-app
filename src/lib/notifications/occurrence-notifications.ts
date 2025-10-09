@@ -79,7 +79,6 @@ export async function notifyOccurrenceCreated(occurrenceId: string) {
 
   // Send notification to each user based on their preferences
   for (const user of users) {
-    console.log("Rich here I'm 1");
     // Check if user has notification preferences and if they're enabled
     if (
       !user.notificationPreferences ||
@@ -95,17 +94,15 @@ export async function notifyOccurrenceCreated(occurrenceId: string) {
       continue;
     }
 
-    console.log("Rich here I'm 2");
     // Check if user has preferences for new occurrences
     const shouldNotify =
       (topLevelIncident
         ? shouldNotifyUserForIncident(user, topLevelIncident.id)
-        : false) || console.log("Rich here I'm 3");
-    shouldNotifyUserForSeverity(user, occurrence.incident.severity.id);
+        : false) ||
+      shouldNotifyUserForSeverity(user, occurrence.incident.severity.id);
 
     console.log("Should notify user", user.name, shouldNotify);
     if (shouldNotify) {
-      console.log("Rich here I'm 4");
       console.log("Sending notification to user", user.name);
       console.log("User notification preferences", {
         userId: user.name,

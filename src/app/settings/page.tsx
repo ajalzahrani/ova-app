@@ -25,7 +25,7 @@ export default async function SettingsPage() {
     return <div>Error: {severityLevels.error}</div>;
   }
 
-  const userPrefs = userNotificationPreferences.userPreferences || [];
+  const user = userNotificationPreferences.userPreferences || null;
 
   type UserNotificationPreferencesWithRelations = Prisma.UserGetPayload<{
     include: {
@@ -33,19 +33,13 @@ export default async function SettingsPage() {
     };
   }>;
 
-  const formattedUserPrefs: UserNotificationPreferencesWithRelations[] = [
-    {
-      notificationPreferences: userPrefs,
-    } as unknown as UserNotificationPreferencesWithRelations,
-  ];
-
   return (
     <DashboardShell>
       <DashboardHeader
         heading="Settings"
         text="Manage application settings"></DashboardHeader>
       <NotificationPreferences
-        userPreferences={formattedUserPrefs}
+        user={user}
         severityLevels={severityLevels.severities || []}
         incidents={incidents.incidents || []}
       />

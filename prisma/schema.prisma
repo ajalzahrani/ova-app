@@ -188,8 +188,6 @@ model NotificationPreference {
   userId         String   @unique
   enabled        Boolean  @default(true)
   channel        NotificationChannel
-  email          String?
-  mobile         String?
   severityLevels String[] // Array of severity IDs the user wants to be notified about
   incidents  String[] // Array of incident IDs the user wants to be notified about
   createdAt      DateTime @default(now())

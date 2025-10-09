@@ -14,28 +14,31 @@ export async function getUserNotificationPreferences() {
 
   try {
     // Directly fetch notification preferences for the user, but exclude fields that don't exist
-    const notificationPreferences =
-      await prisma.notificationPreference.findMany({
-        where: {
-          userId: currentUser.id,
-        },
-        select: {
-          id: true,
-          userId: true,
-          enabled: true,
-          channel: true,
-          email: true,
-          mobile: true,
-          severityLevels: true,
-          incidents: true,
-          createdAt: true,
-          updatedAt: true,
-        },
-      });
+    const notificationPreferences = await prisma.user.findUnique({
+      where: {
+        id: currentUser.id,
+      },
+      include: {
+        notificationPreferences: true,
+      },
+    });
+    // await prisma.notificationPreference.findUnique({
+    //   where: {
+    //     userId: currentUser.id,
+    //   },
+    //   include: {
+    //     user: {
+    //       select: {
+    //         email: true,
+    //         mobileNo: true,
+    //       },
+    //     },
+    //   },
+    // });
 
     return {
       success: true,
-      userPreferences: notificationPreferences || [],
+      userPreferences: notificationPreferences,
     };
   } catch (error: any) {
     console.error("Error fetching user notification preferences", error);
@@ -86,8 +89,6 @@ export async function saveNotificationPreferences(
         channel:
           (preferences[0].channels as NotificationChannel) ||
           NotificationChannel.EMAIL,
-        email: preferences[0].email,
-        mobile: preferences[0].mobile,
         severityLevels: preferences[0].severityLevels || [],
         incidents: preferences[0].incidents || [],
         enabled: preferences[0].enabled,
@@ -97,8 +98,6 @@ export async function saveNotificationPreferences(
         channel:
           (preferences[0].channels as NotificationChannel) ||
           NotificationChannel.EMAIL,
-        email: preferences[0].email,
-        mobile: preferences[0].mobile,
         severityLevels: preferences[0].severityLevels || [],
         incidents: preferences[0].incidents || [],
         enabled: preferences[0].enabled,

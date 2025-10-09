@@ -40,11 +40,11 @@ type IncidentWithRelations = Prisma.IncidentGetPayload<{}>;
 type SeverityWithRelations = Prisma.SeverityGetPayload<{}>;
 
 export function NotificationPreferences({
-  userPreferences,
+  user,
   severityLevels,
   incidents,
 }: {
-  userPreferences: UserNotificationPreferencesWithRelations[];
+  user: UserNotificationPreferencesWithRelations | null;
   severityLevels: SeverityWithRelations[];
   incidents: IncidentWithRelations[];
 }) {
@@ -52,10 +52,10 @@ export function NotificationPreferences({
     resolver: zodResolver(notificationPreferencesSchema),
     defaultValues: {
       id: "",
-      email: "",
-      mobile: "",
       enabled: false,
       channels: "EMAIL",
+      email: "",
+      mobile: "",
       severityLevels: [],
       incidents: [],
     },
@@ -64,40 +64,44 @@ export function NotificationPreferences({
   const isEnabled = form.watch("enabled");
 
   useEffect(() => {
-    if (
-      userPreferences.length > 0 &&
-      userPreferences[0].notificationPreferences.length > 0
-    ) {
-      const userPref = userPreferences[0].notificationPreferences[0];
+    if (user) {
+      // Always populate email and mobile from user data
+      form.setValue("email", user.email || "");
+      form.setValue("mobile", user.mobileNo || "");
 
-      // Log the values received from the API
-      console.log("Server data - severityLevels:", userPref.severityLevels);
-      console.log("Server data - incidents:", userPref.incidents);
+      // If user has existing notification preferences, load them
+      if (user.notificationPreferences.length > 0) {
+        const userPref = user.notificationPreferences[0];
 
-      // Ensure we have valid arrays for multi-select fields
-      const severityLevelValues = Array.isArray(userPref.severityLevels)
-        ? userPref.severityLevels
-        : [];
+        // Log the values received from the API
+        console.log("Server data - severityLevels:", userPref.severityLevels);
+        console.log("Server data - incidents:", userPref.incidents);
 
-      const incidentValues = Array.isArray(userPref.incidents)
-        ? userPref.incidents
-        : [];
+        // Ensure we have valid arrays for multi-select fields
+        const severityLevelValues = Array.isArray(userPref.severityLevels)
+          ? userPref.severityLevels
+          : [];
 
-      // Reset the form with complete values
-      form.reset(
-        {
-          id: userPref.id,
-          email: userPref.email || "",
-          mobile: userPref.mobile || "",
-          enabled: userPref.enabled,
-          channels: userPref.channel,
-          severityLevels: severityLevelValues,
-          incidents: incidentValues,
-        },
-        { keepDefaultValues: false }
-      );
+        const incidentValues = Array.isArray(userPref.incidents)
+          ? userPref.incidents
+          : [];
+
+        // Reset the form with complete values
+        form.reset(
+          {
+            id: userPref.id,
+            enabled: userPref.enabled,
+            channels: userPref.channel,
+            email: user.email || "",
+            mobile: user.mobileNo || "",
+            severityLevels: severityLevelValues,
+            incidents: incidentValues,
+          },
+          { keepDefaultValues: false }
+        );
+      }
     }
-  }, [userPreferences, form]);
+  }, [user, form]);
 
   const onSubmit = async (data: NotificationPreferencesFormValues) => {
     // Save preferences functionality
@@ -158,6 +162,44 @@ export function NotificationPreferences({
                 <>
                   <FormField
                     control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="email"
+                            disabled
+                            placeholder="Email"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="mobile"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Mobile</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="text"
+                            disabled
+                            placeholder="Mobile"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
                     name="channels"
                     render={({ field }) => (
                       <FormItem>
@@ -177,34 +219,6 @@ export function NotificationPreferences({
                               <SelectItem value="BOTH">Both</SelectItem>
                             </SelectContent>
                           </Select>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input type="email" placeholder="Email" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="mobile"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Mobile</FormLabel>
-                        <FormControl>
-                          <Input type="text" placeholder="Mobile" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

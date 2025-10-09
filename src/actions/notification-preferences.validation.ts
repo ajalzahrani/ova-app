@@ -5,10 +5,8 @@ export const notificationPreferencesSchema = z.object({
   id: z.string().optional(),
   enabled: z.boolean(),
   channels: z.nativeEnum(NotificationChannel).optional(),
-  email: z.union([z.string().email(), z.string().length(0)]).optional(),
-  mobile: z
-    .union([z.string().regex(/^\d{10}$/), z.string().length(0)])
-    .optional(),
+  email: z.string().optional(),
+  mobile: z.string().optional(),
   severityLevels: z.array(z.string()).optional(),
   incidents: z.array(z.string()).optional(),
 });
