@@ -6,6 +6,7 @@ import "./globals.css";
 import { AuthProvider } from "@/providers/auth-provider";
 import { Navbar } from "@/components/navbar/navbar";
 import { TanstackProvider } from "@/providers/tanstack-provider";
+// Using local fonts only - no external requests
 
 export const metadata: Metadata = {
   title: "OVA System | Occupational Violence and Aggression",
@@ -20,7 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`flex flex-col min-h-screen overflow-x-hidden`}>
+      <body className="flex flex-col min-h-screen overflow-x-hidden">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
