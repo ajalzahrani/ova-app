@@ -14,7 +14,6 @@ import { Button } from "@/components/ui/button";
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
-import { Label } from "@radix-ui/react-label";
 import { getOccurrenceByNo } from "@/actions/occurrences";
 import { useToast } from "@/components/ui/use-toast";
 import { useOccurrenceSearchStore } from "@/stores/occurrenceStore";
@@ -112,6 +111,9 @@ export function UserNav() {
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => router.push("/notifications")}>
               Notifications
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push("/change-password")}>
+              Change Password
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />

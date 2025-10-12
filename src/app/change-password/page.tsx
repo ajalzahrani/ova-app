@@ -7,9 +7,14 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   firstLoginPasswordSchema,
+  changePasswordSchema,
+  type ChangePasswordInput,
   type FirstLoginPasswordInput,
 } from "@/actions/password-change.validation";
-import { firstLoginPasswordChangeAction } from "@/actions/password-change";
+import {
+  changePasswordAction,
+  firstLoginPasswordChangeAction,
+} from "@/actions/password-change";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -30,27 +35,28 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Eye, EyeOff, Lock, Shield } from "lucide-react";
 
-export default function FirstLoginPage() {
+export default function ChangePasswordPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  const form = useForm<FirstLoginPasswordInput>({
-    resolver: zodResolver(firstLoginPasswordSchema),
+  const form = useForm<ChangePasswordInput>({
+    resolver: zodResolver(changePasswordSchema),
     defaultValues: {
+      currentPassword: "",
       newPassword: "",
       confirmPassword: "",
     },
   });
 
-  const onSubmit = async (data: FirstLoginPasswordInput) => {
+  const onSubmit = async (data: ChangePasswordInput) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const result = await firstLoginPasswordChangeAction(data);
+      const result = await changePasswordAction(data);
 
       if (result.error) {
         setError(result.error);
@@ -80,7 +86,7 @@ export default function FirstLoginPage() {
             <Shield className="h-6 w-6 text-blue-600" />
           </div>
           <h2 className="text-3xl font-extrabold text-gray-900">
-            Welcome! Set Your Password
+            Change Your Password
           </h2>
         </div>
 
@@ -88,13 +94,8 @@ export default function FirstLoginPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Lock className="h-5 w-5" />
-              Create New Password
+              Change Password
             </CardTitle>
-            <CardDescription>
-              Choose a strong password that you'll remember. It must contain at
-              least 8 characters with uppercase, lowercase, number, and special
-              character.
-            </CardDescription>
           </CardHeader>
           <CardContent>
             <Form {...form}>
@@ -106,6 +107,24 @@ export default function FirstLoginPage() {
                     <AlertDescription>{error}</AlertDescription>
                   </Alert>
                 )}
+
+                <FormField
+                  control={form.control}
+                  name="currentPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Current Password</FormLabel>
+                      <FormControl>
+                        <Input
+                          type={"password"}
+                          placeholder="Enter your current password"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 <FormField
                   control={form.control}
@@ -174,10 +193,10 @@ export default function FirstLoginPage() {
                 />
 
                 <div className="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-50 p-4 rounded-lg">
-                  <h4 className="text-sm font-medium  mb-2">
+                  <h4 className="text-sm font-medium mb-2">
                     Password Requirements:
                   </h4>
-                  <ul className="text-sm  space-y-1">
+                  <ul className="text-sm space-y-1">
                     <li>• At least 8 characters long</li>
                     <li>• One uppercase letter (A-Z)</li>
                     <li>• One lowercase letter (a-z)</li>

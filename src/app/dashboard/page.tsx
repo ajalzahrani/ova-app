@@ -5,6 +5,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -18,7 +19,35 @@ export default async function DashboardPage() {
   const dashboardData = await getDashboardData();
 
   if (!dashboardData.success || !dashboardData.data) {
-    return <div>{dashboardData.error}</div>;
+    const { isDepartment, departmentName } = dashboardData.data || {
+      isDepartment: false,
+      departmentName: null,
+    };
+    return (
+      <DashboardShell>
+        <DashboardHeader
+          heading={
+            isDepartment && departmentName
+              ? `${departmentName} Department Dashboard`
+              : "Dashboard"
+          }
+          text={
+            isDepartment && departmentName
+              ? `Overview of ${departmentName} department's incidents and reports`
+              : "Overview of OVA incidents and reports"
+          }>
+          <Link href="/occurrences/new">
+            <Button>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Report Occurrence
+            </Button>
+          </Link>
+        </DashboardHeader>
+        <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
+          <div className="text-2xl font-bold">{dashboardData.error}</div>
+        </div>
+      </DashboardShell>
+    );
   }
 
   const {
