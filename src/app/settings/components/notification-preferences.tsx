@@ -27,7 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { MultiSelect } from "@/components/ui/multi-select";
+import { MultiSelectAdv } from "@/components/ui/multi-select-adv";
 import { NotificationChannel } from "@prisma/client";
 import { toast } from "@/components/ui/use-toast";
 
@@ -232,7 +232,7 @@ export function NotificationPreferences({
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Severity Levels</FormLabel>
-                          <MultiSelect
+                          <MultiSelectAdv
                             options={severityLevels.map((severity) => ({
                               label: severity.name,
                               value: severity.id,
@@ -258,7 +258,7 @@ export function NotificationPreferences({
                         <FormItem>
                           <FormLabel>Incidents</FormLabel>
                           <FormControl onClick={(e) => e.stopPropagation()}>
-                            <MultiSelect
+                            <MultiSelectAdv
                               options={incidents.map((incident) => ({
                                 label: incident.name,
                                 value: incident.id,
