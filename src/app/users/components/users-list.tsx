@@ -76,6 +76,7 @@ export function UserList({ users }: UserListProps) {
               <TableRow>
                 <TableHead>Name</TableHead>
                 <TableHead>Role</TableHead>
+                <TableHead>Email</TableHead>
                 <TableHead>Department</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -86,6 +87,7 @@ export function UserList({ users }: UserListProps) {
                   <TableRow key={user.id}>
                     <TableCell>{user.name}</TableCell>
                     <TableCell>{user.role.name}</TableCell>
+                    <TableCell>{user.email}</TableCell>
                     <TableCell>{user.department?.name}</TableCell>
                     <TableCell className="text-right">
                       <Button variant="ghost" size="icon">

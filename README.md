@@ -15,5 +15,6 @@ This is the OVA reporting system.
 - [x] Add user feedback shared link.
 - [x] Use user email for notification.
 - [ ] Allow user to update mobile number & email from user profile page.
+- [ ] Add first login password change.
 - [ ] Let user to choose notification types (create, referral, messages, resolved)
 - [ ] Add notification enable for specific occurrance within occurrence details page.

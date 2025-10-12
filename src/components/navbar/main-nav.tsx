@@ -1,7 +1,5 @@
 import Link from "next/link";
-import { Shield } from "lucide-react";
-
-import { Input } from "@/components/ui/input";
+import Image from "next/image";
 
 import { NAV_ITEMS } from "@/config/nav.config";
 import { hasPermission } from "@/lib/permissions"; // your existing helper
@@ -38,7 +36,7 @@ export async function MainNav() {
   return (
     <div className="flex gap-6 md:gap-10">
       <Link href="/" className="flex items-center space-x-2">
-        <Shield className="h-6 w-6" />
+        <Image src="/logo.png" alt="OVA System" width={30} height={30} />
         <span className="font-bold inline-block">OVA System</span>
       </Link>
       <nav className="flex gap-6 items-center">

@@ -3,7 +3,8 @@ import { UserNav } from "./user-nav";
 import { ModeToggle } from "@/components/ui/mode-toggle";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { ShieldAlert } from "lucide-react";
+// import { ShieldAlert } from "lucide-react";
+import Image from "next/image";
 
 export async function Navbar() {
   const session = await getServerSession(authOptions);
@@ -13,7 +14,8 @@ export async function Navbar() {
       <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/95 backdrop-blur">
         <div className="container mx-auto max-w-screen-xl flex h-14 items-center justify-between px-4">
           <div className="flex items-center space-x-2">
-            <ShieldAlert className="h-6 w-6" />
+            {/* <ShieldAlert className="h-6 w-6" /> */}
+            <Image src="/logo.png" alt="OVA System" width={40} height={40} />
             <h1 className="text-xl font-bold">OVA System</h1>
           </div>
         </div>
