@@ -42,6 +42,7 @@ export const authOptions: NextAuthOptions = {
           roleId: user.role.id,
           departmentId: user.departmentId,
           permissions: user.permissions,
+          isFirstLogin: user.isFirstLogin,
         };
       },
     }),
@@ -54,6 +55,7 @@ export const authOptions: NextAuthOptions = {
         token.roleId = user.roleId as string;
         token.departmentId = user.departmentId as string;
         token.permissions = user.permissions as string[];
+        token.isFirstLogin = user.isFirstLogin as boolean;
       }
       return token;
     },
@@ -64,6 +66,7 @@ export const authOptions: NextAuthOptions = {
         session.user.roleId = token.roleId;
         session.user.permissions = token.permissions;
         session.user.departmentId = token.departmentId;
+        session.user.isFirstLogin = token.isFirstLogin;
       }
       return session;
     },

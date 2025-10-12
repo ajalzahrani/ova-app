@@ -154,7 +154,7 @@ export async function createUser(data: UserFormValuesWithRolesAndDepartments) {
         issues: error.errors,
       };
     }
-    return { success: false, error: "Failed to create user" };
+    return { success: false, error: "Failed to create user " + error };
   }
 }
 
@@ -203,6 +203,7 @@ export async function updateUser(
       // Only update password if provided
       if (hashedPassword) {
         userData.password = hashedPassword;
+        userData.isFirstLogin = true; // Allow user to reset the password.
       }
 
       // Update the user

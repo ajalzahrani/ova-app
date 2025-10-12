@@ -11,13 +11,14 @@ model User {
   id                 String              @id @default(uuid())
   name               String
   email              String              @unique
-  mobileNo           String?             @unique
+  mobileNo           String?             
   username           String              @unique
   password           String
   departmentId       String?
   createdAt          DateTime            @default(now())
   roleId             String
   feedbackId         String?
+  isFirstLogin       Boolean             @default(true)
   occurrencesCreated Occurrence[]        @relation("CreatedOccurrences")
   occurrencesUpdated Occurrence[]        @relation("UpdatedOccurrences")
   messages           OccurrenceMessage[]
