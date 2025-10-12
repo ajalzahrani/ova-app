@@ -35,3 +35,12 @@ export type UserFormValuesWithRolesAndDepartments = UserFormValues & {
   role: z.infer<typeof userRoleSchema>;
   department: z.infer<typeof userDepartmentSchema>;
 };
+
+export const userProfileSchema = userSchema.pick({
+  id: true,
+  name: true,
+  email: true,
+  mobileNo: true,
+});
+
+export type UserProfileFormValues = z.infer<typeof userProfileSchema>;

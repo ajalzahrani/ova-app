@@ -9,6 +9,7 @@ import { redirect } from "next/navigation";
 import { PermissionButton } from "@/components/auth/permission-button";
 import { checkServerPermission } from "@/lib/server-permissions";
 import { getCurrentUserFromDB } from "@/actions/auths";
+import { UserProfile } from "./components/user-profile";
 
 export default async function ProfilePage() {
   const session = await getServerSession(authOptions);
@@ -29,6 +30,7 @@ export default async function ProfilePage() {
           </PermissionButton>
         </Link>
       </DashboardHeader>
+      <UserProfile user={user} />
     </DashboardShell>
   );
 }

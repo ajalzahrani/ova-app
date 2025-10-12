@@ -8,6 +8,8 @@ import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
 import {
   userFormSchema,
+  UserProfileFormValues,
+  userProfileSchema,
   userSchema,
   type UserFormValues,
   type UserFormValuesWithRolesAndDepartments,
@@ -294,5 +296,61 @@ export async function deleteUser(userId: string) {
   } catch (error) {
     console.error("Error deleting user:", error);
     return { success: false, error: "Failed to delete user" };
+  }
+}
+
+// Update user profile
+export async function updateUserProfile(
+  userId: string,
+  data: UserProfileFormValues
+) {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user) {
+    return { success: false, error: "Not authorized" };
+  }
+
+  try {
+    // Validate data
+    const validatedData = userProfileSchema.parse(data);
+
+    // Check if email already exists (for another user)
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        email: validatedData.email,
+        NOT: { id: userId },
+      },
+    });
+
+    if (existingUser) {
+      return { success: false, error: "Email already in use by another user" };
+    }
+
+    // Update basic user info
+    const userData: any = {
+      name: validatedData.name,
+      email: validatedData.email,
+      mobileNo: validatedData.mobileNo,
+    };
+
+    // Update the user
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: userData,
+    });
+
+    revalidatePath("/profile");
+
+    return { success: true, user: updatedUser };
+  } catch (error) {
+    console.error("Error updating user profile:", error);
+    if (error instanceof z.ZodError) {
+      return {
+        success: false,
+        error: "Validation failed",
+        issues: error.errors,
+      };
+    }
+    return { success: false, error: "Failed to update user profile" + error };
   }
 }
