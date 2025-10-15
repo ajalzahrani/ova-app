@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -20,6 +20,14 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import Image from "next/image";
+import {
+  Select,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from "@/components/ui/select";
+import { getTestingEmails } from "@/actions/users";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -31,12 +39,14 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 export default function LoginPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const [testingEmails, setTestingEmails] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -70,6 +80,14 @@ export default function LoginPage() {
     }
   };
 
+  useEffect(() => {
+    const fetchEmails = async () => {
+      const emails = await getTestingEmails();
+      setTestingEmails(emails.filter(Boolean));
+    };
+    fetchEmails();
+  }, []);
+
   return (
     <div className="flex h-[calc(100vh-4rem)] items-center justify-center bg-gray-50 dark:bg-gray-900">
       <Card className="w-full max-w-md mx-4">
@@ -89,6 +107,25 @@ export default function LoginPage() {
             </Alert>
           )}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="username">Testing Emails</Label>
+              <Select
+                disabled={testingEmails.length === 0}
+                onValueChange={(value: string) => {
+                  setValue("email", value);
+                }}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Testing Email" />
+                </SelectTrigger>
+                <SelectContent>
+                  {testingEmails.filter(Boolean).map((email: string) => (
+                    <SelectItem key={email} value={email}>
+                      {email}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input

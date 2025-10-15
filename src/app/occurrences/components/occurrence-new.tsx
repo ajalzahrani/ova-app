@@ -145,9 +145,9 @@ export function OccurrenceNew() {
       return;
     }
     try {
-      const data = await fetch(
-        `http://172.16.51.49:3002/api/v1/patient/by-mrn/${mrn}`
-      );
+      const patientApiUrl =
+        process.env.PATIENT_API_URL || "http://172.16.51.49:3002/api/v1";
+      const data = await fetch(`${patientApiUrl}/patient/by-mrn/${mrn}`);
       const response = await data.json();
       console.log("API response", response);
       if (response) {

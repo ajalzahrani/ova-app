@@ -354,3 +354,13 @@ export async function updateUserProfile(
     return { success: false, error: "Failed to update user profile" + error };
   }
 }
+
+export const getTestingEmails = async () => {
+  const emails = await prisma.user.findMany({
+    select: {
+      email: true,
+    },
+  });
+
+  return emails.map((email) => email.email);
+};

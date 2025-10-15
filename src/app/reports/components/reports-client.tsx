@@ -50,64 +50,54 @@ export function ReportsClient({
 
   return (
     <div className="space-y-6">
-      {/* Export Buttons */}
-      <div className="flex justify-end">
+      {/* Actions Row: Export + Filter */}
+      <div className="flex justify-end items-center gap-2">
         <ExportButtons occurrences={occurrences} statistics={statistics} />
+        <ReportFilters
+          filterOptions={filterOptions}
+          onFilterChange={handleFilterChange}
+        />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-4">
-        {/* Filters Sidebar */}
-        <div className="lg:col-span-1">
-          <ReportFilters
-            filterOptions={filterOptions}
-            onFilterChange={handleFilterChange}
-          />
-        </div>
-
-        {/* Main Content */}
-        <div className="lg:col-span-3 space-y-6">
-          {isLoading ? (
-            <div className="flex items-center justify-center h-64">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-                <p className="mt-4 text-muted-foreground">
-                  Loading report data...
-                </p>
-              </div>
+      {/* Main Content */}
+      <div className="space-y-6">
+        {isLoading ? (
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+              <p className="mt-4 text-muted-foreground">
+                Loading report data...
+              </p>
             </div>
-          ) : (
-            <>
-              {/* Statistics Cards */}
-              <ReportStatistics statistics={statistics} />
+          </div>
+        ) : (
+          <>
+            {/* Statistics Cards */}
+            <ReportStatistics statistics={statistics} />
 
-              {/* Tabs for Charts and Table */}
-              <Tabs defaultValue="charts" className="space-y-4">
-                <TabsList>
-                  <TabsTrigger
-                    value="charts"
-                    className="flex items-center gap-2">
-                    <PieChart className="h-4 w-4" />
-                    Charts
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="table"
-                    className="flex items-center gap-2">
-                    <TableIcon className="h-4 w-4" />
-                    Data Table
-                  </TabsTrigger>
-                </TabsList>
+            {/* Tabs for Charts and Table */}
+            <Tabs defaultValue="charts" className="space-y-4">
+              <TabsList>
+                <TabsTrigger value="charts" className="flex items-center gap-2">
+                  <PieChart className="h-4 w-4" />
+                  Charts
+                </TabsTrigger>
+                <TabsTrigger value="table" className="flex items-center gap-2">
+                  <TableIcon className="h-4 w-4" />
+                  Data Table
+                </TabsTrigger>
+              </TabsList>
 
-                <TabsContent value="charts" className="space-y-4">
-                  <ReportCharts statistics={statistics} />
-                </TabsContent>
+              <TabsContent value="charts" className="space-y-4">
+                <ReportCharts statistics={statistics} />
+              </TabsContent>
 
-                <TabsContent value="table">
-                  <ReportTable occurrences={occurrences} />
-                </TabsContent>
-              </Tabs>
-            </>
-          )}
-        </div>
+              <TabsContent value="table">
+                <ReportTable occurrences={occurrences} />
+              </TabsContent>
+            </Tabs>
+          </>
+        )}
       </div>
     </div>
   );
