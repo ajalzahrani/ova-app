@@ -1,6 +1,8 @@
 import { NotificationChannel, NotificationType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { padCountryCode, validateMobileNumber } from "./utils";
+import { JsonValue } from "@prisma/client/runtime/library";
+import { Prisma } from "@prisma/client";
 
 export async function sendNotification({
   userId,
@@ -21,7 +23,7 @@ export async function sendNotification({
   type: NotificationType;
   referenceIds: string[];
   channel: NotificationChannel;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
 }) {
   // Create notification record
   const notification = await prisma.notification.create({
@@ -32,8 +34,8 @@ export async function sendNotification({
       type,
       channel,
       referenceIds,
-      metadata,
-    },
+      metadata: metadata as unknown as JsonValue,
+    } as unknown as Prisma.NotificationCreateInput,
   });
 
   // Send to appropriate channels
@@ -66,7 +68,7 @@ async function sendEmailNotification(
   email: string,
   title: string,
   message: string,
-  metadata: any
+  metadata: Record<string, unknown>
 ) {
   try {
     if (!email) {
@@ -91,8 +93,7 @@ async function sendEmailNotification(
     }
 
     // Lazy-load nodemailer to avoid client bundles including it
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const nodemailer: any = await import("nodemailer");
+    const nodemailer: any = await import("nodemailer"); // eslint-disable-line @typescript-eslint/no-explicit-any
 
     const secure = process.env.SMTP_SECURE
       ? process.env.SMTP_SECURE === "true"
@@ -209,7 +210,7 @@ async function sendMobileNotification(
   mobileNo: string,
   title: string,
   message: string,
-  metadata: any
+  metadata: Record<string, unknown>
 ) {
   // Connect to your push notification service (MSD SMS Gateway)
   try {
@@ -253,8 +254,12 @@ async function sendMobileNotification(
       } ${JSON.stringify(response.body)}`
     );
     return false;
-  } catch (error: any) {
-    console.error(`Error sending SMS: ${error.message}`);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error(`Error sending SMS: ${error.message}`);
+    } else {
+      console.error(`Error sending SMS: ${error}`);
+    }
     return false;
   }
 }

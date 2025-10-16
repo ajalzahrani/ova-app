@@ -18,17 +18,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useState } from "react";
-import { toast, useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import { PermissionFormValues } from "@/actions/permissions.validation";
 import { deletePermission } from "@/actions/permissions";
+import { Permission } from "@prisma/client";
 
-interface PermissionListProps {
-  permissions: PermissionFormValues[];
-}
-
-export function PermissionList({ permissions }: PermissionListProps) {
+export function PermissionList({ permissions }: { permissions: Permission[] }) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [permissionToDelete, setPermissionToDelete] =
     useState<PermissionFormValues | null>(null);
@@ -38,7 +35,7 @@ export function PermissionList({ permissions }: PermissionListProps) {
 
   // Group permissions by object (based on code suffix after ":")
   const groupedPermissions = permissions.reduce(
-    (groups: Record<string, Permission[]>, permission) => {
+    (groups: Record<string, PermissionFormValues[]>, permission) => {
       const parts = permission.code.split(":");
       const object =
         parts.length > 1
@@ -49,7 +46,14 @@ export function PermissionList({ permissions }: PermissionListProps) {
       if (!groups[object]) {
         groups[object] = [];
       }
-      groups[object].push(permission);
+      groups[object].push({
+        name: permission.name,
+        code: permission.code,
+        description: permission.description || "",
+        id: permission.id,
+        createdAt: permission.createdAt,
+        updatedAt: permission.updatedAt,
+      });
       return groups;
     },
     {}

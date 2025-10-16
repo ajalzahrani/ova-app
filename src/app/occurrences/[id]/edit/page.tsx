@@ -2,9 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -16,14 +15,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import Link from "next/link";
 import { use } from "react";
-import { ArrowLeft } from "lucide-react";
-import {
-  getOccurrenceById,
-  updateOccurrence,
-  type OccurrenceFormValues,
-} from "@/actions/occurrences";
+import { getOccurrenceById, updateOccurrence } from "@/actions/occurrences";
 import { useToast } from "@/components/ui/use-toast";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
@@ -37,19 +30,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Select } from "@/components/ui/select";
-import { checkBusinessPermission } from "@/lib/business-permissions";
 import { BackToOccurrencesButton } from "@/app/occurrences/components/back-to-occurrences-button";
-
-// Form schema for occurrence edit
-const occurrenceSchema = z.object({
-  title: z.string().min(5, "Title must be at least 5 characters"),
-  description: z.string().min(10, "Description must be at least 10 characters"),
-  locationId: z.string().min(1, "Location is required"),
-  incidentId: z.string().min(1, "Incident is required"),
-  occurrenceDate: z.string().refine((val) => !isNaN(Date.parse(val)), {
-    message: "Invalid date",
-  }),
-});
+import {
+  occurrenceSchema,
+  OccurrenceFormValues,
+} from "@/actions/occurrences.validations";
 
 interface PageParams {
   id: string;
@@ -58,7 +43,7 @@ interface PageParams {
 export default function EditOccurrencePage({
   params,
 }: {
-  params: PageParams | Promise<PageParams>;
+  params: Promise<PageParams>;
 }) {
   const resolvedParams = use(params as Promise<PageParams>);
   const occurrenceId = resolvedParams.id;
@@ -70,11 +55,14 @@ export default function EditOccurrencePage({
   const form = useForm<OccurrenceFormValues>({
     resolver: zodResolver(occurrenceSchema),
     defaultValues: {
-      title: "",
+      mrn: "",
+      isPatientInvolve: false,
       description: "",
       locationId: "",
       incidentId: "",
-      occurrenceDate: "",
+      occurrenceDate: new Date(),
+      contactEmail: "",
+      contactPhone: "",
     },
   });
 
@@ -90,13 +78,14 @@ export default function EditOccurrencePage({
         if (occurrenceResponse.success) {
           const occurrence = occurrenceResponse.occurrence;
           form.reset({
-            title: occurrence?.title || "",
+            mrn: occurrence?.mrn || "",
+            isPatientInvolve: occurrence?.isPatientInvolve || false,
             description: occurrence?.description || "",
             locationId: occurrence?.locationId || "",
             incidentId: occurrence?.incidentId || "",
             occurrenceDate: occurrence?.occurrenceDate
-              ? new Date(occurrence.occurrenceDate).toISOString().split("T")[0]
-              : "",
+              ? new Date(occurrence.occurrenceDate)
+              : new Date(),
           });
         } else {
           toast({
@@ -118,15 +107,9 @@ export default function EditOccurrencePage({
     console.log("onSubmit called", data);
     setIsSubmitting(true);
     try {
-      // Create empty FormData instance to satisfy schema requirement
-      const formDataInstance = new FormData();
-
-      console.log("data", { data, formDataInstance });
-
       // Call with formData property included
       const result = await updateOccurrence(occurrenceId, {
         ...data,
-        formData: formDataInstance,
       });
 
       if (result.success) {
@@ -179,7 +162,10 @@ export default function EditOccurrencePage({
         </div>
       </DashboardHeader>
       <div className="grid gap-6">
-        <form onSubmit={form.handleSubmit(onSubmit)}>
+        <form
+          onSubmit={form.handleSubmit(
+            onSubmit as SubmitHandler<OccurrenceFormValues>
+          )}>
           <Card>
             <CardHeader>
               <CardTitle>Occurrence Details</CardTitle>
@@ -189,29 +175,29 @@ export default function EditOccurrencePage({
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="title">Title</Label>
+                <Label htmlFor="mrn">MRN</Label>
                 <Input
-                  id="title"
+                  id="mrn"
                   placeholder="Brief description of the occurrence"
-                  {...form.register("title")}
+                  {...form.register("mrn")}
                 />
-                {form.formState.errors.title && (
+                {form.formState.errors.mrn && (
                   <p className="text-sm text-red-500">
-                    {form.formState.errors.title.message}
+                    {form.formState.errors.mrn.message}
                   </p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="occurrenceDate">Date Occurred</Label>
+                <Label htmlFor="isPatientInvolve">Is Patient Involve</Label>
                 <Input
-                  id="occurrenceDate"
+                  id="isPatientInvolve"
                   type="date"
-                  {...form.register("occurrenceDate")}
+                  {...form.register("isPatientInvolve")}
                 />
-                {form.formState.errors.occurrenceDate && (
+                {form.formState.errors.isPatientInvolve && (
                   <p className="text-sm text-red-500">
-                    {form.formState.errors.occurrenceDate.message}
+                    {form.formState.errors.isPatientInvolve.message}
                   </p>
                 )}
               </div>

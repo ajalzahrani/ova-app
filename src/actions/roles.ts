@@ -164,7 +164,7 @@ export async function updateRole(
     }
 
     // Start a transaction to handle the role update
-    const role = await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx) => {
       // Update basic role info
       const updatedRole = await tx.role.update({
         where: { id: roleId },

@@ -120,8 +120,8 @@ export async function notifyOccurrenceCreated(occurrenceId: string) {
       });
       await sendNotification({
         userId: user.id,
-        email: userPreference.email || user.email,
-        mobileNo: userPreference.mobile || user.mobileNo,
+        email: user.email,
+        mobileNo: user.mobileNo,
         title: `New Occurrence: ${occurrence.occurrenceNo}`,
         message: `A new occurrence has been created: ${occurrence.occurrenceNo}`,
         type: NotificationType.OCCURRENCE_CREATED,
@@ -200,8 +200,8 @@ export async function notifyOccurrenceReferral(
       console.log("Sending notification to user", user.name);
       await sendNotification({
         userId: user.id,
-        email: userPreference.email || user.email,
-        mobileNo: userPreference.mobile || user.mobileNo,
+        email: user.email,
+        mobileNo: user.mobileNo,
         title: `Occurrence Referral: ${occurrence.occurrenceNo}`,
         message: `An occurrence has been referred to your department: ${occurrence.occurrenceNo}`,
         type: NotificationType.REFERRAL,
@@ -301,8 +301,8 @@ export async function notifyOccurrenceReferralBulk(
         if (!userNotifications.has(user.id)) {
           userNotifications.set(user.id, {
             userId: user.id,
-            email: user.notificationPreferences[0].email || user.email,
-            mobileNo: user.notificationPreferences[0].mobile || user.mobileNo,
+            email: user.email,
+            mobileNo: user.mobileNo,
             channel: user.notificationPreferences[0].channel,
             severityLevel: occurrence.incident.severity?.level || null,
           });
@@ -316,8 +316,8 @@ export async function notifyOccurrenceReferralBulk(
     const notificationPreference = user.notificationPreferences[0];
     await sendNotification({
       userId: user.id,
-      email: notificationPreference.email || user.email,
-      mobileNo: notificationPreference.mobile || user.mobileNo,
+      email: user.email,
+      mobileNo: user.mobileNo,
       title: `Occurrences Referral`,
       message: `You have received ${occurrenceIds.length} new occurrences for review`,
       type: NotificationType.REFERRAL,

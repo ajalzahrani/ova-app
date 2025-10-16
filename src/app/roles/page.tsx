@@ -7,6 +7,7 @@ import Link from "next/link";
 import { RoleList } from "./components/role-list";
 import { checkServerPermission } from "@/lib/server-permissions";
 import { notFound } from "next/navigation";
+import { RoleFormValues } from "@/actions/roles.validation";
 
 export default async function RolesPage() {
   await checkServerPermission("manage:roles");
@@ -27,7 +28,7 @@ export default async function RolesPage() {
         </Link>
       </DashboardHeader>
 
-      <RoleList roles={roles.roles ?? []} />
+      <RoleList roles={roles.roles as RoleFormValues[]} />
     </DashboardShell>
   );
 }

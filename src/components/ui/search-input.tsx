@@ -205,16 +205,16 @@ const SearchInput = forwardRef<SearchInputRef, SearchInputProps<any>>(
               type="button"
               onClick={clearInput}
               className="absolute inset-y-0 right-0 pr-3 flex items-center">
-              <X className="w-4 h-4 text-gray-400" />
+              <X className="w-4 h-4 text-muted-foreground" />
             </button>
           )}
         </div>
         {(isFocused || filteredOptions.length > 0) && (
-          <ul className="absolute z-10 w-full max-h-40 overflow-y-auto border border-gray-900 rounded-md mt-1 bg-gray-900 shadow-lg">
+          <ul className="absolute z-10 w-full max-h-40 overflow-y-auto border border-border rounded-md mt-1 bg-background shadow-lg">
             {filteredOptions.map((option, index) => (
               <li
                 key={index}
-                className="p-2 hover:bg-gray-800 cursor-pointer"
+                className="p-2 hover:bg-accent cursor-pointer"
                 onClick={() => handleOptionClick(option)}>
                 {renderOption(option)}
               </li>

@@ -1,9 +1,8 @@
 import { getServerSession } from "next-auth";
-import { authOptions, getCurrentUser } from "@/lib/auth";
+import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getCurrentUserFromDB } from "@/actions/auths";
-import { getOccurrenceById } from "@/actions/occurrences";
-import { Occurrence, Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 
 type OccurrenceWithRelations = Prisma.OccurrenceGetPayload<{
   include: {

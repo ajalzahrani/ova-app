@@ -3,7 +3,6 @@
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { Prisma } from "@prisma/client";
 
 // Get all user notifications
 export async function getUserNotifications(limit = 10) {
@@ -37,11 +36,14 @@ export async function getUserNotifications(limit = 10) {
       notifications,
       count,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error fetching user notifications", error);
     return {
       success: false,
-      error: error.message || "Failed to fetch notifications",
+      error:
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch notifications",
     };
   }
 }
@@ -68,11 +70,14 @@ export async function markNotificationAsRead(notificationId: string) {
     return {
       success: true,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error marking notification as read", error);
     return {
       success: false,
-      error: error.message || "Failed to mark notification as read",
+      error:
+        error instanceof Error
+          ? error.message
+          : "Failed to mark notification as read",
     };
   }
 }
@@ -97,11 +102,14 @@ export async function getUnreadNotificationCount() {
       success: true,
       count,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error counting unread notifications", error);
     return {
       success: false,
-      error: error.message || "Failed to count unread notifications",
+      error:
+        error instanceof Error
+          ? error.message
+          : "Failed to count unread notifications",
       count: 0,
     };
   }
@@ -129,11 +137,14 @@ export async function markAllNotificationsAsRead() {
     return {
       success: true,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error marking all notifications as read", error);
     return {
       success: false,
-      error: error.message || "Failed to mark all notifications as read",
+      error:
+        error instanceof Error
+          ? error.message
+          : "Failed to mark all notifications as read",
     };
   }
 }

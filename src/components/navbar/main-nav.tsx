@@ -36,6 +36,7 @@ export async function MainNav() {
   return (
     <div className="flex gap-6 md:gap-10">
       <Link href="/" className="flex items-center space-x-2">
+        {/* TODO: Adjust the logo size */}
         <Image src="/logo.png" alt="OVA System" width={30} height={30} />
         <span className="font-bold inline-block">OVA System</span>
       </Link>

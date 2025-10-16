@@ -10,21 +10,17 @@ import { Separator } from "@/components/ui/separator";
 import {
   AlertCircle,
   ChevronRight,
-  ClipboardList,
   FileText,
-  Search,
   User,
   Building2,
   AlertTriangle,
   MapPin,
   Clock,
-  CheckCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { OccurrenceStatus, Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { OccurrenceCommunication } from "./occurrence-communication";
 import { format } from "date-fns";
-import { OccurrenceFeedback } from "./occurrence-feedback-response";
 import { PermissionCheck } from "@/components/auth/permission-check";
 import { getCurrentUser } from "@/lib/auth";
 import { IncidentHierarchy } from "./incdent-hierarchy";
@@ -32,6 +28,7 @@ import { getAllIncidentsHierarchyByIncidentId } from "@/actions/incidents";
 import { checkServerPermission } from "@/lib/server-permissions";
 import { getSeverityColor } from "@/lib/severity-color";
 import { getStatusBadge } from "@/lib/status-badge";
+import { OccurrenceFeedbackResponse } from "./occurrence-feedback-response";
 
 type OccurrenceWithRelations = Prisma.OccurrenceGetPayload<{
   include: {
@@ -249,7 +246,7 @@ export async function OccurrenceView(props: {
 
       {/* Internal feedback from the department */}
       <PermissionCheck required="view:feedback-share">
-        <OccurrenceFeedback assignmentId={assignmentId ?? ""} />
+        <OccurrenceFeedbackResponse assignmentId={assignmentId ?? ""} />
       </PermissionCheck>
 
       {/* Add the group communication and feedback thread */}

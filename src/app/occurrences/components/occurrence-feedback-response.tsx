@@ -8,7 +8,7 @@ interface OccurrenceFeedbackProps {
   assignmentId: string;
 }
 
-export async function OccurrenceFeedback({
+export async function OccurrenceFeedbackResponse({
   assignmentId,
 }: OccurrenceFeedbackProps) {
   if (!assignmentId || assignmentId.length === 0) return null;
@@ -57,7 +57,9 @@ export async function OccurrenceFeedback({
                       })}
                     </span>
                   </div>
-                  {feedback.used && feedback.responseMessage.length > 0 ? (
+                  {feedback.used &&
+                  feedback.responseMessage &&
+                  feedback.responseMessage.length > 0 ? (
                     <div className="bg-white dark:bg-gray-900 rounded px-3 py-2 mt-1 border text-sm">
                       {feedback.responseMessage}
                     </div>

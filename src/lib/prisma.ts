@@ -28,9 +28,10 @@ const prismaClientSingleton = () => {
       const nextNumber = currentNumber + 1;
 
       // Format with leading zeros (OCC25-0001, OCC25-0002, etc.)
+      // TODO: Add 0 padding for the sequence number of occurrence number in occurrence schema
       params.args.data.occurrenceNo = `${yearPrefix}${nextNumber
         .toString()
-        .padStart(4, "0")}`;
+        .padStart(4, "0")}`; // TODO: Adjust how many zeros in occurrence number in prisma schema
     }
 
     return next(params);

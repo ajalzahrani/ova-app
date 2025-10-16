@@ -27,7 +27,7 @@ interface PageParams {
 export default function EditRolePage({
   params,
 }: {
-  params: PageParams | Promise<PageParams>;
+  params: Promise<PageParams>;
 }) {
   const resolvedParams = use(params as Promise<PageParams>);
   const roleId = resolvedParams.id;

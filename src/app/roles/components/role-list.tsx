@@ -25,11 +25,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import { RoleFormValues } from "@/actions/roles.validation";
 
-interface RoleListProps {
-  roles: RoleFormValues[];
-}
-
-export function RoleList({ roles }: RoleListProps) {
+export function RoleList({ roles }: { roles: RoleFormValues[] }) {
   const [roleToDelete, setRoleToDelete] = useState<RoleFormValues | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();

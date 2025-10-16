@@ -10,15 +10,9 @@ import { NavItem } from "@/config/nav.config";
 import { usePathname } from "next/navigation";
 import { ChevronDown } from "lucide-react";
 import Link from "next/link";
-import { getCurrentUser } from "@/lib/auth";
-import { useSession } from "next-auth/react";
 
 export default function NavList({ items }: { items: NavItem[] }) {
-  const { data: session } = useSession();
-
   const pathname = usePathname();
-
-  if (!session) return null;
 
   return (
     <>

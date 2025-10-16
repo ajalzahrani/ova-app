@@ -55,6 +55,10 @@ export async function OccurrenceFeedbackView(props: {
     occurrence.incident.id
   );
 
+  if (!incident) {
+    return <div>No incident found</div>;
+  }
+
   const statusBadge = getStatusBadge(occurrence.status?.name);
 
   return (

@@ -1,7 +1,6 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { Incident } from "@prisma/client";
 import { IncidentFormValues, incidentSchema } from "./incidents.validation";
 import { revalidatePath } from "next/cache";
 

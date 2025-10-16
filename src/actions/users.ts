@@ -10,8 +10,6 @@ import {
   userFormSchema,
   UserProfileFormValues,
   userProfileSchema,
-  userSchema,
-  type UserFormValues,
   type UserFormValuesWithRolesAndDepartments,
 } from "./users.validations";
 // Get all users with their roles

@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -26,18 +25,10 @@ import {
 } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, ArrowLeft } from "lucide-react";
-import {
-  createPermission,
-  type PermissionFormValues,
-} from "@/actions/permissions";
+import { createPermission } from "@/actions/permissions";
 import { useToast } from "@/components/ui/use-toast";
-
-// Form schema for new permission
-const permissionFormSchema = z.object({
-  code: z.string().min(2, "Code must be at least 2 characters"),
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  description: z.string().optional(),
-});
+import { permissionSchema } from "@/actions/permissions.validation";
+import { PermissionFormValues } from "@/actions/permissions.validation";
 
 export default function NewPermissionPage() {
   const router = useRouter();
@@ -47,10 +38,10 @@ export default function NewPermissionPage() {
 
   // Initialize the form
   const form = useForm<PermissionFormValues>({
-    resolver: zodResolver(permissionFormSchema),
+    resolver: zodResolver(permissionSchema),
     defaultValues: {
-      code: "",
       name: "",
+      code: "",
       description: "",
     },
   });
@@ -123,16 +114,15 @@ export default function NewPermissionPage() {
               <div className="grid gap-6">
                 <FormField
                   control={form.control}
-                  name="code"
+                  name="name"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Code</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g. view:users" {...field} />
+                        <Input placeholder="Enter permission name" {...field} />
                       </FormControl>
                       <FormDescription>
-                        Use format like &quot;action:resource&quot; (e.g.
-                        view:users, edit:occurrences)
+                        A human-readable name for this permission
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -141,15 +131,16 @@ export default function NewPermissionPage() {
 
                 <FormField
                   control={form.control}
-                  name="name"
+                  name="code"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Name</FormLabel>
+                      <FormLabel>Code</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter permission name" {...field} />
+                        <Input placeholder="Enter permission code" {...field} />
                       </FormControl>
                       <FormDescription>
-                        A human-readable name for this permission
+                        Use format like &quot;action:resource&quot; (e.g.
+                        view:users, edit:occurrences). Must be unique.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>

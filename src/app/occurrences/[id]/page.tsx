@@ -57,17 +57,17 @@ export default async function OccurrenceDetails({
             <DeleteOccurrenceDialog occurrenceId={occurrence.id} />
           </PermissionCheck>
 
+          {/* TODO: To Fix occurrence edit page */}
           {/* Conditional buttons based on occurrence status */}
-          {occurrenceStatus === "OPEN" && (
+          {/* {occurrenceStatus === "OPEN" && (
             <>
-              {/* Edit Occurrence - Need edit:occurrences permission */}
               <PermissionButton permission="edit:occurrence" asChild>
                 <Link href={`/occurrences/${occurrence?.id}/edit`}>
                   Edit Occurrence
                 </Link>
               </PermissionButton>
             </>
-          )}
+          )} */}
 
           {/* Resolve Button - Need resolve:occurrences permission and status must be ANSWERED */}
           {occurrenceStatus === "ANSWERED" && (

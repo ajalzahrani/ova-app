@@ -3,7 +3,22 @@
 import { prisma } from "@/lib/prisma";
 import { randomBytes } from "crypto";
 import { addHours } from "date-fns";
-import { getOccurrenceForFeedbackById } from "./occurrences";
+import { Prisma } from "@prisma/client";
+
+type ValidatedTokenData = Prisma.FeedbackTokenGetPayload<{
+  include: {
+    assignment: {
+      include: {
+        department: true;
+      };
+    };
+    sharedBy: true;
+  };
+}>;
+
+type ValidateFeedbackTokenResult =
+  | { valid: false; reason: string; data?: never }
+  | { valid: true; data: ValidatedTokenData; reason?: never };
 
 export async function submitFeedback(token: string, message: string) {
   const tokenRecord = await validateFeedbackToken(token);
@@ -78,7 +93,9 @@ export async function generateFeedbackToken(
   }
 }
 
-export async function validateFeedbackToken(token: string) {
+export async function validateFeedbackToken(
+  token: string
+): Promise<ValidateFeedbackTokenResult> {
   try {
     const tokenRecord = await prisma.feedbackToken.findUnique({
       where: { token },

@@ -1,4 +1,3 @@
-import { prisma } from "@/lib/prisma";
 import {
   Table,
   TableBody,
@@ -9,25 +8,15 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { getRecentOccurrences } from "@/actions/occurrences";
 
-const recentOccurrences = await prisma.occurrence.findMany({
-  orderBy: {
-    createdAt: "desc",
-  },
-  take: 5,
-  include: {
-    status: true,
-    incident: {
-      select: {
-        id: true,
-        name: true,
-        severity: true,
-      },
-    },
-  },
-});
+export async function RecentIncidents() {
+  const recentOccurrences = await getRecentOccurrences();
 
-export function RecentIncidents() {
+  if (!recentOccurrences.success || !recentOccurrences.recentOccurrences) {
+    return <div>No recent occurrences</div>;
+  }
+
   return (
     <Table>
       <TableHeader>
@@ -40,7 +29,7 @@ export function RecentIncidents() {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {recentOccurrences.map((occurrence) => (
+        {recentOccurrences.recentOccurrences.map((occurrence) => (
           <TableRow key={occurrence.id}>
             <TableCell className="font-medium">
               {occurrence.occurrenceNo}

@@ -24,6 +24,8 @@ export async function GET() {
         test: true,
         timestamp: new Date().toISOString(),
       },
+      email: currentUser.email!,
+      mobileNo: "",
     });
 
     return NextResponse.json({
@@ -31,11 +33,14 @@ export async function GET() {
       message: "Test notification created",
       notification,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error creating test notification:", error);
     return NextResponse.json(
       {
-        error: error.message || "Failed to create test notification",
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to create test notification",
       },
       {
         status: 500,

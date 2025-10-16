@@ -1,11 +1,9 @@
 "use server";
 import { prisma } from "@/lib/prisma";
-import { authOptions, getCurrentUser } from "@/lib/auth";
-import { getServerSession } from "next-auth";
+import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
-import { unstable_cache as cache, revalidateTag } from "next/cache";
-import { getPermissionsByRoleId } from "./permissions";
+import { unstable_cache as cache } from "next/cache";
 
 // Cached function to get user data by ID
 const getCachedUserById = cache(

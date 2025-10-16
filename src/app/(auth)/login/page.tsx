@@ -51,7 +51,7 @@ export default function LoginPage() {
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
-      password: "adminpassword",
+      password: "password123",
     },
   });
 
@@ -74,8 +74,12 @@ export default function LoginPage() {
 
       router.push("/");
       router.refresh();
-    } catch (error) {
-      setError("An error occurred during sign in");
+    } catch (error: unknown) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : "An error occurred during sign in"
+      );
       setIsLoading(false);
     }
   };

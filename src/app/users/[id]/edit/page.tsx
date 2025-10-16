@@ -32,7 +32,7 @@ interface PageParams {
 export default function EditUserPage({
   params,
 }: {
-  params: PageParams | Promise<PageParams>;
+  params: Promise<PageParams>;
 }) {
   const resolvedParams = use(params as Promise<PageParams>);
   const userId = resolvedParams.id;

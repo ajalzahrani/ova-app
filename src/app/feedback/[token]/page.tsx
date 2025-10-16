@@ -29,7 +29,7 @@ export default async function FeedbackPage({
     );
   }
 
-  const { assignment, sharedBy, expiresAt } = result.data;
+  const { assignment, sharedBy } = result.data;
   const occurrenceResult = await getOccurrenceById(assignment.occurrenceId);
 
   if (!occurrenceResult.success) {

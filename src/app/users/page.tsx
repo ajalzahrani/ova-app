@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { getUsers } from "@/actions/users";
@@ -8,6 +7,7 @@ import { UserList } from "./components/users-list";
 import { PlusCircle } from "lucide-react";
 import { checkServerPermission } from "@/lib/server-permissions";
 import { notFound } from "next/navigation";
+import { UserFormValuesWithRolesAndDepartments } from "@/actions/users.validations";
 export default async function UsersPage() {
   await checkServerPermission("manage:users");
 
@@ -28,7 +28,9 @@ export default async function UsersPage() {
         </Link>
       </DashboardHeader>
 
-      <UserList users={users.users || []} />
+      <UserList
+        users={users.users as UserFormValuesWithRolesAndDepartments[]}
+      />
     </DashboardShell>
   );
 }

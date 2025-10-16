@@ -16,7 +16,6 @@ import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { getOccurrenceByNo } from "@/actions/occurrences";
 import { useToast } from "@/components/ui/use-toast";
-import { useOccurrenceSearchStore } from "@/stores/occurrenceStore";
 import { NotificationDropdown } from "@/components/notifications/notification-dropdown";
 import { setSearchCookie } from "@/lib/cookies-service";
 export function UserNav() {

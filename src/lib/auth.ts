@@ -20,14 +20,14 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(credentials): Promise<User | null> {
         if (!credentials?.email || !credentials?.password) {
           return null;
         }
 
         const user = await authenticateUser(
           credentials.email,
-          credentials.password
+          credentials.password as string
         );
 
         if (!user) {
@@ -40,7 +40,7 @@ export const authOptions: NextAuthOptions = {
           name: user.name,
           role: user.role.name,
           roleId: user.role.id,
-          departmentId: user.departmentId,
+          departmentId: user.departmentId ?? undefined,
           permissions: user.permissions,
           isFirstLogin: user.isFirstLogin,
         };

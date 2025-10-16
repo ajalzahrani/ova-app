@@ -140,6 +140,7 @@ export function OccurrenceNew() {
     fetchLocations();
   }, []);
 
+  // TODO: handle api call errors
   const handleFetchPatientDetails = async (mrn: string) => {
     if (!mrn) {
       return;

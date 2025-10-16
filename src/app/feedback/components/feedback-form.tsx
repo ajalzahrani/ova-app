@@ -10,7 +10,7 @@ type PageParams = {
 export default function FeedbackForm({
   params,
 }: {
-  params: PageParams | Promise<PageParams>;
+  params: Promise<PageParams>;
 }) {
   const resolvedParams = use(params as Promise<PageParams>);
   const [message, setMessage] = useState("");

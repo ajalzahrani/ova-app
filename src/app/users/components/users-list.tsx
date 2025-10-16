@@ -24,11 +24,11 @@ import { toast } from "@/components/ui/use-toast";
 import { deleteUser } from "@/actions/users";
 import { UserFormValuesWithRolesAndDepartments } from "@/actions/users.validations";
 
-interface UserListProps {
+export function UserList({
+  users,
+}: {
   users: UserFormValuesWithRolesAndDepartments[];
-}
-
-export function UserList({ users }: UserListProps) {
+}) {
   const [userToDelete, setUserToDelete] =
     useState<UserFormValuesWithRolesAndDepartments | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);

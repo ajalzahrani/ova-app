@@ -289,6 +289,49 @@ export async function getOccurrences(params: GetOccurrencesParams) {
   return { occurrences, paginationInfo };
 }
 
+export async function getRecentOccurrences() {
+  const user = await getCurrentUser();
+
+  if (!user) {
+    return { success: false, error: "Not authenticated" };
+  }
+
+  const isAllowedToViewAllOccurrences =
+    user?.role === "ADMIN" || user?.role === "QUALITY_ASSURANCE";
+
+  const whereCondition = {
+    ...(isAllowedToViewAllOccurrences || !user?.departmentId
+      ? {}
+      : {
+          assignments: {
+            some: {
+              departmentId: user.departmentId,
+            },
+          },
+        }),
+  };
+
+  const recentOccurrences = await prisma.occurrence.findMany({
+    where: { ...whereCondition },
+    orderBy: {
+      createdAt: "desc",
+    },
+    take: 5,
+    include: {
+      status: true,
+      incident: {
+        select: {
+          id: true,
+          name: true,
+          severity: true,
+        },
+      },
+    },
+  });
+
+  return { success: true, recentOccurrences };
+}
+
 export async function getOccurrenceById(occurrenceId: string) {
   try {
     const occurrence = await prisma.occurrence.findUnique({
