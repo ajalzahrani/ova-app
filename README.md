@@ -38,6 +38,6 @@ taskkill /f /im node.exe
 
 ## Production notes
 
-remove adminpassword
+remove adminpassword & password123 from login page
 remove testing_emails
 edit password regx

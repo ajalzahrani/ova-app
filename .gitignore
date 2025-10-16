@@ -50,3 +50,6 @@ incidents-v3.csv
 package-lock.json
 
 public/font/
+scripts/db-diagnostic.js
+scripts/simple-db-test.js
+scripts/test-db-connection.js
